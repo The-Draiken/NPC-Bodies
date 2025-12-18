@@ -1,0 +1,1725 @@
+
+BACKUP ~weidu_external/backup/npc-bodies~
+AUTHOR ~EnigmaJazz based on original mod by gunman~
+AUTO_EVAL_STRINGS
+ALWAYS
+	INCLUDE ~npc-bodies/misc_functions.tpa~
+END
+ASK_EVERY_COMPONENT
+AUTO_TRA ~npc-bodies/tra/%s~
+LANGUAGE ~English~
+         ~english~
+         ~npc-bodies/tra/english/setup.tra~
+
+
+
+
+
+BEGIN @100 //Main compoonent
+DESIGNATED 100
+LABEL ~NPC_BODIES_MAIN_COMPONENT~
+
+
+<<<<<<<< npc-inline/NPCbods.2da
+2DA V1.0 
+INDEX	DV	CRE	NAME	SCRIPT	RACE	GENDER	WEIGHT	
+0		#	#	#		#		#		#		#		
+>>>>>>>> 
+
+COPY ~npc-inline/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~ 
+
+
+
+<<<<<<<< npc-inline/baldurextend.baf
+>>>>>>>>
+COPY ~npc-inline/baldurextend.baf~ ~weidu_external/npc-bodies/baldurextend.baf~ 
+
+LAM JOINABLE_NPC_ARRAYS
+OUTER_SET bind = 1
+
+LAF ADD_IDS_ENTRY STR_VAR idsFile =  "GENERAL" identifier = "EJNOBOD" RET value END
+ACTION_IF (value >= 0) BEGIN
+  OUTER_SET EJNOBOD = value
+END
+LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x10b STR_VAR identifier = "EJNOBOD" value = "%EJNOBOD%" relation  = "1" RET index END
+ACTION_IF (index >= 0) BEGIN
+  OUTER_SET nobodprot = index
+END
+LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x103 STR_VAR identifier = "EJDead" value = "%nobodprot%" relation  = "74" RET index END
+ACTION_IF (index >= 0) BEGIN
+  OUTER_SET deadprot = index
+END
+LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x104 STR_VAR identifier = "EJAlive" value = "%nobodprot%" relation  = "74" RET index END
+ACTION_IF (index >= 0) BEGIN
+  OUTER_SET aliveprot = index
+END
+APPEND "state.ids" "0x000007C0 STATE_PERMANENT_DEATH" UNLESS "STATE_PERMANENT_DEATH"
+
+ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
+	OUTER_SET ind = 0
+	OUTER_SET skip = 0
+	COPY_EXISTING ~%cre%~ ~override~
+		READ_STRREF 0x8 name
+		READ_BYTE  0x272 race
+		READ_ASCII 0x248 script
+		READ_BYTE 0x275 gender
+		READ_BYTE 0x271 general
+		PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Ajantis~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 182
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Alora~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 42
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Branwen~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 118
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Coran~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 106
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dorn~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 182
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dynaheir~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 106 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Edwin~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 134 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Eldoth~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 176 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Faldorn~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 112 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Garrick~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 106 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Imoen~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 94 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Jaheira~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 105 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kagain~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 160 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Khalid~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 130 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kivan~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 122 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Minsc~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 188 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Montaron~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 70 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Neera~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 89 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Quayle~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 66 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Rasaad~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 176 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Safana~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 118 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Shar-Teel~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 148 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Skie~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 106 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Tiax~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 69 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Viconia~) BEGIN
+				TEXT_SPRINT body ~DEADFEMA~
+				SET weight = 110 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xan~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 102 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xsar~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 164 
+			END ELSE
+			PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Yeslick~) BEGIN
+				TEXT_SPRINT body ~DEADMALE~
+				SET weight = 155 
+			END ELSE
+			PATCH_IF gender = 1 BEGIN //male
+				TEXT_SPRINT body ~DEADMALE~
+				PATCH_IF race = 1 BEGIN //human
+					SET weight = RANDOM(130 220) 
+				END ELSE
+				PATCH_IF race = 2 BEGIN //elf
+					SET weight = RANDOM(110 195) 
+				END ELSE
+				PATCH_IF race = 3 BEGIN //half-elf
+					SET weight = RANDOM(120 210) 
+				END ELSE
+				PATCH_IF race = 4 BEGIN //dwarf
+					SET weight = RANDOM(130 190) 
+				END ELSE
+				PATCH_IF race = 5 BEGIN //halfling
+					SET weight = RANDOM(40 75) 
+				END ELSE
+				PATCH_IF race = 6 BEGIN //gnome
+					SET weight = RANDOM(35 65) 
+				END ELSE
+				PATCH_IF race = 7 BEGIN //half orc
+					SET weight = RANDOM(170 250) 
+				END ELSE
+					SET weight = RANDOM(130 210) //any other race if used for some reason
+			END ELSE
+			TEXT_SPRINT body ~DEADFEMA~ //all other genders, presumably female most of the time
+			PATCH_IF race = 1 BEGIN //human
+				SET weight = RANDOM(110 170) 
+			END ELSE
+			PATCH_IF race = 2 BEGIN //elf
+				SET weight = RANDOM(105 165) 
+			END ELSE
+				PATCH_IF race = 3 BEGIN //half-elf
+				SET weight = RANDOM(110 180) 
+			END ELSE
+			PATCH_IF race = 4 BEGIN //dwarf
+				SET weight = RANDOM(110 175) 
+			END ELSE
+			PATCH_IF race = 5 BEGIN //halfling
+				SET weight = RANDOM(30 55) 
+			END ELSE
+			PATCH_IF race = 6 BEGIN //gnome
+				SET weight = RANDOM(25 55) 
+			END ELSE
+			PATCH_IF race = 7 BEGIN //half orc
+				SET weight = RANDOM(160 205) 
+			END ELSE
+			SET weight = RANDOM(110 195) //any other race if used for some reason
+			
+	OUTER_INNER_PATCH_SAVE name ~%name%~ BEGIN
+			REPLACE_TEXTUALLY ~ ~ ~_~
+	END		
+	ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN
+		OUTER_SET skip = 1
+	END	
+	ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
+		OUTER_SET skip = 1
+	END	
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_COLS cols
+		READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+		FOR (row = 0; row < r2en_bods; ++row) BEGIN
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 prev_ind
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 prev_dv
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 prev_script
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 7 prev_weight
+			PATCH_IF (skip = 0) BEGIN
+				PATCH_IF (~%dv%~ STRING_EQUAL_CASE ~%prev_dv%~) BEGIN
+					SET ind = prev_ind
+					SET weight = prev_weight					
+					PATCH_IF (~%script%~ STRING_EQUAL_CASE ~%prev_script%~) BEGIN
+						SET skip = 1
+					END	
+				END
+			END
+		END
+		
+	ACTION_IF (ind = 0) BEGIN
+			OUTER_SET ind = bind
+			OUTER_SET bind += 1	
+	END
+		
+	ACTION_IF (skip = 0)	BEGIN
+		APPEND_OUTER ~weidu_external/npc-bodies/NPCbods.2da~ ~%ind% %dv%	%cre%	%name%	%script%	%race%	%gender% %weight% %general%~
+		OUTER_INNER_PATCH_SAVE name ~%name%~ BEGIN
+			REPLACE_TEXTUALLY ~_~ ~ ~
+		END
+		COPY	~npc-bodies/itm/%body%.itm~ ~override/EJB%ind%a.itm~
+				SAY NAME1 @1
+				SAY NAME2 @1
+				SAY UNIDENTIFIED_DESC @2
+				SAY DESC @2
+				WRITE_LONG 0x4c ~%weight%~
+					
+					
+		COPY ~npc-bodies/cre/BODYDROP.CRE~ ~override/EJdro%ind%.cre~
+				WRITE_ASCII 0x280 ~EJdro%ind%~
+	
+		<<<<<<<< npc-inline/%script%.baf
+		>>>>>>>> 			
+		COPY ~npc-inline/%script%.baf~ ~weidu_external/npc-bodies/%script%.baf~
+		
+				
+		APPEND_OUTER ~weidu_external/npc-bodies/%script%.baf~ ~ 
+			IF
+				InParty("%dv%")
+				!Dead("%dv%")
+				PartyHasItem("EJB%ind%a")
+				Global("EJdead%ind%","GLOBAL",1)
+			THEN
+				RESPONSE #100
+					SetGlobal("EJdead%ind%","GLOBAL",0)
+					ChangeGeneral("%dv%","%general%")
+					CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+					ActionOverride("EJdro%ind%",TakePartyItem("EJB%ind%a")) 
+					ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%a"))
+					ActionOverride("EJdro%ind%",DestroySelf())
+					Continue()
+			END
+			IF
+				InParty("%dv%")
+				!Dead("%dv%")
+				!PartyHasItem("EJB%ind%a")
+				Global("EJdead%ind%","GLOBAL",1)
+			THEN
+				RESPONSE #100
+					SetGlobal("EJdead%ind%","GLOBAL",0)
+					ChangeGeneral("%dv%","%general%")
+					CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+					ActionOverride("EJdro%ind%",PickUpItem("EJB%ind%a")) 
+					ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%a"))
+					ActionOverride("EJdro%ind%",DestroySelf())
+					Continue()
+			END
+			IF
+				Dead("%dv%")
+				!StateCheck("%dv%",STATE_PERMANENT_DEATH)
+				Global("EJdead%ind%","GLOBAL",0)
+			THEN
+				RESPONSE #100
+					SetGlobal("EJdead%ind%","GLOBAL",1)
+					SaveObjectLocation("MYAREA","Corpse%ind%","%dv%") 
+					CreateCreatureAtLocation("Corpse%ind%","MYAREA","EJdro%ind%")
+					ActionOverride("EJdro%ind%",CreateItem("EJB%ind%a",0,0,0))
+					ActionOverride("EJdro%ind%",DropItem("EJB%ind%a",[-1.-1]))
+					ActionOverride("EJdro%ind%",DestroySelf())
+					Continue()
+			END~		
+					
+					
+		EXTEND_BOTTOM ~%script%.bcs~ ~weidu_external/npc-bodies/%script%.baf~
+		
+		ACTION_IF !FILE_CONTAINS_EVALUATED(~weidu_external/npc-bodies/baldurextend.baf~ ~EJB%ind%a~) BEGIN
+					
+			APPEND_OUTER ~weidu_external/npc-bodies/baldurextend.baf~ ~
+				IF
+					InPartyAllowDead("%dv%")
+					Global("EJdead%ind%","GLOBAL",1)
+					!PartyHasItem("EJB%ind%a")
+				THEN
+					RESPONSE #100
+						ChangeGeneral("%dv%",EJNOBOD)
+					END
+
+				IF
+					InPartyAllowDead("%dv%")
+					Global("EJdead%ind%","GLOBAL",1)
+					PartyHasItem("EJB%ind%a")
+				THEN
+					RESPONSE #100
+						ChangeGeneral("%dv%",DEAD)
+				END~
+		END
+	END
+END
+
+ACTION_FOR_EACH baldur IN ~baldur~ ~bdbaldur~ ~baldur25~ BEGIN
+	ACTION_IF (FILE_EXISTS_IN_GAME ~%baldur%.bcs~) BEGIN
+		EXTEND_BOTTOM ~%baldur%.bcs~ ~weidu_external/npc-bodies/baldurextend.baf~
+	END
+END
+
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END //raise dead which is cast by temples
+OUTER_TEXT_SPRINT raisedead ~%spell_res%~
+COPY_EXISTING ~%raisedead%.spl~ ~override~
+		READ_STRREF 0x50 ~raise~
+		SAY 0x50 @4
+		LPF CD_EXTEND-O-MATIC INT_VAR level_cap = 2 base_dur = 0 step_dur = 0 min_dur = 0 END 
+		LPF ADD_SPELL_EFFECT INT_VAR header = 2 insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
+	
+
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RECALL_SPIRIT~  RET spell_res END
+COPY_EXISTING ~%spell_res%.spl~ ~override~
+	READ_STRREF 0x50 ~raise~
+	SAY 0x50 @4
+	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
+	
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_MASS_RAISE_DEAD~  RET spell_res END
+COPY_EXISTING ~%spell_res%.spl~ ~override~
+	READ_STRREF 0x50 ~raise~
+	SAY 0x50 @4
+	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 6 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
+
+COPY_EXISTING ~SPJA01.spl~ ~override~ 
+	READ_STRREF 0x50 ~raise~
+	SAY 0x50 @4
+	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
+
+COPY_EXISTING ~spwish10.spl~ ~override~ 
+	READ_STRREF 0x50 ~raise~
+	SAY 0x50 @4
+	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 			
+		
+COPY ~npc-bodies/spl/EJNPRES.spl~ ~override~
+	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (@3) END
+
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
+OUTER_TEXT_SPRINT resurrection ~%spell_res%~
+COPY_EXISTING ~%resurrection%.spl~ ~override~
+	READ_STRREF 0x50 ~res~
+	SAY 0x50 @5
+	LPF ALTER_EFFECT INT_VAR match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %aliveprot% END
+	LPF ALTER_EFFECT INT_VAR match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %deadprot% END
+			
+
+//Adjust temple description
+COPY_EXISTING ~speldesc.2da~ ~override~
+  COUNT_2DA_COLS cols
+  COUNT_2DA_ROWS cols rows
+	FOR (row = 0; row < rows; ++row) BEGIN
+		READ_2DA_ENTRY row 0 cols spell
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+			READ_2DA_ENTRY row 1 cols raise_desc
+		END
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+			READ_2DA_ENTRY row 1 cols res_desc
+		END
+	END
+	ACTION_GET_STRREF raise_desc raise
+	ACTION_GET_STRREF res_desc res
+	OUTER_SET raise_description=RESOLVE_STR_REF(@4)  
+	OUTER_SET res_description=RESOLVE_STR_REF(@5)    
+COPY_EXISTING ~speldesc.2da~ ~override~
+  COUNT_2DA_COLS cols
+  COUNT_2DA_ROWS cols rows
+	FOR (row = 0; row < rows; ++row) BEGIN
+		READ_2DA_ENTRY row 0 cols spell
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+			SET_2DA_ENTRY row 1 cols raise_description
+		END
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+			SET_2DA_ENTRY row 1 cols res_description
+		END
+	END	
+
+
+
+BEGIN @200 // Raise Dead permanent Constitution loss
+DESIGNATED 200
+ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERIC_RECALL_SPIRIT~ ~CLERIC_RESURRECTION~ BEGIN
+	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~%res_spell%~  RET spell_res END
+	ACTION_IF FILE_EXISTS_IN_GAME  ~%spell_res%.spl~ BEGIN
+		COPY_EXISTING ~%spell_res%.SPL~ ~override~
+			READ_STRREF 0x50 ~desc~
+			SAY 0x50 @6
+
+			// (1) Keep whatever you were doing with HP scaling (effect 17)
+			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 100 parameter2 = 2 timing = 1 resist_dispel = 0 probability1 = 100 END
+
+			// (2) Permanent -1 CON on the RAISED creature
+			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 2 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 END
+
+			// (3) If this is CLERIC_RESURRECTION, also hit the CASTER with -1 CON
+			PATCH_IF (~%res_spell%~ STRING_EQUAL_CASE ~CLERIC_RESURRECTION~) BEGIN
+				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 1 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 END
+			END
+
+			// (4) Set raised creature to 1 HP
+			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 1 parameter2 = 1 timing = 4 duration = 1 resist_dispel = 0 probability1 = 100 END
+		BUT_ONLY
+	END
+END	
+ACTION_FOR_EACH res_spell IN  ~SPPRJA01~ ~spwish10~ BEGIN
+	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
+		COPY_EXISTING ~%res_spell%.SPL~ ~override~
+			READ_STRREF 0x50 ~desc~
+			SAY 0x50 @6
+			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 100 parameter2 = 2 timing = 1 resist_dispel = 0 probability1 = 100 END
+			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 2 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 END
+			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 1 parameter2 = 1 timing = 4 duration = 1 resist_dispel = 0 probability1 = 100 END
+		BUT_ONLY
+	END
+END	
+
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END //raise dead which is cast by temples
+OUTER_TEXT_SPRINT raisedead ~%spell_res%~
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
+OUTER_TEXT_SPRINT resurrection ~%spell_res%~
+//Adjust temple description
+COPY_EXISTING ~speldesc.2da~ ~override~
+  COUNT_2DA_COLS cols
+  COUNT_2DA_ROWS cols rows
+	FOR (row = 0; row < rows; ++row) BEGIN
+		READ_2DA_ENTRY row 0 cols spell
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+			READ_2DA_ENTRY row 1 cols raise_desc
+		END
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+			READ_2DA_ENTRY row 1 cols res_desc
+		END
+	END
+	ACTION_GET_STRREF raise_desc desc
+	OUTER_SET raise_description=RESOLVE_STR_REF(@6)
+	ACTION_GET_STRREF res_desc desc 
+	OUTER_SET res_description=RESOLVE_STR_REF(@6)    
+COPY_EXISTING ~speldesc.2da~ ~override~
+  COUNT_2DA_COLS cols
+  COUNT_2DA_ROWS cols rows
+	FOR (row = 0; row < rows; ++row) BEGIN
+		READ_2DA_ENTRY row 0 cols spell
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+			SET_2DA_ENTRY row 1 cols raise_description
+		END
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+			SET_2DA_ENTRY row 1 cols res_description
+		END
+	END	
+
+BEGIN @300 // Progressive price for Raise Dead spell
+DESIGNATED 300
+COPY ~npc-bodies/2da/RAISDEAD.2DA~ ~override/RAISDEAD.2DA~
+
+BEGIN @400 // Time limits for Raise Dead and similar spells
+DESIGNATED 400
+ACTION_IF !(FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~) BEGIN
+	<<<<<<<< npc-inline/NPCbods.2da
+	2DA V1.0 
+	INDEX	DV	CRE	NAME	SCRIPT	RACE	GENDER	WEIGHT
+	0		#	#	#		#		#		#		#
+	>>>>>>>> 
+
+	COPY ~npc-inline/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~ 
+	LAM JOINABLE_NPC_ARRAYS
+	OUTER_SET bind = 1
+	ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
+		OUTER_SET ind = 0
+		OUTER_SET skip = 0
+		COPY_EXISTING ~%cre%~ ~override~
+			READ_STRREF 0x8 name
+			READ_BYTE  0x272 race
+			READ_ASCII 0x248 script
+			READ_BYTE 0x275 gender
+			READ_BYTE 0x271 general
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Ajantis~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 182
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Alora~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 42
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Branwen~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 118
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Coran~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 106
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dorn~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 182
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dynaheir~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Edwin~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 134 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Eldoth~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 176 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Faldorn~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 112 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Garrick~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Imoen~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 94 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Jaheira~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 105 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kagain~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 160 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Khalid~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 130 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kivan~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 122 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Minsc~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 188 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Montaron~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 70 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Neera~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 89 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Quayle~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 66 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Rasaad~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 176 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Safana~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 118 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Shar-Teel~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 148 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Skie~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Tiax~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 69 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Viconia~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 110 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xan~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 102 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xsar~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 164 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Yeslick~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 155 
+				END ELSE
+				PATCH_IF gender = 1 BEGIN //male
+					TEXT_SPRINT body ~DEADMALE~
+					PATCH_IF race = 1 BEGIN //human
+						SET weight = RANDOM(130 220) 
+					END ELSE
+					PATCH_IF race = 2 BEGIN //elf
+						SET weight = RANDOM(110 195) 
+					END ELSE
+					PATCH_IF race = 3 BEGIN //half-elf
+						SET weight = RANDOM(120 210) 
+					END ELSE
+					PATCH_IF race = 4 BEGIN //dwarf
+						SET weight = RANDOM(130 190) 
+					END ELSE
+					PATCH_IF race = 5 BEGIN //halfling
+						SET weight = RANDOM(40 75) 
+					END ELSE
+					PATCH_IF race = 6 BEGIN //gnome
+						SET weight = RANDOM(35 65) 
+					END ELSE
+					PATCH_IF race = 7 BEGIN //half orc
+						SET weight = RANDOM(170 250) 
+					END ELSE
+						SET weight = RANDOM(130 210) //any other race if used for some reason
+				END ELSE
+				TEXT_SPRINT body ~DEADFEMA~ //all other genders, presumably female most of the time
+				PATCH_IF race = 1 BEGIN //human
+					SET weight = RANDOM(110 170) 
+				END ELSE
+				PATCH_IF race = 2 BEGIN //elf
+					SET weight = RANDOM(105 165) 
+				END ELSE
+					PATCH_IF race = 3 BEGIN //half-elf
+					SET weight = RANDOM(110 180) 
+				END ELSE
+				PATCH_IF race = 4 BEGIN //dwarf
+					SET weight = RANDOM(110 175) 
+				END ELSE
+				PATCH_IF race = 5 BEGIN //halfling
+					SET weight = RANDOM(30 55) 
+				END ELSE
+				PATCH_IF race = 6 BEGIN //gnome
+					SET weight = RANDOM(25 55) 
+				END ELSE
+				PATCH_IF race = 7 BEGIN //half orc
+					SET weight = RANDOM(160 205) 
+				END ELSE
+				SET weight = RANDOM(110 195) //any other race if used for some reason
+				
+		OUTER_INNER_PATCH_SAVE name ~%name%~ BEGIN
+				REPLACE_TEXTUALLY ~ ~ ~_~
+		END		
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			COUNT_2DA_COLS cols
+			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+			FOR (row = 0; row < r2en_bods; ++row) BEGIN
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 prev_ind
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 prev_dv
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 prev_script
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 7 prev_weight
+				PATCH_IF (skip = 0) BEGIN
+					PATCH_IF (~%dv%~ STRING_EQUAL_CASE ~%prev_dv%~) BEGIN
+						SET ind = prev_ind
+						SET weight = prev_weight					
+						PATCH_IF (~%script%~ STRING_EQUAL_CASE ~%prev_script%~) BEGIN
+							SET skip = 1
+						END	
+					END
+				END
+			END
+			
+		ACTION_IF (ind = 0) BEGIN
+				OUTER_SET ind = bind
+				OUTER_SET bind += 1	
+		END
+			
+		ACTION_IF (skip = 0)	BEGIN
+			APPEND_OUTER ~weidu_external/npc-bodies/NPCbods.2da~ ~%ind% %dv%	%cre%	%name%	%script%	%race%	%gender% %weight% %general%~
+		END
+	END
+END	
+
+ACTION_IF (MOD_IS_INSTALLED "npc-bodies.TP2" 100) BEGIN
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_COLS cols
+		READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+		FOR (row = 0; row < r2en_bods; ++row) BEGIN
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 dv
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 2 cre
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 3 name
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 script
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 8 general
+			INNER_ACTION BEGIN
+				ACTION_IF (FILE_EXISTS_IN_GAME ~%script%.bcs~) BEGIN
+					COPY_EXISTING ~%script%.bcs~ ~override~
+						DECOMPILE_AND_PATCH BEGIN
+							LPF REPLACE_MULTILINE
+							INT_VAR
+							num = 1
+							strict = 1
+							verbose = 0
+							STR_VAR
+							pattern = EVAL ~~~~~IF
+	Dead("%dv%")
+	!StateCheck("%dv%",STATE_PERMANENT_DEATH)
+	Global("EJdead%ind%","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",1)
+		SaveObjectLocation("MYAREA","Corpse%ind%","%dv%") 
+		CreateCreatureAtLocation("Corpse%ind%","MYAREA","EJdro%ind%")
+		ActionOverride("EJdro%ind%",CreateItem("EJB%ind%a",0,0,0))
+		ActionOverride("EJdro%ind%",DropItem("EJB%ind%a",[-1.-1]))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END~~~~~  //pattern that you want to replace
+							string = EVAL ~~~~~IF
+	Dead("%dv%")
+	!StateCheck("%dv%",STATE_PERMANENT_DEATH)
+	Global("EJdead%ind%","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",1)
+		SaveObjectLocation("MYAREA","Corpse%ind%","%dv%") 
+		CreateCreatureAtLocation("Corpse%ind%","MYAREA","EJdro%ind%")
+		ActionOverride("EJdro%ind%",CreateItem("EJB%ind%a",0,0,0))
+		ActionOverride("EJdro%ind%",DropItem("EJB%ind%a",[-1.-1]))
+		SetGlobalTimer("EJRDT%ind%","GLOBAL",TWO_DAYS)
+		Continue()
+END~~~~~    //string that the pattern will be replaced with
+							END
+							LOOKUP_IDS_SYMBOL_OF_INT generala general %general%
+						LPF REPLACE_MULTILINE
+							INT_VAR
+							num = 1
+							strict = 1
+							verbose = 0
+							STR_VAR
+							pattern = EVAL ~~~~~IF
+	InParty("%dv%")
+	!Dead("%dv%")
+	PartyHasItem("EJB%ind%a")
+	Global("EJdead%ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",0)
+		ChangeGeneral("%dv%",%generala%)
+		CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+		ActionOverride("EJdro%ind%",TakePartyItem("EJB%ind%a")) 
+		ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%a"))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END~~~~~  //pattern that you want to replace
+							string = EVAL ~~~~~IF
+	InParty("%dv%")
+	!Dead("%dv%")
+	PartyHasItem("EJB%ind%a")
+	Global("EJdead%ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",0)
+		ChangeGeneral("%dv%",%generala%)
+		CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+		ActionOverride("EJdro%ind%",TakePartyItem("EJB%ind%a")) 
+		ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%a"))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END
+IF
+	InParty("%dv%")
+	!Dead("%dv%")
+	PartyHasItem("EJB%ind%b")
+	Global("EJdead%ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",0)
+		ChangeGeneral("%dv%",%generala%)
+		CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+		ActionOverride("EJdro%ind%",TakePartyItem("EJB%ind%b")) 
+		ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%b"))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END~~~~~    //string that the pattern will be replaced with
+							END
+						LPF REPLACE_MULTILINE
+							INT_VAR
+							num = 1
+							strict = 1
+							verbose = 0
+							STR_VAR
+							pattern = EVAL ~~~~~IF
+	InParty("%dv%")
+	!Dead("%dv%")
+	!PartyHasItem("EJB%ind%a")
+	Global("EJdead%ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",0)
+		ChangeGeneral("%dv%",%generala%)
+		CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+		ActionOverride("EJdro%ind%",PickUpItem("EJB%ind%a")) 
+		ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%a"))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END~~~~~  //pattern that you want to replace
+							string = EVAL ~~~~~IF
+	InParty("%dv%")
+	!Dead("%dv%")
+	!PartyHasItem("EJB%ind%a")
+	Global("EJdead%ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",0)
+		ChangeGeneral("%dv%",%generala%)
+		CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+		ActionOverride("EJdro%ind%",PickUpItem("EJB%ind%a")) 
+		ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%a"))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END
+IF
+	InParty("%dv%")
+	!Dead("%dv%")
+	!PartyHasItem("EJB%ind%b")
+	Global("EJdead%ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJdead%ind%","GLOBAL",0)
+		ChangeGeneral("%dv%",%generala%)
+		CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+		ActionOverride("EJdro%ind%",PickUpItem("EJB%ind%b")) 
+		ActionOverride("EJdro%ind%",DestroyItem("EJB%ind%b"))
+		ActionOverride("EJdro%ind%",DestroySelf())
+		Continue()
+END~~~~~    //string that the pattern will be replaced with
+							END
+						END
+				END
+				
+				
+			COPY_EXISTING ~EJdro%ind%.cre~ ~override~
+				WRITE_ASCII 0x248 ~EJdro%ind%~
+			COPY ~npc-bodies/spl/EJBG.spl~ ~override/EJB%ind%G.spl~
+				LPF ALTER_EFFECT INT_VAR match_opcode = 232 STR_VAR resource = EVAL ~EJB%ind%C~ END
+			COPY ~npc-bodies/spl/EJBC.spl~ ~override/EJB%ind%C.spl~
+				LPF ALTER_EFFECT INT_VAR match_opcode = 177 STR_VAR resource = EVAL ~EJB%ind%S~ END
+			COPY ~npc-bodies/spl/EJBR.spl~ ~override/EJB%ind%R.spl~
+				LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = EVAL ~EJB%ind%G~ END
+			COPY ~npc-bodies/eff/EJBS.eff~ ~override/EJB%ind%S.eff~
+				WRITE_EVALUATED_ASCII 0x30 ~EJdro%ind%~		
+			
+		
+			COPY_EXISTING ~EJB%ind%a.itm~ ~override/EJB%ind%b.itm~
+				SAY NAME1 @7
+				SAY NAME2 @7
+				SAY UNIDENTIFIED_DESC @8
+				SAY DESC @8
+				READ_LONG 0x4c weight
+				SET weight = weight / 2
+				WRITE_LONG 0x4c ~%weight%~
+			OUTER_SET decay=RESOLVE_STR_REF(@9)
+			<<<<<<<< npc-inline/EJdro%ind%.baf
+			>>>>>>>> 			
+			COPY ~npc-inline/EJdro%ind%.baf~ ~weidu_external/npc-bodies/EJdro%ind%.baf~	
+			APPEND_OUTER ~weidu_external/npc-bodies/EJdro%ind%.baf~ ~
+				IF 
+					!Global("EJdead%ind%","GLOBAL",1)
+				THEN	
+					RESPONSE 100
+						DestroySelf()
+				END		
+				IF
+					RealGlobalTimerExpired("EJB","LOCALS")
+					OR(2)
+						PartyHasItem("EJB%ind%a")
+						PartyHasItem("EJB%ind%b")
+				THEN	
+					RESPONSE 100
+						DestroySelf()
+				END
+				IF
+					Global("EJdead%ind%","GLOBAL",1)
+					GlobalTimerExpired("EJRDT%ind%","GLOBAL")
+					!PartyHasItem("EJB%ind%a")
+					Global("EJRD%ind%","GLOBAL",0)
+				THEN
+					RESPONSE 100
+						PickUpItem("EJB%ind%a")
+						DestroyItem("EJB%ind%a")
+						CreateItem("EJB%ind%b",0,0,0)
+						DropItem("EJB%ind%b",[-1.-1])
+						SetGlobal("EJRD%ind%","GLOBAL",1)
+						DisplayStringNoName(Myself,"%decay%")
+						// NEW: mark this NPC as permanently dead
+						SetGlobal("SPRITE_IS_DEAD%dv%","GLOBAL",1)
+						DisplayStringNoName(Myself,"%decay%")						
+				END~
+				
+			ACTION_FOR_EACH player IN ~1~ ~2~ ~3~ ~4~ ~5~ ~6~ BEGIN
+				APPEND_OUTER ~weidu_external/npc-bodies/EJdro%ind%.baf~ ~
+				IF
+					Global("EJdead%ind%","GLOBAL",1)
+					GlobalTimerExpired("EJRDT%ind%","GLOBAL")
+					HasItem("EJB%ind%a",Player%player%)
+				THEN
+					RESPONSE 100
+						ActionOverride(Player%player%,DestroyItem("EJB%ind%a"))
+						GiveItemCreate("EJB%ind%b",Player%player%,0,0,0)  
+						SetGlobal("EJRD%ind%","GLOBAL",1)
+						// NEW: mark this NPC as permanently dead
+						SetGlobal("SPRITE_IS_DEAD%dv%","GLOBAL",1)
+						DisplayStringNoName(Player%player%,"%decay%")
+				END	
+				IF	
+					Global("EJB%ind%","GLOBAL","%player%")
+					!HasItem("EJB%ind%a",Player%player%)
+					!HasItem("EJB%ind%b",Player%player%)
+				THEN
+					RESPONSE 100
+						ReallyForceSpellRes("EJB%ind%R",Player%player%)
+						Continue()
+				END		
+				IF
+					Global("EJdead%ind%","GLOBAL",1)
+					!Global("EJB%ind%","GLOBAL","%player%")
+					OR(2)
+						HasItem("EJB%ind%a",Player%player%)
+						HasItem("EJB%ind%b",Player%player%)
+				THEN
+					RESPONSE 100
+						ReallyForceSpellRes("EJB%ind%G",Player%player%)
+						SetGlobal("EJB%ind%","GLOBAL","%player%")
+						Continue()
+				END	
+				IF
+					Global("EJdead%ind%","GLOBAL",1)
+					OR(2)
+						HasItem("EJB%ind%a",Player%player%)
+						HasItem("EJB%ind%b",Player%player%)
+				THEN
+					RESPONSE 100
+						RealSetGlobalTimer("EJB","LOCALS",6)
+						Continue()
+				END	
+				IF
+					Global("EJB%ind%","GLOBAL","%player%")
+					!PartyHasItem("EJB%ind%a")
+					!PartyHasItem("EJB%ind%b")
+				THEN	
+					RESPONSE 100
+						SetGlobal("EJB%ind%","GLOBAL","0")
+						CreateCreatureObject("EJdro%ind%",Player%player%,0,0,0)
+						DestroySelf()
+				END~	
+			END
+		COMPILE ~weidu_external/npc-bodies/EJdro%ind%.baf~
+		END
+	END
+END	
+ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERIC_RECALL_SPIRIT~ BEGIN
+	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~%res_spell%~  RET spell_res END
+	ACTION_IF FILE_EXISTS_IN_GAME  ~%spell_res%.spl~ BEGIN
+		COPY_EXISTING ~%spell_res%.SPL~ ~override~
+			READ_STRREF 0x50 ~raise~
+			SAY 0x50 @10
+		BUT_ONLY
+	END
+END	
+ACTION_FOR_EACH res_spell IN  ~SPPRJA01~ ~spwish10~ BEGIN
+	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
+		COPY_EXISTING ~%res_spell%.SPL~ ~override~
+			READ_STRREF 0x50 ~raise~
+			SAY 0x50 @11
+		BUT_ONLY
+	END
+END	
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
+OUTER_TEXT_SPRINT resurrection ~%spell_res%~
+COPY_EXISTING ~%resurrection%.spl~ ~override~
+	READ_STRREF 0x50 ~res~
+	SAY 0x50 @11
+
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END //raise dead which is cast by temples
+OUTER_TEXT_SPRINT raisedead ~%spell_res%~
+COPY_EXISTING ~speldesc.2da~ ~override~
+  COUNT_2DA_COLS cols
+  COUNT_2DA_ROWS cols rows
+	FOR (row = 0; row < rows; ++row) BEGIN
+		READ_2DA_ENTRY row 0 cols spell
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+			READ_2DA_ENTRY row 1 cols raise_desc
+		END
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+			READ_2DA_ENTRY row 1 cols res_desc
+		END
+	END
+	ACTION_GET_STRREF raise_desc raise
+	OUTER_SET raise_description=RESOLVE_STR_REF(@10)
+	ACTION_GET_STRREF res_desc res 
+	OUTER_SET res_description=RESOLVE_STR_REF(@11)    
+COPY_EXISTING ~speldesc.2da~ ~override~
+  COUNT_2DA_COLS cols
+  COUNT_2DA_ROWS cols rows
+	FOR (row = 0; row < rows; ++row) BEGIN
+		READ_2DA_ENTRY row 0 cols spell
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+			SET_2DA_ENTRY row 1 cols raise_description
+		END
+		PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+			SET_2DA_ENTRY row 1 cols res_description
+		END
+	END	
+
+			
+BEGIN @500 // Add revivify- 3rd level spell that allows NPCs to be raised within one minute of death
+DESIGNATED 500
+REQUIRE_COMPONENT ~npc-bodies.tp2~ "100" "Requires main component to be installed"""
+ACTION_IF !(FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~) BEGIN
+	<<<<<<<< npc-inline/NPCbods.2da
+	2DA V1.0 
+	INDEX	DV	CRE	NAME	SCRIPT	RACE	GENDER	WEIGHT
+	0		#	#	#		#		#		#		#
+	>>>>>>>> 
+
+	COPY ~npc-inline/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~ 
+	LAM JOINABLE_NPC_ARRAYS
+	OUTER_SET bind = 1
+	ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
+		OUTER_SET ind = 0
+		OUTER_SET skip = 0
+		COPY_EXISTING ~%cre%~ ~override~
+			READ_STRREF 0x8 name
+			READ_BYTE  0x272 race
+			READ_ASCII 0x248 script
+			READ_BYTE 0x275 gender
+			READ_BYTE 0x271 general
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Ajantis~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 182
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Alora~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 42
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Branwen~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 118
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Coran~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 106
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dorn~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 182
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dynaheir~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Edwin~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 134 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Eldoth~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 176 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Faldorn~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 112 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Garrick~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Imoen~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 94 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Jaheira~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 105 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kagain~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 160 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Khalid~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 130 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kivan~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 122 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Minsc~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 188 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Montaron~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 70 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Neera~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 89 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Quayle~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 66 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Rasaad~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 176 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Safana~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 118 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Shar-Teel~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 148 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Skie~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Tiax~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 69 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Viconia~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 110 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xan~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 102 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xsar~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 164 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Yeslick~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 155 
+				END ELSE
+				PATCH_IF gender = 1 BEGIN //male
+					TEXT_SPRINT body ~DEADMALE~
+					PATCH_IF race = 1 BEGIN //human
+						SET weight = RANDOM(130 220) 
+					END ELSE
+					PATCH_IF race = 2 BEGIN //elf
+						SET weight = RANDOM(110 195) 
+					END ELSE
+					PATCH_IF race = 3 BEGIN //half-elf
+						SET weight = RANDOM(120 210) 
+					END ELSE
+					PATCH_IF race = 4 BEGIN //dwarf
+						SET weight = RANDOM(130 190) 
+					END ELSE
+					PATCH_IF race = 5 BEGIN //halfling
+						SET weight = RANDOM(40 75) 
+					END ELSE
+					PATCH_IF race = 6 BEGIN //gnome
+						SET weight = RANDOM(35 65) 
+					END ELSE
+					PATCH_IF race = 7 BEGIN //half orc
+						SET weight = RANDOM(170 250) 
+					END ELSE
+						SET weight = RANDOM(130 210) //any other race if used for some reason
+				END ELSE
+				TEXT_SPRINT body ~DEADFEMA~ //all other genders, presumably female most of the time
+				PATCH_IF race = 1 BEGIN //human
+					SET weight = RANDOM(110 170) 
+				END ELSE
+				PATCH_IF race = 2 BEGIN //elf
+					SET weight = RANDOM(105 165) 
+				END ELSE
+					PATCH_IF race = 3 BEGIN //half-elf
+					SET weight = RANDOM(110 180) 
+				END ELSE
+				PATCH_IF race = 4 BEGIN //dwarf
+					SET weight = RANDOM(110 175) 
+				END ELSE
+				PATCH_IF race = 5 BEGIN //halfling
+					SET weight = RANDOM(30 55) 
+				END ELSE
+				PATCH_IF race = 6 BEGIN //gnome
+					SET weight = RANDOM(25 55) 
+				END ELSE
+				PATCH_IF race = 7 BEGIN //half orc
+					SET weight = RANDOM(160 205) 
+				END ELSE
+				SET weight = RANDOM(110 195) //any other race if used for some reason
+				
+		OUTER_INNER_PATCH_SAVE name ~%name%~ BEGIN
+				REPLACE_TEXTUALLY ~ ~ ~_~
+		END		
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			COUNT_2DA_COLS cols
+			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+			FOR (row = 0; row < r2en_bods; ++row) BEGIN
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 prev_ind
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 prev_dv
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 prev_script
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 7 prev_weight
+				PATCH_IF (skip = 0) BEGIN
+					PATCH_IF (~%dv%~ STRING_EQUAL_CASE ~%prev_dv%~) BEGIN
+						SET ind = prev_ind
+						SET weight = prev_weight					
+						PATCH_IF (~%script%~ STRING_EQUAL_CASE ~%prev_script%~) BEGIN
+							SET skip = 1
+						END	
+					END
+				END
+			END
+			
+		ACTION_IF (ind = 0) BEGIN
+				OUTER_SET ind = bind
+				OUTER_SET bind += 1	
+		END
+			
+		ACTION_IF (skip = 0)	BEGIN
+			APPEND_OUTER ~weidu_external/npc-bodies/NPCbods.2da~ ~%ind% %dv%	%cre%	%name%	%script%	%race%	%gender% %weight% %general%~
+		END
+	END
+END	
+ACTION_IF (MOD_IS_INSTALLED "npc-bodies.TP2" 100) BEGIN
+
+	
+	LAF ADD_IDS_ENTRY INT_VAR minValue = 1 STR_VAR idsFile =  "GENERAL" identifier = "EJREV" RET value END
+	ACTION_IF (value >= 0) BEGIN
+		OUTER_SET EJREV = value
+	END	
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x10b STR_VAR identifier = "EJREV" value = "%EJREV%" relation  = "1" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET revprot = index
+	END
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x10b STR_VAR identifier = "EJNOREV" value = "%EJREV%" relation  = "5" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET norevprot = index
+	END
+
+	OUTER_SET EJNOBOD = IDS_OF_SYMBOL (general EJNOBOD) 
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x10b STR_VAR identifier = "EJNOBOD" value = "%EJNOBOD%" relation  = "1" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET nobodprot = index
+	END
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x103 STR_VAR identifier = "EJDead" value = "%nobodprot%" relation  = "74" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET deadprot = index
+	END
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x104 STR_VAR identifier = "EJAlive" value = "%nobodprot%" relation  = "74" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET aliveprot = index
+	END
+		
+		
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x104 STR_VAR identifier = "EJRevAlive" value = "%revprot%" relation  = "%deadprot%" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET revaliveprot = index
+	END
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x103 STR_VAR identifier = "EJRevDead" value = "%revprot%" relation  = "%deadprot%" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET revdeadprot = index
+	END
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x103 STR_VAR identifier = "EJRevRaise" value = "%revprot%" relation  = "74" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET raiseprot = index
+	END
+	LAF ADD_SPLPROT_ENTRY INT_VAR stat = 0x104 STR_VAR identifier = "EJRevNoraise" value = "%revprot%" relation  = "74" RET index END
+	ACTION_IF (index >= 0) BEGIN
+		OUTER_SET noraiseprot = index
+	END
+
+	
+	
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_COLS cols
+		READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+		FOR (row = 0; row < r2en_bods; ++row) BEGIN
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 dv
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 3 name
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 script
+			INNER_ACTION BEGIN
+			OUTER_SET decay=RESOLVE_STR_REF(@12)
+				ACTION_IF (FILE_EXISTS_IN_GAME ~%script%.bcs~) BEGIN
+					COPY_EXISTING ~%script%.bcs~ ~override~
+						DECOMPILE_AND_PATCH BEGIN
+							LPF REPLACE_MULTILINE
+							INT_VAR
+							strict = 1
+							verbose = 0
+							STR_VAR
+							pattern = EVAL ~~~~~ActionOverride("EJdro%ind%",DropItem("EJB%ind%a",[-1.-1]))~~~~~  //pattern that you want to replace
+							string = EVAL ~~~~~ActionOverride("EJdro%ind%",DropItem("EJB%ind%a",[-1.-1]))
+		SetGlobalTimer("EJREV%ind%","GLOBAL",TEN_ROUNDS)
+		ChangeGeneral("%dv%",EJREV)~~~~~    //string that the pattern will be replaced with
+							END
+							LPF REPLACE_MULTILINE
+							INT_VAR
+							strict = 1
+							verbose = 0
+							STR_VAR
+							pattern = EVAL ~~~~~SetGlobal("EJdead%ind%","GLOBAL",0)~~~~~  //pattern that you want to replace
+							string = EVAL ~~~~~SetGlobal("EJdead%ind%","GLOBAL",0)
+			SetGlobal("EJNOREV%ind%","GLOBAL",0)~~~~~    //string that the pattern will be replaced with
+							END
+						END
+				END
+				ACTION_FOR_EACH baldur IN ~baldur~ ~bdbaldur~ ~baldur25~ BEGIN
+					ACTION_IF (FILE_EXISTS_IN_GAME ~%baldur%.bcs~) BEGIN
+						ACTION_IF !FILE_CONTAINS_EVALUATED(~%baldur%.bcs~ ~EJREV%ind%~) BEGIN
+							COPY_EXISTING ~%baldur%.bcs~ ~override~
+								DECOMPILE_AND_PATCH BEGIN
+									LPF REPLACE_MULTILINE
+											INT_VAR
+											strict = 1
+											verbose = 0
+											STR_VAR
+											pattern = EVAL ~~~~~IF
+    InPartyAllowDead("%dv%")
+    Global("EJdead%ind%","GLOBAL",1)
+    PartyHasItem("EJB%ind%a")
+THEN
+    RESPONSE #100
+        ChangeGeneral("%dv%",DEAD)
+END~~~~~  //pattern that you want to replace
+											string = EVAL ~~~~~IF
+    InPartyAllowDead("%dv%")
+    Global("EJdead%ind%","GLOBAL",1)
+    PartyHasItem("EJB%ind%a")
+	GlobalTimerExpired("EJREV%ind%","GLOBAL")
+THEN
+    RESPONSE #100
+        ChangeGeneral("%dv%",DEAD)
+END
+IF
+    InPartyAllowDead("%dv%")
+    Global("EJdead%ind%","GLOBAL",1)
+    PartyHasItem("EJB%ind%a")
+	!GlobalTimerExpired("EJREV%ind%","GLOBAL")
+THEN
+    RESPONSE #100
+        ChangeGeneral("%dv%",EJREV)
+END~~~~~    //string that the pattern will be replaced with
+								END
+							END	
+						END				
+					END
+				END
+				<<<<<<<< npc-inline/EJdro%ind%a.baf
+>>>>>>>>
+				COPY ~npc-inline/EJdro%ind%a.baf~ ~weidu_external/npc-bodies/EJdro%ind%a.baf~ 	
+APPEND_OUTER ~weidu_external/npc-bodies/EJdro%ind%a.baf~ 
+~IF
+	Dead("%dv%")
+	GlobalTimerExpired("EJREV%ind%","GLOBAL")
+	Global("EJNOREV%ind%","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("EJNOREV%ind%","GLOBAL",1)
+		DisplayStringNoName(Myself,"%decay%")
+		Continue()
+END~
+				ACTION_IF (FILE_EXISTS_IN_GAME ~EJdro%ind%.bcs~) BEGIN	
+					EXTEND_TOP "EJDRO%ind%.bcs" "weidu_external/npc-bodies/EJdro%ind%a.baf"
+				END ELSE
+					EXTEND_TOP "baldur.bcs" "weidu_external/npc-bodies/EJdro%ind%a.baf"
+			END	
+		END
+	COPY ~npc-bodies/bam/EJrevivB.BAM~ ~override~
+	COPY ~npc-bodies/bam/EJrevivC.BAM~ ~override~
+	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END
+	COPY_EXISTING ~%spell_res%.spl~ ~override/EJRev.spl~
+		SAY 0x08 @13
+		SAY 0x50 @14
+		WRITE_LONG 0x34 3
+		WRITE_ASCII 0x3a ~EJrevivC~
+		LPF ALTER_SPELL_HEADER INT_VAR speed = 1  STR_VAR icon = ~EJrevivB~ END
+	ADD_SPELL ~override/EJRev.spl~ 1 3 CLERIC_REVIVIFY
+	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_REVIVIFY~  RET spell_res END
+	COPY_EXISTING ~%spell_res%.spl~ ~override~ 
+		LPF ALTER_EFFECT INT_VAR match_opcode = 324 STR_VAR resource = ~%spell_res%~ END
+		LPF ALTER_EFFECT INT_VAR match_opcode = 318 STR_VAR resource = ~%spell_res%~ END
+		LPF ALTER_EFFECT INT_VAR match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %norevprot% END
+		LPF ALTER_EFFECT INT_VAR match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revprot% END
+		LPF ADD_SPELL_EFFECT INT_VAR insert_point = 1 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %norevprot% timing = 1 STR_VAR resource = ~EJNPREV~ END
+		LPF ADD_SPELL_EFFECT INT_VAR insert_point = 1 target = 2 opcode = 324 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 0 STR_VAR resource = EVAL ~%spell_res%~ END		
+	COPY ~npc-bodies/spl/EJNPRES.spl~ ~override/EJNPREV.spl~
+		LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (@15) END
+		
+		LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END //raise dead which is cast by temples
+		COPY_EXISTING ~%spell_res%.spl~ ~override~
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
+	
+		LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RECALL_SPIRIT~  RET spell_res END
+			COPY_EXISTING ~%spell_res%.spl~ ~override~
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
+				
+		LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_MASS_RAISE_DEAD~  RET spell_res END
+			COPY_EXISTING ~%spell_res%.spl~ ~override~
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
+				
+		COPY_EXISTING ~SPJA01.spl~ ~override~ 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
+				
+		COPY_EXISTING ~spwish10.spl~ ~override~ 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
+				
+		LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
+			COPY_EXISTING ~%spell_res%.spl~ ~override~
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %revaliveprot% END
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revdeadprot% END
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter2 = EVAL %aliveprot% parameter1 = 0 parameter2 = EVAL %revaliveprot% END
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter2 = EVAL %deadprot% parameter1 = 0 parameter2 = EVAL %revdeadprot% END
+				
+					LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_REVIVIFY~  RET spell_res END
+	COPY_EXISTING ~%spell_res%.spl~ ~override~ 
+		LPF ALTER_EFFECT INT_VAR match_opcode = 324 STR_VAR resource = ~%spell_res%~ END
+		LPF ALTER_EFFECT INT_VAR match_opcode = 318 STR_VAR resource = ~%spell_res%~ END
+		LPF ALTER_EFFECT INT_VAR match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %norevprot% END
+		LPF ALTER_EFFECT INT_VAR match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revprot% END
+
+		// *** NEW: remove the permanent -1 CON from Revivify’s copy of Raise Dead ***
+		LPF ALTER_EFFECT INT_VAR match_opcode = 10 match_parameter1 = (0 - 1) match_parameter2 = 0 parameter1 = 0 END
+
+		// ...rest of your existing ADD_SPELL_EFFECT calls...
+END
+
+//BEGIN @600 //Add Gentle Repose- A second level spell which prevents decay, allowing the individual to be raised later than would usually be possible
+//REQUIRE_PREDICATE (MOD_IS_INSTALLED "npc-bodies.tp2" 400) || (MOD_IS_INSTALLED "npc-bodies.tp2" 500) "This component is only relevanrt if you have the timing and/or revivify components installed"
+/*ACTION_IF !(FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~) BEGIN
+	<<<<<<<< npc-inline/NPCbods.2da
+	2DA V1.0 
+	INDEX	DV	CRE	NAME	SCRIPT	RACE	GENDER	WEIGHT
+	0		#	#	#		#		#		#		#
+	>>>>>>>> 
+
+	COPY ~npc-inline/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~ 
+	LAM JOINABLE_NPC_ARRAYS
+	OUTER_SET bind = 1
+	ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
+		OUTER_SET ind = 0
+		OUTER_SET skip = 0
+		COPY_EXISTING ~%cre%~ ~override~
+			READ_STRREF 0x8 name
+			READ_BYTE  0x272 race
+			READ_ASCII 0x248 script
+			READ_BYTE 0x275 gender
+			READ_BYTE 0x271 general
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Ajantis~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 182
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Alora~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 42
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Branwen~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 118
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Coran~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 106
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dorn~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 182
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Dynaheir~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Edwin~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 134 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Eldoth~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 176 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Faldorn~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 112 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Garrick~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Imoen~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 94 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Jaheira~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 105 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kagain~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 160 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Khalid~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 130 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Kivan~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 122 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Minsc~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 188 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Montaron~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 70 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Neera~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 89 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Quayle~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 66 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Rasaad~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 176 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Safana~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 118 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Shar-Teel~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 148 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Skie~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 106 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Tiax~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 69 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Viconia~) BEGIN
+					TEXT_SPRINT body ~DEADFEMA~
+					SET weight = 110 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xan~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 102 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Xsar~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 164 
+				END ELSE
+				PATCH_IF (~%name%~ STRING_EQUAL_CASE ~Yeslick~) BEGIN
+					TEXT_SPRINT body ~DEADMALE~
+					SET weight = 155 
+				END ELSE
+				PATCH_IF gender = 1 BEGIN //male
+					TEXT_SPRINT body ~DEADMALE~
+					PATCH_IF race = 1 BEGIN //human
+						SET weight = RANDOM(130 220) 
+					END ELSE
+					PATCH_IF race = 2 BEGIN //elf
+						SET weight = RANDOM(110 195) 
+					END ELSE
+					PATCH_IF race = 3 BEGIN //half-elf
+						SET weight = RANDOM(120 210) 
+					END ELSE
+					PATCH_IF race = 4 BEGIN //dwarf
+						SET weight = RANDOM(130 190) 
+					END ELSE
+					PATCH_IF race = 5 BEGIN //halfling
+						SET weight = RANDOM(40 75) 
+					END ELSE
+					PATCH_IF race = 6 BEGIN //gnome
+						SET weight = RANDOM(35 65) 
+					END ELSE
+					PATCH_IF race = 7 BEGIN //half orc
+						SET weight = RANDOM(170 250) 
+					END ELSE
+						SET weight = RANDOM(130 210) //any other race if used for some reason
+				END ELSE
+				TEXT_SPRINT body ~DEADFEMA~ //all other genders, presumably female most of the time
+				PATCH_IF race = 1 BEGIN //human
+					SET weight = RANDOM(110 170) 
+				END ELSE
+				PATCH_IF race = 2 BEGIN //elf
+					SET weight = RANDOM(105 165) 
+				END ELSE
+					PATCH_IF race = 3 BEGIN //half-elf
+					SET weight = RANDOM(110 180) 
+				END ELSE
+				PATCH_IF race = 4 BEGIN //dwarf
+					SET weight = RANDOM(110 175) 
+				END ELSE
+				PATCH_IF race = 5 BEGIN //halfling
+					SET weight = RANDOM(30 55) 
+				END ELSE
+				PATCH_IF race = 6 BEGIN //gnome
+					SET weight = RANDOM(25 55) 
+				END ELSE
+				PATCH_IF race = 7 BEGIN //half orc
+					SET weight = RANDOM(160 205) 
+				END ELSE
+				SET weight = RANDOM(110 195) //any other race if used for some reason
+				
+		OUTER_INNER_PATCH_SAVE name ~%name%~ BEGIN
+				REPLACE_TEXTUALLY ~ ~ ~_~
+		END		
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			COUNT_2DA_COLS cols
+			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+			FOR (row = 0; row < r2en_bods; ++row) BEGIN
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 prev_ind
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 prev_dv
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 prev_script
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 7 prev_weight
+				PATCH_IF (skip = 0) BEGIN
+					PATCH_IF (~%dv%~ STRING_EQUAL_CASE ~%prev_dv%~) BEGIN
+						SET ind = prev_ind
+						SET weight = prev_weight					
+						PATCH_IF (~%script%~ STRING_EQUAL_CASE ~%prev_script%~) BEGIN
+							SET skip = 1
+						END	
+					END
+				END
+			END
+			
+		ACTION_IF (ind = 0) BEGIN
+				OUTER_SET ind = bind
+				OUTER_SET bind += 1	
+		END
+			
+		ACTION_IF (skip = 0)	BEGIN
+			APPEND_OUTER ~weidu_external/npc-bodies/NPCbods.2da~ ~%ind% %dv%	%cre%	%name%	%script%	%race%	%gender% %weight% %general%~
+		END
+	END
+END */
+/*COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_COLS cols
+		READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+		FOR (row = 0; row < r2en_bods; ++row) BEGIN
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 dv
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 3 name
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 script
+			INNER_ACTION BEGIN */
+//Need to have a way to set another timer, do all dead npcs in party-- spell summons invisible creature that sest a global for each NPC for revivify and another for the normal timing, when the timer ends for these spells instead of doing the normal effect these restart the timer set to 10 days. 		
+	

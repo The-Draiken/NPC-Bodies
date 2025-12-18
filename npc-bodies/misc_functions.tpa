@@ -1,0 +1,1101 @@
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+// found by Ardanis in Rogue Rebalancing, had apparently been written by Nythrun
+// fixed two things, wrapped a function over it
+
+DEFINE_PATCH_FUNCTION ~FJ_SPL_ITM_REINDEX~ BEGIN
+
+PATCH_IF !(~%SOURCE_FILE%~ STRING_MATCHES_REGEXP ~^.+\.spl~) BEGIN
+  hs = 0x28
+  WRITE_LONG 0xc ~-1~ //Identified name
+  WRITE_LONG 0x54 ~-1~ //Identified description
+  PATCH_FOR_EACH tz IN 0x44 0x48 0x58 0x5c BEGIN
+    WRITE_LONG tz 0
+  END
+END ELSE PATCH_IF !(~%SOURCE_FILE%~ STRING_MATCHES_REGEXP ~^.+\.itm~) BEGIN
+  hs = 0x38
+END
+READ_LONG 0x64 hf //Extended header offset
+READ_SHORT 0x68 hc //Extended header count
+READ_LONG 0x6a fb //Feature block table offset
+READ_SHORT 0x70 fc //Feature block count
+PATCH_IF ((hf > fb) AND (hc > 0)) BEGIN // Ardanis: fixed "hc > 1" to "hc > 0"
+  READ_ASCII hf ~eh~ ELSE ~fail~ (hs * hc)
+  PATCH_IF (~%eh%~ STRING_EQUAL ~fail~) BEGIN
+    WHILE ((~%eh%~ STRING_EQUAL ~fail~) AND (hc > 0)) BEGIN
+      READ_ASCII hf ~eh~ ELSE ~fail~ (hs * hc)
+      hc -= 1
+    END
+  END
+  DELETE_BYTES hf (hs * hc)
+  hf = 0x72
+  WRITE_LONG 0x64 hf
+  WRITE_SHORT 0x68 hc
+  fb = (0x72 + (hs * hc))
+  WRITE_LONG 0x6a fb
+  PATCH_IF !(~%eh%~ STRING_EQUAL ~fail~) BEGIN
+    INSERT_BYTES hf (hs * hc)
+    WRITE_ASCIIE hf ~%eh%~
+  END
+END ELSE PATCH_IF ((hf != 0x72) AND (hc = 0)) BEGIN
+  hf = 0x72
+  WRITE_LONG 0x64 hf
+END
+FOR (i1 = 0; i1 < (hs * hc); i1 += hs) BEGIN
+  WRITE_SHORT (hf + i1 + 0x20) fc
+  READ_SHORT (hf + i1 + 0x1e) cx
+  fc += cx
+END
+PATCH_IF (SOURCE_SIZE > (0x72 + (hs * hc) + (0x30 * fc))) BEGIN
+  DELETE_BYTES (0x72 + (hs * hc) + (0x30 * fc)) (SOURCE_SIZE - (0x72 + (hs * hc) + (0x30 * fc)))
+END
+
+// added by Ardanis
+WRITE_SHORT 0x6e 0
+
+END // end of function
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION ~ADD_ITEM_HEADER~
+  INT_VAR
+    type=3
+    required_id=0
+    location=3
+    alt_dicesize=0
+    target=1
+    target_count=0
+    range=0
+    projectile_type=0
+    alt_dicenumber=0
+    speed=0
+    alt_damage=0
+    thaco=0
+    dicesize=0
+    school=0
+    dicenumber=0
+    sectype=0
+    damage=0
+    damage_type=0
+    charges=0
+    depletion=0
+    flags=0
+    projectile=1
+    overhand=0
+    backhand=0
+    thrust=0
+    is_bow=0
+    is_xbow=0
+    is_sling=0
+    copy_header=0
+    insert_point=~-1~
+  STR_VAR
+    icon=~~
+  RET
+    insert_point
+BEGIN
+  LPF ~FJ_SPL_ITM_REINDEX~ END
+  hs=0x38
+
+  READ_LONG 0x64 ho
+  READ_SHORT 0x68 hc
+  READ_LONG 0x6a eo
+  insert_point = (insert_point>hc || insert_point<0) ? hc : insert_point
+  copy_header = (copy_header<0) ? 0 : copy_header
+
+  PATCH_IF copy_header>hc BEGIN
+    PATCH_WARN ~Unable to copy %copy_header%th header, %SOURCE_FILE% contains only %hc% headers!~
+  END ELSE BEGIN
+    INSERT_BYTES ho+insert_point*hs hs
+    hc+=1
+    eo+=hs
+    PATCH_IF copy_header BEGIN
+      READ_SHORT ho+(copy_header - 1)*hs+0x1e ec
+      READ_SHORT ho+(copy_header - 1)*hs+0x20 ei
+      READ_ASCII eo+ei*0x30 effs (ec*0x30)
+      READ_ASCII ho+(copy_header - 1)*hs copy (hs)
+      WRITE_ASCIIE ho+insert_point*hs ~%copy%~ (hs)
+    END
+    WRITE_SHORT 0x68 hc
+    WRITE_LONG 0x6a eo
+
+    READ_SHORT 0x70 ei // technically, it is a counter
+    FOR (i=ho;i<ho+hc*hs;i+=hs) BEGIN
+      READ_SHORT i+0x1e ec
+      WRITE_SHORT i+0x20 ei
+      ei+=ec
+    END
+
+    PATCH_IF copy_header BEGIN
+      READ_SHORT ho+insert_point*hs+0x1e ec
+      READ_SHORT ho+insert_point*hs+0x20 ei
+      INSERT_BYTES eo+ei*0x30 ec*0x30
+      WRITE_ASCIIE eo+ei*0x30 ~%effs%~ (ec*0x30)
+    END ELSE BEGIN
+      off=ho+insert_point*hs
+      WRITE_BYTE off type
+      WRITE_BYTE off+0x1 required_id
+      WRITE_BYTE off+0x2 location
+      WRITE_BYTE off+0x3 alt_dicesize
+      WRITE_ASCIIE off+0x4 ~%icon%~ (8)
+      WRITE_BYTE off+0xc target
+      WRITE_BYTE off+0xd target_count
+      WRITE_SHORT off+0xe range
+      WRITE_BYTE off+0x10 projectile_type
+      WRITE_BYTE off+0x11 alt_dicenumber
+      WRITE_BYTE off+0x12 speed
+      WRITE_BYTE off+0x13 alt_damage
+      WRITE_SHORT off+0x14 thaco
+      WRITE_BYTE off+0x16 dicesize
+      WRITE_BYTE off+0x17 school
+      WRITE_BYTE off+0x18 dicenumber
+      WRITE_BYTE off+0x19 sectype
+      WRITE_SHORT off+0x1a damage
+      WRITE_SHORT off+0x1c damage_type
+      WRITE_SHORT off+0x22 charges
+      WRITE_SHORT off+0x24 depletion
+      WRITE_LONG off+0x26 flags
+      WRITE_SHORT off+0x2a projectile
+      WRITE_SHORT off+0x2c overhand
+      WRITE_SHORT off+0x2e backhand
+      WRITE_SHORT off+0x30 thrust
+      WRITE_SHORT off+0x32 is_bow
+      WRITE_SHORT off+0x34 is_xbow
+      WRITE_SHORT off+0x36 is_sling
+    END
+  END
+END
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+// found by Ardanis in Rogue Rebalancing, had apparently been written by Nythrun
+// fixed two things, wrapped a function over it
+
+DEFINE_PATCH_FUNCTION ~FJ_SPL_ITM_REINDEX~ BEGIN
+
+PATCH_IF !(~%SOURCE_FILE%~ STRING_MATCHES_REGEXP ~^.+\.spl~) BEGIN
+  hs = 0x28
+  WRITE_LONG 0xc ~-1~ //Identified name
+  WRITE_LONG 0x54 ~-1~ //Identified description
+  PATCH_FOR_EACH tz IN 0x44 0x48 0x58 0x5c BEGIN
+    WRITE_LONG tz 0
+  END
+END ELSE PATCH_IF !(~%SOURCE_FILE%~ STRING_MATCHES_REGEXP ~^.+\.itm~) BEGIN
+  hs = 0x38
+END
+READ_LONG 0x64 hf //Extended header offset
+READ_SHORT 0x68 hc //Extended header count
+READ_LONG 0x6a fb //Feature block table offset
+READ_SHORT 0x70 fc //Feature block count
+PATCH_IF ((hf > fb) AND (hc > 0)) BEGIN // Ardanis: fixed "hc > 1" to "hc > 0"
+  READ_ASCII hf ~eh~ ELSE ~fail~ (hs * hc)
+  PATCH_IF (~%eh%~ STRING_EQUAL ~fail~) BEGIN
+    WHILE ((~%eh%~ STRING_EQUAL ~fail~) AND (hc > 0)) BEGIN
+      READ_ASCII hf ~eh~ ELSE ~fail~ (hs * hc)
+      hc -= 1
+    END
+  END
+  DELETE_BYTES hf (hs * hc)
+  hf = 0x72
+  WRITE_LONG 0x64 hf
+  WRITE_SHORT 0x68 hc
+  fb = (0x72 + (hs * hc))
+  WRITE_LONG 0x6a fb
+  PATCH_IF !(~%eh%~ STRING_EQUAL ~fail~) BEGIN
+    INSERT_BYTES hf (hs * hc)
+    WRITE_ASCIIE hf ~%eh%~
+  END
+END ELSE PATCH_IF ((hf != 0x72) AND (hc = 0)) BEGIN
+  hf = 0x72
+  WRITE_LONG 0x64 hf
+END
+FOR (i1 = 0; i1 < (hs * hc); i1 += hs) BEGIN
+  WRITE_SHORT (hf + i1 + 0x20) fc
+  READ_SHORT (hf + i1 + 0x1e) cx
+  fc += cx
+END
+PATCH_IF (SOURCE_SIZE > (0x72 + (hs * hc) + (0x30 * fc))) BEGIN
+  DELETE_BYTES (0x72 + (hs * hc) + (0x30 * fc)) (SOURCE_SIZE - (0x72 + (hs * hc) + (0x30 * fc)))
+END
+// added by Ardanis
+WRITE_SHORT 0x6e 0
+END // end of function
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION ~ADD_SPELL_HEADER~
+  INT_VAR
+    type=1
+    location=4
+    target=1
+    target_count=0
+    range=0
+    required_level=1
+    speed=0
+    projectile=1
+    copy_header=0
+    insert_point=~-1~
+  STR_VAR
+    icon=~~
+  RET
+    insert_point
+BEGIN
+  LPF ~FJ_SPL_ITM_REINDEX~ END
+  hs=0x28
+  READ_LONG 0x64 ho
+  READ_SHORT 0x68 hc
+  READ_LONG 0x6a eo
+  insert_point = (insert_point>hc || insert_point<0) ? hc : insert_point
+  copy_header = (copy_header<0) ? 0 : copy_header
+  PATCH_IF copy_header>hc BEGIN
+    PATCH_WARN ~Unable to copy %copy_header%th header, %SOURCE_FILE% contains only %hc% headers!~
+  END ELSE BEGIN
+    INSERT_BYTES ho+insert_point*hs hs
+    hc+=1
+    eo+=hs
+    PATCH_IF copy_header BEGIN
+      READ_SHORT ho+(copy_header - 1)*hs+0x1e ec
+      READ_SHORT ho+(copy_header - 1)*hs+0x20 ei
+      READ_ASCII eo+ei*0x30 effs (ec*0x30)
+      READ_ASCII ho+(copy_header - 1)*hs copy (hs)
+      WRITE_ASCIIE ho+insert_point*hs ~%copy%~ (hs)
+    END
+    WRITE_SHORT 0x68 hc
+    WRITE_LONG 0x6a eo
+    READ_SHORT 0x70 ei // technically, it is a counter
+    FOR (i=ho;i<ho+hc*hs;i+=hs) BEGIN
+      READ_SHORT i+0x1e ec
+      WRITE_SHORT i+0x20 ei
+      ei+=ec
+    END
+    PATCH_IF copy_header BEGIN
+      READ_SHORT ho+insert_point*hs+0x1e ec
+      READ_SHORT ho+insert_point*hs+0x20 ei
+      INSERT_BYTES eo+ei*0x30 ec*0x30
+      WRITE_ASCIIE eo+ei*0x30 ~%effs%~ (ec*0x30)
+    END ELSE BEGIN
+      off=ho+insert_point*hs
+      WRITE_BYTE off type
+      WRITE_BYTE off+0x2 location
+      WRITE_ASCIIE off+0x4 ~%icon%~ (8)
+      WRITE_BYTE off+0xc target
+      WRITE_BYTE off+0xd target_count
+      WRITE_SHORT off+0xe range
+      WRITE_SHORT off+0x10 required_level
+      WRITE_LONG off+0x12 speed
+      WRITE_SHORT off+0x26 projectile
+    END
+  END
+END
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+//ADD SPELLSTATE MACRO______________________________________________________________
+//
+DEFINE_ACTION_FUNCTION d5_resolve_state STR_VAR new_state_id = ~blah~ RET new_state_ind BEGIN
+  OUTER_SET state_ind = IDS_OF_SYMBOL (~splstate~ ~%new_state_id%~)
+  ACTION_IF !(state_ind = 0 - 1) BEGIN
+    OUTER_SET new_state_ind = state_ind
+  END
+  ACTION_IF (state_ind = 0 - 1) BEGIN
+    OUTER_SET new_state_ind = 0
+    COPY_EXISTING ~splstate.ids~ ~override~
+      READ_2DA_ENTRIES_NOW rows 2
+      PATCH_IF (rows < 256) BEGIN
+        SET found = 0
+        FOR (row = 1; row < rows; ++row) BEGIN
+          PATCH_IF (found = 0) BEGIN
+            READ_2DA_ENTRY_FORMER rows row 0 ind
+            READ_2DA_ENTRY_FORMER rows row 1 spec
+            SET poss_ind = (ind + 1)
+            PATCH_IF (poss_ind < 256) BEGIN
+              LOOKUP_IDS_SYMBOL_OF_INT poss_state ~splstate~ poss_ind
+              PATCH_IF (~%poss_state%~ STRING_EQUAL_CASE ~%poss_ind%~) BEGIN
+                SET found = 1
+                SET new_state_ind = poss_ind
+              END
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (new_state_ind > 0) BEGIN
+      APPEND ~splstate.ids~ ~%new_state_ind%  %new_state_id%~
+    END
+  END
+END 
+//__________________________________________________________________________________
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+//JOINABLE NPCS ARRAY MACRO__________________________________________________________
+//
+DEFINE_ACTION_MACRO JOINABLE_NPC_ARRAYS BEGIN
+	//PDIALOG.2DA exists in all games
+	ACTION_DEFINE_ASSOCIATIVE_ARRAY JOINABLE_NPC_ARRAY_2da BEGIN ~PDIALOG~ => ~~ END
+	//Check PDIALOG.2DA file variants referenced in CAMPAIGN.2DA
+	ACTION_IF FILE_EXISTS_IN_GAME ~CAMPAIGN.2DA~ BEGIN
+		COPY_EXISTING ~CAMPAIGN.2DA~ ~CAMPAIGN.2DA~
+			COUNT_2DA_ROWS 32 "cntrow"
+			FOR (i = 0; i < cntrow; i = i + 1) BEGIN
+				READ_2DA_ENTRY i 11 32 file
+				TO_UPPER file
+				DEFINE_ASSOCIATIVE_ARRAY JOINABLE_NPC_ARRAY_2da BEGIN ~%file%~ => ~~ END
+			END
+		BUT_ONLY
+	END
+	//Generate array with joinable NPC DV
+	ACTION_PHP_EACH JOINABLE_NPC_ARRAY_2da AS file => ~~ BEGIN
+		ACTION_IF FILE_EXISTS_IN_GAME ~%file%.2da~ BEGIN
+			COPY_EXISTING ~%file%.2da~ ~override~
+				COUNT_2DA_ROWS 3 "cntrow"
+				FOR (i = 1; i < cntrow; i = i + 1) BEGIN
+					READ_2DA_ENTRY i 0 3 "dv"
+					TO_UPPER dv
+					DEFINE_ASSOCIATIVE_ARRAY JOINABLE_NPC_ARRAY_dv BEGIN ~%dv%~ => ~~ END
+				END
+			BUT_ONLY
+		END
+	END
+	//Generate array with joinable NPC cre files
+	COPY_EXISTING_REGEXP GLOB ~.+\.CRE~ ~override~
+		READ_ASCII DEATHVAR "dv" (32) NULL
+		TO_UPPER dv
+		PATCH_IF VARIABLE_IS_SET $JOINABLE_NPC_ARRAY_dv(~%dv%~) BEGIN
+			DEFINE_ASSOCIATIVE_ARRAY JOINABLE_NPC_ARRAY BEGIN ~%SOURCE_FILE%~ => ~%dv%~ END
+		END
+		PATCH_IF NOT VARIABLE_IS_SET $JOINABLE_NPC_ARRAY_dv(~%dv%~) BEGIN
+			DEFINE_ASSOCIATIVE_ARRAY NON_JOINABLE_NPC_ARRAY BEGIN ~%SOURCE_FILE%~ => ~%dv%~ END
+		END
+	BUT_ONLY
+END
+//__________________________________________________________________________________
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////                                                  \\\\\
+///// spell_to_innate                                  \\\\\
+/////                                                  \\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+
+// converts spell to innate and lowers casting time by two
+
+DEFINE_PATCH_MACRO ~spell_to_innate~ BEGIN
+
+  READ_LONG  0x64 abil_off ELSE 0
+  READ_SHORT 0x68 abil_num ELSE 0
+  READ_ASCII (abil_off + 0x04) bam (8) // reads the bam filename from ability
+  WRITE_SHORT 0x1C 4                         // sets spell type to innate (4)
+  WRITE_LONG  0x34 1                         // sets spell level to 1 to avoid scripting issues
+  WRITE_ASCIIE 0x3A "%bam%" #8      // writes the bam filename from abilities to spell icon
+  FOR (index = 0 ; index < abil_num ; ++index) BEGIN
+    WRITE_SHORT (abil_off + 0x02 + (0x28 * index)) 4 // changes ability icon location to innate (4)
+    READ_SHORT  (abil_off + 0x12 + (0x28 * index)) speed // reads casting speed
+    PATCH_IF (speed > 3) BEGIN
+      WRITE_SHORT  (abil_off + 0x12 + (0x28 * index)) (speed - 2) // reduces casting speed
+    END ELSE BEGIN
+      WRITE_SHORT  (abil_off + 0x12 + (0x28 * index)) 0 // makes instant
+    END
+  END
+
+END
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+// fix kitlist IDS entries
+
+DEFINE_ACTION_FUNCTION fix_kitlist_missing_ids BEGIN
+	COPY_EXISTING ~kitlist.2da~ ~override~
+		PRETTY_PRINT_2DA
+		PATCH_IF ~%entry%~ STR_EQ ~~ BEGIN
+			READ_2DA_ENTRY 1 0 1 "entry"
+		END
+		COUNT_2DA_COLS "cols"
+		SET cnt = 0
+		REPLACE_EVALUATE ~^\(.+\)$~ BEGIN
+			PATCH_IF cnt >= 3 BEGIN
+				INNER_PATCH_SAVE MATCH1 ~%MATCH1%~ BEGIN
+					COUNT_REGEXP_INSTANCES ~ +~ num_matches
+					WHILE (num_matches < (cols - 1)) BEGIN
+						REPLACE_TEXTUALLY ~$~ ~ ZZZZZ~
+						SET num_matches = num_matches + 1
+					END
+				END
+			END ELSE BEGIN
+				SET cnt = cnt + 1
+			END
+		END ~%MATCH1%~
+		PRETTY_PRINT_2DA
+	BUT_ONLY
+	COPY_EXISTING ~kitlist.2da~ ~override~
+		COUNT_2DA_ROWS 10 rows
+		FOR (row = 1; row < rows; ++row) BEGIN
+			SET val = (row - 12)
+			TEXT_SPRINT new_ids ~000040%val%~
+			READ_2DA_ENTRY row 9 10 ids_val
+			PATCH_IF !(IS_AN_INT ~%ids_val%~) BEGIN
+				SET_2DA_ENTRY row 9 10 ~0x%new_ids%~
+			END
+		END
+	BUT_ONLY
+END
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+// Automatically fixes missing column entries in 2da files. Can be used as both patch and action function
+
+DEFINE_ACTION_FUNCTION 2DA_MISSING_COLS
+	INT_VAR
+	cols = 0 //minimum amount of columns that should have values (if not set function will automatically read max number of columns in file)
+	STR_VAR
+	2da = ~~ //2da file that should be patched, e.g. kitlist
+	entry = ~~ //what entry should be set in missing columns (if not set function will automatically read default entry from loaded 2da, e.g. *)
+BEGIN
+	ACTION_IF ~%2da%~ STR_EQ ~~ BEGIN
+		FAIL ~2DA_MISSING_COLS: %2da% STR_VAR not set~
+	END
+	COPY_EXISTING ~%2da%.2da~ ~override~
+		PRETTY_PRINT_2DA
+		PATCH_IF ~%entry%~ STR_EQ ~~ BEGIN
+			READ_2DA_ENTRY 1 0 1 "entry"
+		END
+		PATCH_IF cols = 0 BEGIN
+			COUNT_2DA_COLS "cols"
+		END
+		SET cnt = 0
+		REPLACE_EVALUATE ~^\(.+\)$~ BEGIN
+			PATCH_IF cnt >= 3 BEGIN
+				INNER_PATCH_SAVE MATCH1 ~%MATCH1%~ BEGIN
+					COUNT_REGEXP_INSTANCES ~ +~ num_matches
+					WHILE (num_matches < (cols - 1)) BEGIN
+						REPLACE_TEXTUALLY ~$~ ~ %entry%~
+						SET num_matches = num_matches + 1
+					END
+				END
+			END ELSE BEGIN
+				SET cnt = cnt + 1
+			END
+		END ~%MATCH1%~
+		PRETTY_PRINT_2DA
+	BUT_ONLY
+END
+
+DEFINE_PATCH_FUNCTION 2DA_MISSING_COLS
+	INT_VAR
+	cols = 0 //minimum amount of columns that should have values (if not set function will automatically read max number of columns in file)
+	STR_VAR
+	entry = ~~ //what entry should be used in missing columns (if not set function will automatically read default entry from loaded 2da, e.g. *)
+BEGIN
+	PRETTY_PRINT_2DA
+	PATCH_IF ~%entry%~ STR_EQ ~~ BEGIN
+		READ_2DA_ENTRY 1 0 1 "entry"
+	END
+	PATCH_IF cols = 0 BEGIN
+		COUNT_2DA_COLS "cols"
+	END
+	SET cnt = 0
+	REPLACE_EVALUATE ~^\(.+\)$~ BEGIN
+		PATCH_IF cnt >= 3 BEGIN
+			INNER_PATCH_SAVE MATCH1 ~%MATCH1%~ BEGIN
+				COUNT_REGEXP_INSTANCES ~ +~ num_matches
+				WHILE (num_matches < (cols - 1)) BEGIN
+					REPLACE_TEXTUALLY ~$~ ~ %entry%~
+					SET num_matches = num_matches + 1
+				END
+			END
+		END ELSE BEGIN
+			SET cnt = cnt + 1
+		END
+	END ~%MATCH1%~
+	PRETTY_PRINT_2DA
+END
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+/* do this in the code...??
+OUTER_INNER_PATCH ~1~ BEGIN
+  WRITE_BYTE 0 0x09
+  READ_ASCII 0 tab (1)  // 0x09, tab
+  WRITE_BYTE 0 0x0d
+  READ_ASCII 0 mnl (1)  // 0x0d, Mac
+END
+*/
+
+DEFINE_PATCH_FUNCTION ~TRA2STR~ // given tra reference, returns string
+  STR_VAR tra = ~~ // e.g. ~@123~
+  RET str
+BEGIN
+  PATCH_IF ((~%tra%~ STRING_MATCHES_REGEXP ~@-?[0-9]+~) == 0) BEGIN
+    INNER_ACTION BEGIN
+      <<<<<<<< .../inlined/mi_tra2str.tph
+        OUTER_SPRINT str %tra%
+      >>>>>>>>
+      COPY - ~.../inlined/mi_tra2str.tph~ ~.../inlined/mi_tra2str.tph~
+        EVALUATE_BUFFER
+      REINCLUDE ~.../inlined/mi_tra2str.tph~
+    END
+  END
+  ELSE BEGIN
+    TEXT_SPRINT str ~%tra%~
+  END
+END
+
+DEFINE_ACTION_FUNCTION ~ADD_ITEM_TOOLTIPS~
+  STR_VAR item = ~~     // e.g. ~sw1h01~
+          tooltips = ~~ // e.g. ~@123 @124 6620~, takes combination of tra refs and strrefs for as many abilities as you need to specify
+BEGIN
+  ACTION_IF (STRING_LENGTH ~%item%~ > 0) BEGIN
+    // generate our row to add to tooltip.2da
+    OUTER_TEXT_SPRINT row ~%item%~
+    OUTER_PATCH ~ %tooltips%~ BEGIN // extract our tooltips from the tooltips string
+      REPLACE_EVALUATE ~[ %tab%]+\(@?-?[0-9]+\)~ BEGIN
+        PATCH_IF ((~%MATCH1%~ STRING_MATCHES_REGEXP ~@-?[0-9]+~) == 0) BEGIN // tra ref
+          // look up string for given tra reference
+          LAUNCH_PATCH_FUNCTION ~TRA2STR~ STR_VAR tra = EVALUATE_BUFFER ~%MATCH1%~ RET str = str END
+          // use REPLACE to get a strref for our new string
+          INNER_PATCH ~0~ BEGIN
+            REPLACE ~0~ ~%str%~
+            READ_2DA_ENTRY 0 0 1 strref
+          END
+          TEXT_SPRINT row ~%row% %strref%~ // add to our row
+        END
+        ELSE BEGIN // strref
+          TEXT_SPRINT row ~%row% %MATCH1%~ // add to our row
+        END
+      END ~~
+    END
+    
+    COPY_EXISTING ~tooltip.2da~ ~override~
+      REPLACE_TEXTUALLY ~^[ %tab%]*%item%[ %tab%].*~ ~~ // remove previous row for this item if it exists
+      COUNT_2DA_ROWS 1 num_rows
+      INSERT_2DA_ROW num_rows 1 ~%row%~ // insert our row at the end
+      
+      // ensure all rows have -1 entries in unused columns
+      REPLACE_TEXTUALLY ~^[ %tab%]*0?[ %tab%]*1[ %tab%]+2[ %tab%]+3.*~ ~~ // remove column labels for now
+      COUNT_2DA_COLS num_cols
+      TEXT_SPRINT entries ~~
+      TEXT_SPRINT col_labels ~~
+      FOR (i = 1; i < (num_cols - 1); i += 1) BEGIN // for each number of columns less than there should be
+        TEXT_SPRINT entries ~%entries%[ %tab%]+[0-9-]+~ // generate regexp to detect this many columns
+        TEXT_SPRINT empties ~~
+        FOR (j = (num_cols - 1); j > i; j -= 1) BEGIN // generate -1 entries for the number of missing columns
+          TEXT_SPRINT empties ~%empties% -1~
+        END
+        REPLACE_TEXTUALLY ~^\([ %tab%]*[^ %tab%]+%entries%\)[ %tab%]*[%mnl%]?$~ ~\1%empties%~ // add -1 entries to all rows with this many missing columns
+        TEXT_SPRINT col_labels ~%col_labels% %i%~ // generate fresh column labels
+      END
+      INSERT_2DA_ROW 2 1 ~%col_labels% %i%~ // re-add column labels, with last entry where i == (num_cols - 1)
+      PRETTY_PRINT_2DA
+      REPLACE_TEXTUALLY ~2DA +~ ~2DA ~
+    
+  END
+END
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
+DEFINE_PATCH_FUNCTION QD_ADD_EMPTY_SPELL_HEADER
+INT_VAR
+  type            = 1
+  location        = 4
+  target          = 1
+  target_count    = 0
+  range           = 0
+  required_level  = 1
+  speed           = 0
+  projectile      = 1
+  copy_header     = 0
+  insert_point    = ~-1~
+STR_VAR
+  icon            = ~~
+RET
+  insert_point
+BEGIN
+  SET hs = 0x28
+  READ_LONG 0x64 ho
+  READ_SHORT 0x68 hc
+  READ_LONG 0x6a eo
+  SET insert_point = (insert_point > hc || insert_point < 0) ? hc : insert_point
+  SET copy_header = (copy_header < 0) ? 0 : copy_header
+  PATCH_IF (copy_header > hc) BEGIN
+    PATCH_WARN ~WARNING: Unable to copy %copy_header%th header, %SOURCE_FILE% contains only %hc% headers!~
+  END ELSE BEGIN
+    INSERT_BYTES (ho + insert_point * hs) hs
+    SET hc += 1
+    SET eo += hs
+    PATCH_IF (copy_header) BEGIN
+      READ_SHORT (ho + (copy_header - 1) * hs + 0x1e) ec
+      READ_SHORT (ho + (copy_header - 1) * hs + 0x20) ei
+      READ_ASCII (eo + ei * 0x30) effs (ec * 0x30)
+      READ_ASCII (ho + (copy_header - 1) * hs) copy (hs)
+      WRITE_ASCIIE (ho + insert_point * hs) ~%copy%~ (hs)
+    END
+    WRITE_SHORT 0x68 hc
+    WRITE_LONG 0x6a eo
+    READ_SHORT 0x70 ei // technically, it is a counter
+    FOR (i = ho; i < ho + hc * hs; i += hs) BEGIN
+      READ_SHORT (i + 0x1e) ec
+      WRITE_SHORT (i + 0x20) ei
+      SET ei += ec
+    END
+    PATCH_IF (copy_header) BEGIN
+      READ_SHORT (ho + insert_point * hs + 0x1e) ec
+      READ_SHORT (ho + insert_point * hs + 0x20) ei
+      INSERT_BYTES (eo + ei * 0x30) (ec * 0x30)
+      WRITE_ASCIIE (eo + ei * 0x30) ~%effs%~ (ec * 0x30)
+    END ELSE BEGIN
+      SET off = ho + insert_point * hs
+      WRITE_BYTE off type
+      WRITE_BYTE (off + 0x2) location
+      WRITE_ASCIIE (off + 0x4) ~%icon%~ (8)
+      WRITE_BYTE (off + 0xc) target
+      WRITE_BYTE (off + 0xd) target_count
+      WRITE_SHORT (off + 0xe) range
+      WRITE_SHORT (off + 0x10) required_level
+      WRITE_LONG (off + 0x12) speed
+      WRITE_SHORT (off + 0x26) projectile
+    END
+  END
+END
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+/////                                                  \\\\\
+///// CD_EXTEND-O-MATIC, patent pending                \\\\\
+/////                                                  \\\\\
+
+// this function creates headers and does basic duration extensions to level 30; written for inwd-in-bg2 ages ago
+// added abil_delta tracking
+DEFINE_PATCH_FUNCTION CD_EXTEND-O-MATIC
+  INT_VAR base_dur       = 0     // constant to add to all durations
+          step_dur       = round // how much duration to add to each consecutive header
+          step_size      = 1     // how many levels between headers
+          level_cap      = cap   // stop extending at level
+          min_dur        = 4     // ignore effects with durations less than this (e.g. cosmetics)
+          dur_special    = 0     // just add step_dur to existing effects (ignore base_dur)
+          min_lev_alt    = 0     // if extending from level 1, use this value as its minimum level instead (e.g. fifth slevel spell with only one header, use 9 here)
+          base_dmg_rolls = 0     // base roll damage
+          base_dmg_fixed = 0     // base fixed damage
+          damage_rolls   = 0     // +die roll damage per level
+          damage_fixed   = 0     // +fixed damage per level
+          save_for_half  = 0     // if we need to split damage for non-ee: 0=no split, 1=split with odd totals going to no-save half, 2=split with odd totals going to save half
+          damage_special = 0     // just add damage_rolls/damage_fixed to existing effects (ignore base_dmg_rolls, base_dmg_fixed)
+  RET     abil_delta
+BEGIN
+
+  SET abil_delta = 0
+  READ_LONG  0x64 abil_off
+  READ_SHORT 0x68 abil_num
+  READ_LONG  0x6a fx_off
+  READ_SHORT (abil_off + 0x10 + (0x28 * (abil_num - 1))) min_lev // read level of last ability
+  // fudge factor is to determine which half of damage gets the full die when adding 1 per level
+  SET save_fudge_fixed = 0 SET save_fudge_rolls = 0 SET nonsave_fudge_fixed = 0 SET nonsave_fudge_rolls = 0
+  PATCH_IF save_for_half BEGIN  
+    PATCH_MATCH save_for_half WITH
+      2 BEGIN SET save_fudge_fixed = 1 SET save_fudge_rolls = 1 END
+      3 BEGIN SET save_fudge_rolls = 1 SET nonsave_fudge_fixed = 1 END
+      4 BEGIN SET save_fudge_fixed = 1 SET nonsave_fudge_rolls = 1  END
+      DEFAULT SET nonsave_fudge_fixed = 1 SET nonsave_fudge_rolls = 1 // 1, or non-valid
+    END
+  END    
+  PATCH_IF ((min_lev = 1) AND (min_lev_alt != 0)) BEGIN SET min_lev = min_lev_alt END
+  FOR (index = min_lev + step_size ; index < (level_cap + 1) ; index = index + step_size) BEGIN
+    READ_ASCII (abil_off +        (0x28 * (abil_num - 1))) abil (0x28) // read entire ability
+    READ_SHORT (abil_off + 0x1e + (0x28 * (abil_num - 1))) abil_fx_num
+    READ_SHORT (abil_off + 0x20 + (0x28 * (abil_num - 1))) abil_fx_idx
+    READ_ASCII (fx_off +        (0x30 * abil_fx_idx)) effects (abil_fx_num * 0x30) // read entire fx block
+    INSERT_BYTES (fx_off +        (0x30 * (abil_fx_idx + abil_fx_num))) (abil_fx_num * 0x30) // insert bytes for new ability
+    WRITE_ASCIIE (fx_off +        (0x30 * (abil_fx_idx + abil_fx_num))) "%effects%"          // write in effects block
+    // if damage_special & save_for_half, we use the first loop only to gather total damage between the split damage opcodes, then use it in a second loop
+    PATCH_IF damage_special BEGIN
+      SET special_fixed = 0  
+      SET special_rolls = 0 
+    END  
+    FOR (index2 = 0 ; index2 < abil_fx_num ; ++index2) BEGIN
+      READ_BYTE (fx_off + 0x0c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) timing
+      READ_LONG (fx_off + 0x0e + (0x30 * (abil_fx_idx + abil_fx_num + index2))) duration
+      PATCH_IF ((duration > min_dur) AND (timing < 10)) BEGIN // exclude instant/cosmetic efects, skip durations in ticks
+        PATCH_IF dur_special = 1 BEGIN
+          SET new_dur = duration + step_dur
+        END ELSE BEGIN
+          SET new_dur = (base_dur + (index * step_dur))
+        END
+        WRITE_LONG (fx_off + 0x0e + (0x30 * (abil_fx_idx + abil_fx_num + index2))) new_dur // adjust durations
+      END
+      PATCH_IF damage_rolls OR damage_fixed BEGIN // if any scaling damage
+        SET new_fixed = (base_dmg_fixed + (index * damage_fixed))
+        SET new_rolls = (base_dmg_rolls + (index * damage_rolls))
+        READ_SHORT (fx_off +        (0x30 * (abil_fx_idx + abil_fx_num + index2))) opcode
+        PATCH_IF opcode = 12 BEGIN // damage
+          READ_LONG (fx_off + 0x2c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) special
+          PATCH_IF (save_for_half AND ((special & BIT8) = 0)) BEGIN // if we're saving for half and there's no EE save-for-half flag, split damage
+            PATCH_IF damage_special BEGIN
+              SET special_fixed = special_fixed + LONG_AT (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2)))
+              SET special_rolls = special_rolls + LONG_AT (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2)))
+            END ELSE BEGIN  
+              READ_LONG (fx_off + 0x24 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) save // have to account for non-EE damage split
+              PATCH_IF ((save & (BIT0 + BIT1 + BIT2 + BIT3 + BIT4)) = 0) BEGIN // 1/2 damage that always happens 
+                WRITE_LONG (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_fixed + nonsave_fudge_fixed) / 2)
+                WRITE_LONG (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_rolls + nonsave_fudge_rolls) / 2)
+              END ELSE BEGIN
+                WRITE_LONG (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_fixed + save_fudge_fixed) / 2)
+                WRITE_LONG (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_rolls + save_fudge_rolls) / 2)
+              END  
+            END
+          END ELSE BEGIN // either no save-for-half or on EE with its save-for-half flag
+            PATCH_IF damage_special BEGIN
+              WRITE_LONG (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) (THIS + damage_fixed)
+              WRITE_LONG (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) (THIS + damage_rolls)   
+            END ELSE BEGIN
+              WRITE_LONG (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) new_fixed
+              WRITE_LONG (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) new_rolls      
+            END  
+          END
+        END   
+      END    
+    END // closes effects loop
+    PATCH_IF (damage_special AND (special_fixed OR special_rolls)) BEGIN
+      SET new_fixed = (special_fixed + damage_fixed)
+      SET new_rolls = (special_rolls + damage_rolls)
+      FOR (index2 = 0 ; index2 < abil_fx_num ; ++index2) BEGIN
+        READ_SHORT (fx_off +        (0x30 * (abil_fx_idx + abil_fx_num + index2))) opcode
+        PATCH_IF opcode = 12 BEGIN // damage
+          READ_LONG (fx_off + 0x2c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) special
+          PATCH_IF (save_for_half AND ((special & BIT8) = 0)) BEGIN // if we're saving for half and there's no EE save-for-half flag, split damage
+            READ_LONG (fx_off + 0x24 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) save // have to account for non-EE damage split
+            PATCH_IF ((save & (BIT0 + BIT1 + BIT2 + BIT3 + BIT4)) = 0) BEGIN // 1/2 damage that always happens 
+              WRITE_LONG (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_fixed + nonsave_fudge_fixed) / 2)
+              WRITE_LONG (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_rolls + nonsave_fudge_rolls) / 2)
+            END ELSE BEGIN
+              WRITE_LONG (fx_off + 0x04 + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_fixed + save_fudge_fixed) / 2)
+              WRITE_LONG (fx_off + 0x1c + (0x30 * (abil_fx_idx + abil_fx_num + index2))) ((new_rolls + save_fudge_rolls) / 2)
+            END  
+          END
+        END   
+      END // closes second effects loop for damage_special
+    END // end patch_if for damage_special
+    INSERT_BYTES (abil_off +        (0x28 * abil_num)) 0x28 // insert new ability
+    WRITE_ASCIIE (abil_off +        (0x28 * abil_num)) "%abil%"
+    WRITE_SHORT  (abil_off + 0x10 + (0x28 * abil_num)) index
+    WRITE_SHORT  (abil_off + 0x20 + (0x28 * abil_num)) (abil_fx_idx + abil_fx_num)
+    SET abil_num += 1
+    SET abil_delta += 1
+    SET fx_off   += 0x28
+  END
+  WRITE_SHORT 0x68 abil_num
+  WRITE_LONG  0x6a fx_off
+
+END
+
+/**
+ * Converts any decimal number into a hexadecimal number
+ */
+DEFINE_ACTION_FUNCTION TO_HEX_NUMBER
+INT_VAR
+  value     = 0   // the decimal number
+  minDigits = 1   // min. number of digits in return value (not counting sign)
+  prefix    = 0   // whether to return number with "0x" prefix
+  signed    = 1   // whether number is treated as a signed number
+  upperCase = 0   // whether to represent alphabetic digits in upper case
+RET
+  hexNumber       // returned as string without prefix
+BEGIN
+  ACTION_IF (minDigits < 1) BEGIN OUTER_SET minDigits = 1 END
+  ACTION_IF (minDigits > 8) BEGIN OUTER_SET minDigits = 8 END
+  OUTER_TEXT_SPRINT hexNumber ~~
+  ACTION_DEFINE_ARRAY digit BEGIN ~0~ ~1~ ~2~ ~3~ ~4~ ~5~ ~6~ ~7~ ~8~ ~9~ ~a~ ~b~ ~c~ ~d~ ~e~ ~f~ END
+
+  ACTION_IF (signed && value < 0) BEGIN
+    OUTER_SET isSigned = 1
+    OUTER_SET value = 0 - value
+  END ELSE BEGIN
+    OUTER_SET isSigned = 0
+  END
+
+  OUTER_WHILE (value != 0) BEGIN
+    OUTER_SET curDigit = value BAND 0xf
+    OUTER_SET value = value BLSR 4
+    OUTER_TEXT_SPRINT hexDigit $EVAL digit(~%curDigit%~)
+    OUTER_TEXT_SPRINT hexNumber ~%hexDigit%%hexNumber%~
+  END
+
+  OUTER_WHILE (STRING_LENGTH ~%hexNumber%~ < minDigits) BEGIN
+    OUTER_TEXT_SPRINT hexNumber ~0%hexNumber%~
+  END
+
+  ACTION_IF (upperCase) BEGIN
+    ACTION_TO_UPPER ~hexNumber~
+  END
+
+  ACTION_IF (prefix) BEGIN
+    OUTER_TEXT_SPRINT hexNumber ~0x%hexNumber%~
+  END
+
+  ACTION_IF (isSigned) BEGIN
+    OUTER_TEXT_SPRINT hexNumber ~-%hexNumber%~
+  END
+END
+
+DEFINE_PATCH_FUNCTION TO_HEX_NUMBER
+INT_VAR
+  value     = 0
+  minDigits = 1
+  prefix    = 0
+  signed    = 1
+  upperCase = 0
+RET
+  hexNumber
+BEGIN
+  INNER_ACTION BEGIN
+    LAF TO_HEX_NUMBER INT_VAR value minDigits prefix signed upperCase RET hexNumber END
+  END
+END
+
+
+/** From Argent77
+ * Adds a new entry to a specified IDS file and returns its IDS value.
+ * 
+ * INT_VAR minValue       Minimum IDS value to consider. (Default: 0)
+ * INT_VAR maxValue       Maximum IDS value to consider. (Default: 255)
+ * INT_VAR preferredValue Try this IDS value first if available. (Default: unset)
+ * INT_VAR hexadecimal    Set to nonzero to add IDS value in hexadecimal notation. (Default: 0)
+ * STR_VAR idsFile        The IDS file to add the entry to.
+ * STR_VAR identifier     The identifier name for the IDS value. Must not contain whitespace.
+ * RET value              The IDS value if entry has been added successfully. -1 if entry could not be added.
+ */
+DEFINE_ACTION_FUNCTION ADD_IDS_ENTRY
+INT_VAR
+  minValue        = 0
+  maxValue        = 255
+  preferredValue  = "-1"
+  hexadecimal     = 0
+STR_VAR
+  idsFile         = ""
+  identifier      = ""
+RET
+  value
+BEGIN
+  OUTER_SET value = "-1"
+
+  ACTION_IF (minValue < 0) BEGIN OUTER_SET minValue = 0 END
+  ACTION_IF (maxValue < minValue) BEGIN OUTER_SET maxValue = minValue END
+
+  ACTION_IF (~%idsFile%~ STRING_MATCHES_REGEXP ~.+\..+~ = 0) BEGIN
+    OUTER_PATCH_SAVE idsFile ~%idsFile%~ BEGIN REPLACE_TEXTUALLY ~\(.+\)\.[^.]+~ ~\1~ END
+  END
+
+  ACTION_IF (FILE_EXISTS_IN_GAME ~%idsFile%.ids~) BEGIN
+    // Try preferred value first
+    OUTER_PATCH ~~ BEGIN
+      PATCH_IF (preferredValue >= minValue AND preferredValue <= maxValue) BEGIN
+        LOOKUP_IDS_SYMBOL_OF_INT retVal ~%idsFile%~ preferredValue
+        PATCH_IF (~%retVal%~ STRING_EQUAL ~%preferredValue%~) BEGIN
+          SET value = preferredValue
+        END
+      END
+    END
+    
+    // Looking for available IDS slot
+    ACTION_IF (value = "-1") BEGIN
+      OUTER_PATCH ~~ BEGIN
+        FOR (v = minValue; v <= maxValue; v += 1) BEGIN
+          LOOKUP_IDS_SYMBOL_OF_INT retVal ~%idsFile%~ v
+          PATCH_IF (~%retVal%~ STRING_EQUAL ~%v%~) BEGIN
+            SET value = v
+            SET v = maxValue + 1
+          END
+        END
+      END
+    END
+
+    // Falling back to preferred value if no free slot found
+    ACTION_IF (value = "-1" AND preferredValue >= minValue AND preferredValue <= maxValue) BEGIN
+      OUTER_SET value = preferredValue
+    END
+
+    // Adding new entry
+    ACTION_IF (value != "-1") BEGIN
+      ACTION_IF (hexadecimal) BEGIN
+        LAF TO_HEX_NUMBER INT_VAR value = value RET hexNumber END
+        OUTER_TEXT_SPRINT idsValue ~0x%hexNumber%~
+      END ELSE BEGIN
+        OUTER_TEXT_SPRINT idsValue ~%value%~
+      END
+
+      APPEND ~%idsFile%.ids~ ~%idsValue% %identifier%~ UNLESS ~%identifier%~
+      OUTER_SET value = IDS_OF_SYMBOL (~%idsFile%~ ~%identifier%~)
+      ACTION_IF (value < minValue OR value > maxValue) BEGIN
+        OUTER_SET value = "-1"
+      END
+    END
+  END
+END
+
+/** Adapted from Argent77
+ * Adds a new entry to SPLPROT.2DA and returns its index. If an identical entry already exists it will return 
+ * the index of that entry instead.
+ * INT_VAR stat     A code from STATS.IDS or an extended stat code starting at 0x100 (256).
+ * STR_VAR value    Either a numeric value that is evaluated by "stat", or a default value "*" for specific stats.
+ *                  (Note: "-1" indicates a user-defined value.)
+ * STR_VAR relation Specifies how to evaluate the value.
+ *                  (Note: Not all extended stats require a relation code. Use "*" in this case.)
+ * RET index        Entry number that can be used to refer to this operation in various effect opcodes.
+ *                  Returns -1 on error.
+ */
+DEFINE_ACTION_FUNCTION ADD_SPLPROT_ENTRY
+INT_VAR
+  stat      = "-1"
+STR_VAR
+  identifier = "*"
+  value     = "*"
+  relation  = "*"
+RET
+  index
+BEGIN
+  OUTER_SET index = "-1"
+
+  ACTION_IF (stat >= 0) BEGIN
+    LAF TO_HEX_NUMBER INT_VAR value = stat RET hexNumber END
+    OUTER_TEXT_SPRINT valueHex ~0x%hexNumber%~
+    ACTION_IF (~%value%~ STRING_EQUAL ~~) BEGIN
+      OUTER_TEXT_SPRINT value ~*~
+    END
+    ACTION_IF (~%relation%~ STRING_EQUAL ~~) BEGIN
+      OUTER_TEXT_SPRINT relation ~*~
+    END
+
+    ACTION_IF (FILE_EXISTS_IN_GAME ~splprot.2da~) BEGIN
+      COPY_EXISTING ~splprot.2da~ ~override~
+        READ_2DA_ENTRIES_NOW table 4
+        // Search for identical entries
+        FOR (idx = 0; idx < table; idx += 1) BEGIN
+          READ_2DA_ENTRY_FORMER table idx 1 curStat
+          PATCH_IF (~%stat%~ STRING_EQUAL ~%curStat%~ OR ~%valueHex%~ STRING_EQUAL_CASE ~%curStat%~) BEGIN
+            READ_2DA_ENTRY_FORMER table idx 2 curValue
+            PATCH_IF (~%value%~ STRING_EQUAL ~%curValue%~) BEGIN
+              READ_2DA_ENTRY_FORMER table idx 3 curRelation
+              PATCH_IF (~%relation%~ STRING_EQUAL ~%curRelation%~) BEGIN
+                SET index = idx
+                SET idx = table
+              END
+            END
+          END
+        END
+
+        PATCH_IF (index < 0) BEGIN
+          // Add new entry
+          PATCH_IF (stat >= 0x100) BEGIN
+            TEXT_SPRINT line ~%identifier%        %valueHex%        %value%         %relation%~
+          END ELSE BEGIN
+            TEXT_SPRINT line ~%identifier%        %stat%          %value%         %relation%~
+          END
+          INSERT_2DA_ROW table 4 ~%line%~
+          SET index = table
+        END
+      BUT_ONLY IF_EXISTS
+    END
+  END
+END
+
+//From K4thos
+//Patch function that replaces set or all occurrences of the given regexp pattern in the file with the given string.
+//Use EVAL to perform variable substitution on the string and/or the regexp pattern.
+//Unlike REPLACE_TEXTUALLY the pattern can be multi-line text, even without using regexp.
+//Just like REPLACE_BCS_BLOCK the function ignores pattern whitespace.
+//The function can be also used as a COUNT_REGEXP_INSTANCES alternative with the above mentioned features.
+//Optional PATCH_WARN message is printed if the task could not be performed (pattern not found or different amount of pattern matches than expected).
+
+DEFINE_PATCH_FUNCTION REPLACE_MULTILINE
+	INT_VAR
+		num = "-1"     //amount of times the pattern should be replaced with string (-1 by default which is at least 1 but without max limit)
+		strict = 0     //set to 1 to enable strict checking (auto escapes $^.*+?[]\ special characters)
+		verbose = 1    //set to 0 to skip printing patching message
+		warn = 1       //set to 0 to skip printing warning message if the function can't do what you ask it to do
+		only_count = 0 //set to to 1 to skip pattern replacing and just return num_matches (COUNT_REGEXP_INSTANCES alternative)
+	STR_VAR
+		pattern = ""   //pattern that you want to replace
+		string = ""    //string that the pattern will be replaced with
+	RET
+		num_matches    //amount of times the pattern has been found
+	BEGIN
+	TEXT_SPRINT percent ~%~
+	INNER_PATCH_SAVE textToReplace ~%pattern%~ BEGIN
+		PATCH_IF strict = 1 BEGIN
+			REPLACE_TEXTUALLY ~\\~ ~\\\\~
+			REPLACE_TEXTUALLY ~\[~ ~\[~
+			REPLACE_TEXTUALLY ~\]~ ~\]~
+			REPLACE_EVALUATE ~\([\$\^\.\*\+\?]\)~ BEGIN END ~\%MATCH1%~
+		END
+		REPLACE_TEXTUALLY ~[%WNL%%LNL%%MNL%%TAB% ]+~ ~[%WNL%%LNL%%MNL%%TAB% ]+~
+	END
+	SET num_matches = 0
+	PATCH_IF only_count = 0 BEGIN
+		REPLACE_EVALUATE CASE_INSENSITIVE ~%textToReplace%~ BEGIN
+			SET num_matches = num_matches + 1
+			INNER_PATCH_SAVE string ~%string%~ BEGIN
+				REPLACE_TEXTUALLY ~%percent%MATCH\([0-9]+\)%percent%~ ~%MATCH\1%~
+			END
+		END ~%string%~
+		SET warned = 0
+		PATCH_IF num_matches != num BEGIN
+			PATCH_IF num_matches = 0 BEGIN
+				PATCH_IF warn = 1 BEGIN
+					PATCH_WARN ~WARNING %SOURCE_FILESPEC% - pattern not found:%LNL%%pattern%~
+				END
+				SET warned = 1
+			END ELSE PATCH_IF num >= 0 AND (num_matches > num OR num_matches < num) BEGIN
+				PATCH_IF warn = 1 BEGIN
+					PATCH_WARN ~WARNING %SOURCE_FILESPEC% - pattern replaced %num_matches% time(s) instead of %num%:%LNL%%pattern%~
+				END
+				SET warned = 1
+			END
+		END
+		PATCH_IF verbose = 1 AND warned = 0 BEGIN
+			PATCH_PRINT ~Patching %SOURCE_FILESPEC% - pattern replaced %num_matches% time(s):%LNL%%pattern% => %string%~
+		END
+	END ELSE BEGIN
+		COUNT_REGEXP_INSTANCES ~%textToReplace%~ num_matches
+	END
+END

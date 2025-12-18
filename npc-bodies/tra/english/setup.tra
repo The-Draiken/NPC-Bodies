@@ -1,0 +1,43 @@
+@1=~%name%'s Body~
+@2=~This is the dead body of %name%.
+
+STATISTICS:
+
+Weight: %weight%
+~
+
+@3=~Without enough of the body being present, the spell failed.~
+@4=~%raise% This spell will fail if the body is not present.~
+@5=~%res% This spell works even if the body is not present.~
+@6=~%desc% If succesful the raised character will suffer a reduction in constiution by one.~ 
+@7=~%name%'s Decaying Body~
+@8=~This is the dead body of %name%. It has deteriorated beyond the ability to be used for the Raise Dead spell. Only Resurrection will allow a body in this state to be restored to life.
+
+STATISTICS:
+
+Weight: %weight%
+~
+@9=~%name%'s Body has decayed beyond usefulness for Raise Dead and similar spells.~
+@10=~%raise% After ten days following death the body will have deteriorated such that this spell will no longer work.~
+@11=~%res% Resurrection will work any length of time after death.~
+@12=~%name% has been dead too long for revivify to work~
+@13=~Revifify~
+@14=~Revivify
+(Necromancy)
+
+Level: 3
+Sphere: Necromantic 
+Range: Visual range of the caster
+Duration: Permanent 
+Casting Time: 9 
+Area of Effect: 1 person 
+Saving Throw: Special 
+Revivify allows the priest to restore life to a member of their party as long as they have been dead for no longer than one minute. 
+The party member will be restored with only one hit point.
+This spell requires the body to be intact so that it is not effective for disentegrated, dismembered or incinerated allies. This spell will fail if the body is not present.~
+@15=~Revivify is only effective within one minute of death~
+@100=~Main Component~
+@200=~Raise Dead permanent Constitution loss~
+@300=~Progressive price for Raise Dead spell~
+@400=~Time limits for Raise Dead and similar spells~
+@500=~Add revivify- 3rd level spell that allows NPCs to be raised within one minute of death~
