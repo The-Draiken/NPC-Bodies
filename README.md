@@ -3,7 +3,7 @@ Original Author: [Gunman](https://forums.beamdog.com/profile/gunman)
 Fixed by: [Enigmajazz](https://www.gibberlings3.net/profile/12873-enigmajazz/)
 
 ## Disclaimer
-his is a Mod Created by Gunman back in 2016, I had asked Enigmajazz to fix a bunch of Issues with the mod after he sorted out fixing Temnix Animate Dead Now Mod for me personally, 
+This is a Mod Created by Gunman back in 2016, I had asked Enigmajazz to fix a bunch of Issues with the mod after he sorted out fixing Temnix Animate Dead Now Mod for me personally, 
 he coudn't solve all the Issues but did solve Most and then I used ChatGPT (as I've been using it to Mod BG3 code for me recently) to fix up the rest of the Mod. All credit though goes to Enigmajazz for doing this for me and Gunman for originally coming up with the Mod.
 
 ## Overview
