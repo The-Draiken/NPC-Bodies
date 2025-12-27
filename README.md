@@ -1,6 +1,6 @@
-Original Author: [Gunman]((https://forums.beamdog.com/profile/gunman)
+Original Author: [Gunman](https://forums.beamdog.com/profile/gunman)
 
-Fixed by: [Enigmajazz]((https://www.gibberlings3.net/profile/12873-enigmajazz/)
+Fixed by: [Enigmajazz](https://www.gibberlings3.net/profile/12873-enigmajazz/)
 
 ## Disclaimer
 his is a Mod Created by Gunman back in 2016, I had asked Enigmajazz to fix a bunch of Issues with the mod after he sorted out fixing Temnix Animate Dead Now Mod for me personally, 
