@@ -435,6 +435,135 @@ COPY_EXISTING ~speldesc.2da~ ~override~
 
 BEGIN @200 // Raise Dead permanent Constitution loss
 DESIGNATED 200
+// -----------------------------------------------------------------------------
+// Temple-service exemption (STO cures):
+//  - Ensure clean copies EJTRD/EJTRES exist in override
+//  - Patch temple STO cure entries so services use EJTRD/EJTRES instead of the
+//    (penalized) player spells.
+// -----------------------------------------------------------------------------
+
+// Resolve the actual spell resources for portability (usually SPPR504 / SPPR712)
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~ RET spell_res END
+OUTER_TEXT_SPRINT raisedead ~%spell_res%~
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~ RET spell_res END
+OUTER_TEXT_SPRINT resurrection ~%spell_res%~
+
+// Prefer the clean spells shipped with the mod (npc-bodies/For Temples/).
+// If they are missing, fall back to copying the base spell resources.
+ACTION_IF FILE_EXISTS ~npc-bodies/For Temples/EJTRD.SPL~ BEGIN
+  COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJTRD.SPL~
+END ELSE BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%raisedead%.SPL~ BEGIN
+    COPY_EXISTING ~%raisedead%.SPL~ ~override/EJTRD.SPL~
+    BUT_ONLY
+  END
+END
+
+ACTION_IF FILE_EXISTS ~npc-bodies/For Temples/EJTRES.SPL~ BEGIN
+  COPY ~npc-bodies/For Temples/EJTRES.SPL~ ~override/EJTRES.SPL~
+END ELSE BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%resurrection%.SPL~ BEGIN
+    COPY_EXISTING ~%resurrection%.SPL~ ~override/EJTRES.SPL~
+    BUT_ONLY
+  END
+END
+
+// Make the temple-service copies always castable by temples:
+// many temple services are gated by spell type/level, so we set these clones to Innate (4), level 1.
+// (This mirrors how mods like aTweaks clone temple-service spells.)
+ACTION_IF FILE_EXISTS_IN_GAME ~EJTRD.SPL~ BEGIN
+  COPY_EXISTING ~EJTRD.SPL~ ~override~
+    WRITE_SHORT 0x1c 4 // Spell type: Innate
+    WRITE_LONG  0x34 1 // Spell level: 1
+  BUT_ONLY_IF_IT_CHANGES
+END
+ACTION_IF FILE_EXISTS_IN_GAME ~EJTRES.SPL~ BEGIN
+  COPY_EXISTING ~EJTRES.SPL~ ~override~
+    WRITE_SHORT 0x1c 4 // Spell type: Innate
+    WRITE_LONG  0x34 1 // Spell level: 1
+  BUT_ONLY_IF_IT_CHANGES
+END
+
+
+// Patch listed temple stores (skip any that don't exist in the current install)
+ACTION_FOR_EACH temple_store IN
+  ~11RAGNIB~ ~20ARTE~ ~4INATE~ ~6ONATHAN~
+  ~BHELM~ ~DAWNMAS~
+  ~DETEMPE~ ~DETEMPLE~ ~DOCHMA~ ~DOGHMA~ ~EDTEMPLE~ ~EHTEMPLE~
+  ~GARLENA~ ~GOVWAU~ ~HELMPR~ ~KPCHAPOL~ ~KUTEMPLE~
+  ~LDD_BEOR~ ~LDD_GUEL~ ~LDD_PER~
+  ~NWARTO~ ~NWHELMI1~ ~NWHELMI2~ ~NWNEURIK~ ~NWOLEFF~
+  ~OHBMIM~ ~PPUMBOI~ ~SAHPR1~ ~SARTEMO1~
+  ~SULMAT~ ~SUELFLO~ ~TALMISS~
+  ~TEM0OO2~ ~TEM0L31~ ~TEM0L32~ ~TEM23O4~ ~TEM2601~ ~TEM3402~ ~TEM4003~ ~TEM4802~
+  ~TEMHELM~ ~TEMLATH~ ~TEMSUP~ ~TEMTALOS~
+  ~WILMAT~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%temple_store%.sto~ BEGIN
+    COPY_EXISTING ~%temple_store%.sto~ ~override~
+      // STO v9 (BGEE/BG2EE/EET): 0x70 = cure offset, 0x74 = cure count
+      READ_LONG 0x70 cure_off
+      READ_LONG 0x74 cure_num
+
+      // Each cure entry is 0x0C bytes: resref[8] + price[4]
+      PATCH_IF (cure_num > 0
+                AND cure_off > 0
+                AND cure_off < SOURCE_SIZE
+                AND (cure_off + (cure_num * 0x0C)) <= SOURCE_SIZE) BEGIN
+        FOR (i = 0; i < cure_num; ++i) BEGIN
+          READ_ASCII (cure_off + (i * 0x0C)) cure_res (8) NULL
+
+          PATCH_IF (~%cure_res%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+            WRITE_ASCIIE (cure_off + (i * 0x0C)) ~EJTRD~ #8
+          END
+
+          PATCH_IF (~%cure_res%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+            WRITE_ASCIIE (cure_off + (i * 0x0C)) ~EJTRES~ #8
+          END
+        END
+      END
+    BUT_ONLY_IF_IT_CHANGES
+  END
+END
+
+// Append EJTRD/EJTRES to SPELDESC.2DA so temple UI recognizes them.
+// We reuse the description strrefs from the existing Raise Dead / Resurrection rows (portable across BGEE/BG2EE/EET and modded tables).
+OUTER_SET ej_rd_desc = 0
+OUTER_SET ej_res_desc = 0
+ACTION_IF FILE_EXISTS_IN_GAME ~SPELDESC.2DA~ BEGIN
+  COPY_EXISTING ~SPELDESC.2DA~ ~override~
+    COUNT_2DA_COLS cols
+    COUNT_2DA_ROWS cols rows
+    FOR (row = 0; row < rows; ++row) BEGIN
+      READ_2DA_ENTRY row 0 cols spell
+      PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%raisedead%~) BEGIN
+        READ_2DA_ENTRY row 1 cols ej_rd_desc_str
+        PATCH_IF (NOT ~%ej_rd_desc_str%~ STRING_EQUAL_CASE ~*~) BEGIN
+          SET ej_rd_desc = ej_rd_desc_str
+        END
+      END
+      PATCH_IF (~%spell%~ STRING_EQUAL_CASE ~%resurrection%~) BEGIN
+        READ_2DA_ENTRY row 1 cols ej_res_desc_str
+        PATCH_IF (NOT ~%ej_res_desc_str%~ STRING_EQUAL_CASE ~*~) BEGIN
+          SET ej_res_desc = ej_res_desc_str
+        END
+      END
+    END
+  BUT_ONLY
+
+  ACTION_IF (ej_rd_desc > 0) BEGIN
+    APPEND ~SPELDESC.2DA~ ~EJTRD %ej_rd_desc%~ UNLESS ~^EJTRD[ %TAB%]~
+  END ELSE BEGIN
+    APPEND ~SPELDESC.2DA~ ~EJTRD 0~ UNLESS ~^EJTRD[ %TAB%]~
+  END
+
+  ACTION_IF (ej_res_desc > 0) BEGIN
+    APPEND ~SPELDESC.2DA~ ~EJTRES %ej_res_desc%~ UNLESS ~^EJTRES[ %TAB%]~
+  END ELSE BEGIN
+    APPEND ~SPELDESC.2DA~ ~EJTRES 0~ UNLESS ~^EJTRES[ %TAB%]~
+  END
+END
+
 ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERIC_RECALL_SPIRIT~ ~CLERIC_RESURRECTION~ BEGIN
 	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~%res_spell%~  RET spell_res END
 	ACTION_IF FILE_EXISTS_IN_GAME  ~%spell_res%.spl~ BEGIN
