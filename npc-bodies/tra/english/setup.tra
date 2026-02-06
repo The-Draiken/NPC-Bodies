@@ -37,7 +37,7 @@ The party member will be restored with only one hit point.
 This spell requires the body to be intact so that it is not effective for disentegrated, dismembered or incinerated allies. This spell will fail if the body is not present.~
 @15=~Revivify is only effective within one minute of death~
 @100=~Main Component~
-@200=~Raise Dead permanent Constitution loss~
+@200=~Raise Dead Level Drain Penalty/Resurrection Con Penalty~
 @300=~Progressive price for Raise Dead spell~
 @400=~Time limits for Raise Dead and similar spells~
 @500=~Add revivify- 3rd level spell that allows NPCs to be raised within one minute of death~
