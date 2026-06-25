@@ -1,0 +1,457 @@
+
+@401 = ~Najpowszechniejsza wersja topora bojowego składa się z solidnego trzonka o ponad metrowej długości, na którego końcu osadzono jednosieczne ostrze o zakrzywionym kształcie. Topory bojowe są również nazywane toporami szerokimi.
+
+Ten konkretny topór bojowy został nad wyraz starannie wykonany, a jego ostrze jest doskonale wyważone i ostre niczym brzytwa. Choć nie został umagiczniony, jest w stanie precyzyjniej trafić przeciwnika, zadając głębsze rany niż zwykły topór.
+
+PARAMETRY:
+
+Obrażenia: 1k8 +1
+TraK0: +1
+Typ obrażeń: sieczne
+Opóźnienie: 7
+Rodzaj biegłości: topór
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 10
+
+Waga: 7
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@402 = ~Znakomity topór bojowy~
+@403 = ~Morgensztern składa się z drewnianego styliska, zwieńczonego żelazną głowicą nabitą licznymi szpiczastymi ćwiekami. Broń ta ma od około stu dwudziestu do stu trzydziestu centymetrów długości. Różne jej rodzaje posiadają głowicę kulistą, owalną lub cylindryczną. Bez względu jednak na rodzaj, większość morgenszternów zakończona jest długim szpikulcem, przeznaczonym do kłucia.
+
+Twórcę tego morgenszterna cechowała staranność wykonania. Mimo iż nie dorównuje on jakością broniom obdarzonym magicznymi właściwościami, jest orężem wysokiej jakości i śmiercionośnym.
+
+PARAMETRY:
+
+Obrażenia: 2k4 +1
+TraK0: +1
+Typ obrażeń: obuchowe
+Opóźnienie: 7
+Rodzaj biegłości: cep bojowy/morgensztern
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 11
+
+Waga: 12
+
+Nie może używać:
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@404 = ~Znakomity morgensztern~
+@405 = ~Długi łuk jest podobny do krótkiego, z wyjątkiem tego, że długość łęczyska wynosi prawie tyle, ile wzrost łucznika, zwykle jest to od metra osiemdziesięciu do dwóch metrów wysokości. Ma lepszy zasięg i celność niż łuk krótki, ale mniejszą szybkostrzelność.
+
+Ten konkretny łuk został wykonany z niezwykłą starannością, dzięki czemu jest jeszcze celniejszy i potężniejszy od zwykłego długiego łuku i to pomimo tego, że nie został obdarzony magicznymi właściwościami.
+
+PARAMETRY:
+
+TraK0: +2
+Opóźnienie: 7
+Rodzaj biegłości: długi łuk
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 6
+
+Waga: 3
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Kensai
+ Kawaler~
+@406 = ~Znakomity długi łuk~
+@407 = ~Łuki krótkie zostały wprowadzone jako pierwsze, choć nie były tak nazywane. Jest to raczej umowne określenie, które odnosi się do wszystkich rodzajów tej broni, które nie są łukami długimi. Ich łęczyska mają w przybliżeniu półtora metra długości. Przez lata próbowano zwiększyć ich zasięg. W tym celu wydłużano im łęczyska lub poprawiano sprężystość, ale zmiany te nigdy nie dotyczyły całkowitej długości łuków. Łuki należące do pierwszej kategorii nazwano łukami długimi.
+
+Ten konkretny łuk wykonano z rzadkiego rodzaju drewna z południowych krain, niezwykle cenionego i poszukiwanego przez łuczników. Dzięki temu broń ta, mimo niewielkiego rozmiaru, jest równie celna co długi łuk i nieco od niego potężniejsza.
+
+PARAMETRY:
+
+TraK0: +1
+Opóźnienie: 6
+Rodzaj biegłości: krótki łuk
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 3
+
+Waga: 2
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Mnich
+ Kensai
+ Kawaler~
+@408 = ~Znakomity krótki łuk~
+@409 = ~Typowy sztylet posiada ostro zakończone, przeważnie obusieczne ostrze, w przeciwieństwie do noża, który jest jednosieczny i nieco od niego krótszy.
+
+Sztylet ten to niewątpliwie dzieło mistrza rzemiosła. Mimo iż nie został obdarzony magią, jest doskonale wyważony, a ostre niczym brzytwa krawędzie czynią z niego piękną i śmiercionośną broń.
+
+PARAMETRY:
+
+Obrażenia: 1k4 +1
+TraK0: +1
+Typ obrażeń: kłute
+Opóźnienie: 2
+Rodzaj biegłości: sztylet
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 3
+
+Waga: 1
+
+Nie może używać:
+ Kapłan
+ Władca zwierząt~
+@410 = ~Znakomity sztylet~
+@411 = ~Halabarda jest zdecydowanie najstarszą i najczęściej używaną bronią drzewcową, składającą się z przypominającego kształtem tasak ostrza, które pełni funkcję topora, zamocowanego na stylisku o długości około dwóch metrów. Ostrze równoważone jest z drugiej strony przez zadzior, a na jego szczycie znajduje się ostry kolec, zwykle o czworobocznej konstrukcji. Zadzior jest czasami zastępowany hakiem wykorzystywanym do zrzucania z koni kawalerzystów. Halabardę można najlepiej opisać jako skrzyżowanie włóczni z toporem.
+
+Halabarda ta została wykonana ze szczególną starannością: począwszy od rzeźbionego styliska, na połyskującym niczym lustro ostrzu w kształcie topora skończywszy. Oręż ta jest tak wysokiej jakości, że aż trudno uwierzyć, iż można ją było wykuć bez pomocy magii.
+
+PARAMETRY:
+
+Obrażenia: 1k10 +1
+TraK0: +1
+Typ obrażeń: kłute
+Opóźnienie: 9
+Rodzaj biegłości: halabarda
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 13
+
+Waga: 15
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@412 = ~Znakomita halabarda~
+@413 = ~Konni rycerze nie są w stanie skutecznie używać długich broni drzewcowych, siedząc na końskim grzbiecie, w związku z czym wiele broni zostało zaopatrzonych w krótsze styliska, aby można się było nimi posługiwać jednorącz. Doskonałym tego przykładem są wekiery i cepy bojowe, kolejnym zaś, młot bojowy. Jeździecki młot bojowy wywodzi się od młota używanego przez lansjerów. Jest on wykonany w całości ze stali, z rondelkami chroniącymi i wzmacniającymi uchwyt. Rondelki te są małymi dyskami z metalu, o najczęściej dekoracyjnych kształtach. Stylisko młota bojowego ma około pół metra długości.
+
+Jest to wyjątkowej jakości młot bojowy, którego głownia została wyważona tak, aby ciężar i siła posługującej się nim osoby była zawsze skupiona tylko i wyłącznie na celu. Dzięki temu orężem tym można wykonywać precyzyjne zamachy, nie tracąc przy tym nic z siły uderzenia.
+
+PARAMETRY:
+
+Obrażenia: 1k4 +2
+TraK0: +1
+Typ obrażeń: obuchowe
+Opóźnienie: 4
+Rodzaj biegłości: młot bojowy
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 9
+
+Waga: 6
+
+Nie może używać:
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@414 = ~Znakomity młot bojowy~
+@415 = ~Kij to najprostsza i najzwyklejsza z broni drzewcowych. Długość żerdzi wynosi od metra osiemdziesięciu do prawie trzech metrów. Wysokiej jakości kije wykonane są z twardego dębu i obijane metalem na obu końcach. Do władania nim niezbędne jest używanie obu rąk.
+
+Kij ten został wykonany z niezwykle wytrzymałego drewna, rzeźbionego z niebywałą starannością i wzmocnionego dodatkowo stalowymi okuciami. Mimo swej prostoty jest on stosunkowo potężną bronią.
+
+PARAMETRY:
+
+Obrażenia: 1k6 +1
+TraK0: +1
+Typ obrażeń: obuchowe
+Opóźnienie: 4
+Rodzaj biegłości: kij
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 5
+
+Waga: 4
+
+Nie może używać:
+ Mnich~
+@416 = ~Znakomity kij~
+@417 = ~Miecz półtoraręczny zwany jest również „bękartem”, gdyż stanowi niejako skrzyżowanie miecza długiego i oburęcznego. Ma obusieczne ostrze i długą rękojeść, dzięki czemu można go używać jedną ręką lub oburącz. Jego długość waha się od stu dwudziestu do stu czterdziestu pięciu centymetrów.
+
+Jest to wyjątkowej jakości, precyzyjnie wyważony miecz półtoraręczny, którego ostrze, wykute przez mistrza kowalstwa, zadaje głębokie i precyzyjne cięcia.
+
+PARAMETRY:
+
+Obrażenia: 2k4 +1
+TraK0: +1
+Typ obrażeń: sieczne
+Opóźnienie: 8
+Rodzaj biegłości: miecz półtoraręczny
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 11
+
+Waga: 10
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@418 = ~Znakomity miecz półtoraręczny~
+@419 = ~Miecze te nazywa się zwykle mieczami obusiecznymi, wojennymi lub wojskowymi. W wielu wypadkach miecz długi posiada jedną krawędź tnącą. Nie istnieje jedna wersja miecza długiego, jego konstrukcja i długość mogą się bowiem różnić w zależności od kultury, a nawet w obrębie tej samej społeczności, jeśli weźmie się pod uwagę różne epoki. Jedną z najbardziej charakterystycznych cech mieczy długich jest ich długość, która waha się od dziewięćdziesięciu do stu dwudziestu centymetrów. W tym ostatnim przypadku samo ostrze może mierzyć nawet do stu centymetrów. Większość mieczy długich jest obusiecznych i ma ostre zakończenie. Pomimo posiadania sztychu, miecz długi przeznaczony jest do cięcia, a nie do wyprowadzania pchnięć.
+
+Ten konkretny miecz długi jest dziełem wyjątkowej jakości. Został wyważony niemal idealnie, a jego klinga charakteryzuje się ostrymi niczym brzytwa krawędziami.
+
+PARAMETRY:
+
+Obrażenia: 1k8 +1
+TraK0: +1
+Typ obrażeń: sieczne
+Opóźnienie: 5
+Rodzaj biegłości: miecz długi
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 6
+
+Waga: 4
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Władca zwierząt~
+@420 = ~Znakomity miecz długi~
+@421 = ~Miecze krótkie pojawiły się jako pierwsze w tej grupie broni. W najprostszych słowach jest to sztylet o ostrzu tak długim, że nie może być dłużej traktowany jak sztylet. Termin „miecz krótki” nie istnieje w żadnych klasyfikacjach mieczy. Jednakże jest tu używany do opisania dwusiecznego ostrza o długości około sześćdziesięciu centymetrów. Czubki tych mieczy są zazwyczaj ostre, co czyni je doskonałymi do zadawania ran kłutych.
+
+Ten konkretny miecz krótki jest dziełem wyjątkowej jakości. Został wyważony niemal idealnie, a jego klinga charakteryzuje się ostrymi niczym brzytwa krawędziami.
+
+PARAMETRY:
+
+Obrażenia: 1k6 +1
+TraK0: +1
+Typ obrażeń: kłute
+Opóźnienie: 3
+Rodzaj biegłości: miecz krótki
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 5
+
+Waga: 3
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Władca zwierząt~
+@422 = ~Znakomity miecz krótki~
+@423 = ~Włócznia to jeden z najwcześniejszych rodzajów broni, którymi zaczął posługiwać się człowiek. Pierwsze egzemplarze były wykonane z drewna i zaostrzone na końcu. Kiedy człowiek nauczył się wytapiać metale, groty włóczni zaczęto wytwarzać z żelaza i stali. W pewnym momencie zaczęto eksperymentować z różnymi typami grotów i w ten sposób powstały różne typy broni drzewcowej.
+
+Większość włóczni to prymitywne i produkowane na masową skalę bronie, jednak ten egzemplarz wykonano z niezwykłą starannością. Grot wykonano z wysokiej jakości stali, a całość została idealnie wyważona.
+
+PARAMETRY:
+
+Obrażenia: 1k6 +1
+TraK0: +1
+Typ obrażeń: kłute
+Opóźnienie: 6
+Rodzaj biegłości: włócznia
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 5
+
+Waga: 5
+
+Nie może używać:
+ Kapłan
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@424 = ~Znakomita włócznia~
+@425 = ~Wekiera jest w prostej linii spadkobierczynią zwykłej maczugi, będąc po prostu drewnianym trzonem, na którym została osadzona kamienna lub metalowa głowica. Wygląd głowicy może się różnić, niektóre są nabijane ostrymi kolcami inne metalowymi ćwiekami, a jeszcze inne mają kształt ostrosłupa.
+
+W tym wypadku głowicę w kształcie ostrosłupa wykuto z niezwykłą starannością i choć wekiera ta nie została obdarzona magią, jest dość skuteczna w walce.
+
+PARAMETRY:
+
+Obrażenia: 1k6 +2
+TraK0: +1
+Typ obrażeń: obuchowe
+Opóźnienie: 7
+Rodzaj biegłości: wekiera
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 10
+
+Waga: 8
+
+Nie może używać:
+ Druid
+ Mag
+ Złodziej
+ Mnich
+ Władca zwierząt~
+@426 = ~Znakomita wekiera~
+@427 = ~Miecz oburęczny wywodzi się od miecza długiego. Płatnerze od zawsze szukali sposobów, aby ulepszać istniejące bronie. W przypadku miecza długiego zdecydowano się na wydłużenie ostrza, ale w konsekwencji należało uczynić to samo z rękojeścią, gdyż do właściwego wymachiwania mieczem niezbędne były obie dłonie. Główną funkcją mieczy oburęcznych jest przecinanie na pół rycerzy konnych oraz przełamywanie formacji pikinierów.
+
+Ten miecz szczególnie dobrze spełnia swoją funkcję, ponieważ został wykuty z najprzedniejszej krasnoludzkiej stali.
+
+PARAMETRY:
+
+Obrażenia: 1k10 +1
+TraK0: +1
+Typ obrażeń: sieczne
+Opóźnienie: 10
+Rodzaj biegłości: miecz oburęczny
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 14
+
+Waga: 12
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Złodziej~
+@428 = ~Znakomity miecz oburęczny~
+@429 = ~Sejmitar, nazywany pierwotnie „szamszirem”, posiada jednosieczne mocno zakrzywione ostrze, zakończone wydłużonym, ostrym szpicem. W efekcie jest on nieco wolniejszy niż inna broń tego rodzaju, jednak bardziej skuteczny i zabójczy w walce.
+
+Ten konkretny egzemplarz, mimo iż nie został obdarzony magią, charakteryzuje się wysoką jakością wykonania.
+
+PARAMETRY:
+
+Obrażenia: 1k8 +1
+TraK0: +1
+Typ obrażeń: sieczne
+Opóźnienie: 5
+Rodzaj biegłości: sejmitar/wakizashi/ninja-to
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 10
+
+Waga: 4
+
+Nie może używać:
+ Kapłan
+ Mag
+ Złodziej~
+@430 = ~Znakomity sejmitar~
+@431 = ~Łuki refleksyjne to łuki długie lub krótkie, których łęczysko wykonano z wielu rodzajów drewna. Zapewnia im to większą sprężystość i sprawia, że wystrzeliwane przez nie strzały zadają więcej obrażeń. Wynaleziono je po zwykłych łukach długich.
+
+Ten konkretny łuk, choć nie obdarzono go magią, został wykonany z niezwykłą starannością i z najprzedniejszych materiałów.
+
+PARAMETRY:
+
+Obrażenia: +1
+TraK0: +2
+Opóźnienie: 7
+Rodzaj biegłości: długi łuk
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 18
+
+Waga: 9
+
+Nie może używać:
+ Kapłan
+ Mag
+ Złodziej~
+@432 = ~Znakomity długi łuk refleksyjny~
+@433 = ~Cep bojowy składa się z solidnego drzewca, służącego za uchwyt, do którego przymocowany jest gruby metalowy pręt, nabijany ostrymi kawałkami metalu lub kamieni drąg, lub też żelazna kula ze szpikulcami. Te dwa elementy są zwykle połączone krótkim łańcuchem lub mocnymi rzemieniami.
+
+Ta broń została wykonana z najprzedniejszej stali i drewna cisowego, w związku z czym jest lekka, dobrze wyważona i mimo iż nie obdarzono jej magią, wysoce skuteczna.
+
+PARAMETRY:
+
+Obrażenia: 1k6 +2
+TraK0: +1
+Typ obrażeń: obuchowe
+Opóźnienie: 7
+Rodzaj biegłości: cep bojowy/morgensztern
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 13
+
+Waga: 15
+
+Nie może używać:
+ Druid
+ Mag
+ Złodziej~
+@434 = ~Znakomity cep bojowy~
+@435 = ~Katana to lekko zakrzywiony miecz o jednym ostrzu. Są to prawdopodobnie najostrzejsze miecze jakie kiedykolwiek wykuto, proces ich tworzenia jest długi, trzymany w tajemnicy i jest prawdziwą sztuką. To ostrze jest chyba najważniejszą częścią kultury Kara-Tur. Dotknięcie czy wzięcie do ręki katany samuraja to dla niego obraza i zawsze wywołuje jego gniew. Rzadkością jest by gaijin, czyli obcokrajowiec, posiadał taki miecz. Albo ten gaijin jest serdecznym przyjacielem ważnego ministra, albo zamordował samuraja.
+
+Ta piękna katana jest tak kunsztownie wykonana, że aż ciężko uwierzyć w jej brak umagicznienia. Mało który kowal posiada umiejętności, aby wykuć taką broń.
+
+PARAMETRY:
+
+Obrażenia: 1k10 +1
+TraK0: +1
+Typ obrażeń: sieczne
+Opóźnienie: 4
+Rodzaj biegłości: katana
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 6
+
+Waga: 6
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag~
+@436 = ~Znakomita katana~
+@437 = ~Wakizashi, czyli miecz pomocniczy, jest niezwykle ważny dla samuraja. Nosi się go przez cały czas, nawet w mieszkaniu, spoczywa blisko samuraja, gdy ten śpi. Wykonany z równą pieczołowitością co katana, krótszy miecz, długości trzydziestu pięciu do sześćdziesięciu centymetrów jest niebezpieczną bronią w rękach wyszkolonego szermierza.
+
+To wakizashi jest wyjątkowo dobrze wykonane, aczkolwiek nie jest magiczne.
+
+PARAMETRY:
+
+Obrażenia: 1k8 +1
+TraK0: +1
+Typ obrażeń: kłute
+Opóźnienie: 3
+Rodzaj biegłości: sejmitar/wakizashi/ninja-to
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 5
+
+Waga: 3
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag~
+@438 = ~Znakomite wakizashi~

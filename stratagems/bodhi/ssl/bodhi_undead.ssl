@@ -1,0 +1,10 @@
+
+IF TRIGGER
+   Detect([GOODCUTOFF.UNDEAD])
+   !InParty(LastSeenBy(Myself))
+   TriggerBlock(EasyPlus)
+THEN DO
+    // dominate undead
+    Action(Literal)
+    ReallyForceSpellRES("ibodhi8",LastSeenBy(Myself))
+END

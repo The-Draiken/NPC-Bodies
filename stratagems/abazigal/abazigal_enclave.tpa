@@ -1,0 +1,1186 @@
+LAF include STR_VAR file=dragon_shared.tph locbase=dragon END
+LAF include STR_VAR file=caster_shared.tph locbase=caster_shared END
+INCLUDE ~%MOD_FOLDER%/lib/ai_wrap.tph~
+
+DEFINE_ACTION_FUNCTION abazigal_enclave BEGIN
+
+   
+      LAM read_in_NPC_dialogs
+
+      LAF dragon_resources_shared END
+      LAM read_in_spell_trigger_data // do it after creating dragon sequencers
+      // core
+
+      ACTION_FOR_EACH func IN new_ar6008 new_ar6012 misc beholder fourdragons yellowdragon  BEGIN
+         LAF ~abazigal_%func%~ END
+      END
+
+      // WoP compatibility
+	ACTION_IF FILE_EXISTS_IN_GAME ~dw#melis.cre~ THEN BEGIN
+	   LAF abazigal_wheels END
+	END
+
+
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_misc BEGIN
+
+     LAF include STR_VAR file=clericmage_shared.tph locbase="caster_shared/clericmage" END
+
+     // restored weapon animations 
+     ACTION_IF !enhanced_edition BEGIN
+       LAF check_ini STR_VAR ini=No_Lizard_Biff RET value END
+       ACTION_IF value BEGIN
+         LAF install INT_VAR overwrite=0 STR_VAR location=animations postfix=bam file=all END
+       END ELSE BEGIN
+         MAKE_BIFF dw#liza BEGIN ~%MOD_FOLDER%/%component_loc%/animations~ ~.*\.bam~ END
+       END
+     END
+
+     // weapon with new animation type
+     
+     MAKE_PATCH
+        inventory=>CL
+     END
+     LAF clone_item STR_VAR item="blun34=>dw#lzwp3" edits=patch_data END
+
+     // generic warriors
+
+     MAKE_PATCH
+        remove_items=>~halb02~
+        add_items=>~plat05 halb03~
+        enforce_charclass=>null
+     END
+     LAF edit_creature STR_VAR creature=bazliz03 edits=patch_data END
+
+     MAKE_PATCH
+        level=>25
+        remove_items=>~halb07~
+        add_items=>~plat05 dw#lzwp3~
+        enforce_charclass=>null
+     END
+     LAF edit_creature STR_VAR creature=bazliz04 edits=patch_data  END
+
+     // make relevant gear undroppable
+
+     MAKE_PATCH
+        match=>"item_resource is_in [plat05 halb03 dw#lzwp3]"
+        undroppable=>1
+        unstealable=>1
+     END
+     LAF edit_creature STR_VAR creature="bazliz03 bazliz04" editstring="patch_item=>patch_data" END
+
+     // create fiends
+     
+     LAF clone_creature STR_VAR creature=~telpit1=>dw#bazpf~ editstring=~dv=>dw#bazpf script_override=>dw#bazpf~ END
+
+     COPY_EXISTING "telpit1.bcs" override 
+           DECOMPILE_AND_PATCH BEGIN
+              REPLACE_TEXTUALLY ~!AreaCheck("AR5201")~ ~InWatchersKeep()~
+           END
+     BUT_ONLY
+     
+     <<<<<<<< .../stratagems-inline/dw#bazpf.baf
+     IF
+	See([GOODCUTOFF])
+	Global("SaidPiece","LOCALS",0)
+THEN
+	RESPONSE #100
+		SetGlobal("SaidPiece","LOCALS",1)
+		DisplayStringHead(Myself,@2200)
+		Continue()
+END
+     >>>>>>>>
+     COMPILE ".../stratagems-inline/dw#bazpf.baf"
+
+     // replace frost salamanders in first area with lizard men, and set up fiend ambush
+
+       MAKE_PATCH
+           add_actor_inline'0=>~actor_baseline=>null actor_x_coord=>662 actor_y_coord=>514 actor_orientation=>8 actor_resource=>bazliz04 actor_name=>lizcapt~
+           add_actor_inline'1=>~actor_baseline=>null actor_x_coord=>462 actor_y_coord=>426 actor_orientation=>11 actor_resource=>bazliz03 actor_name=>lizard1~
+           add_actor_inline'2=>~actor_baseline=>null actor_x_coord=>496 actor_y_coord=>479 actor_orientation=>10 actor_resource=>bazliz03 actor_name=>lizard2~
+           add_actor_inline'3=>~actor_baseline=>null actor_x_coord=>594 actor_y_coord=>556 actor_orientation=>9 actor_resource=>bazliz03 actor_name=>lizard3~
+           add_actor_inline'4=>~actor_baseline=>null actor_x_coord=>738 actor_y_coord=>551 actor_orientation=>7 actor_resource=>bazliz03 actor_name=>lizard4~
+           add_actor_inline'5=>~actor_baseline=>null actor_x_coord=>849 actor_y_coord=>481 actor_orientation=>6 actor_resource=>bazliz03 actor_name=>lizard5~
+           add_actor_inline'6=>~actor_baseline=>null actor_x_coord=>889 actor_y_coord=>410 actor_orientation=>5 actor_resource=>bazliz03 actor_name=>lizard6~
+       END
+       LAF edit_area STR_VAR area=ar6008 edits=patch_data END
+
+     LAF install STR_VAR file=dwabazba.baf location=resource END
+
+    // create lizard men shamans (high-level druids)
+
+     LAF check_label STR_VAR label=dw#clericmage RET cleric_mages=value END
+     ACTION_IF cleric_mages BEGIN
+       MAKE_PATCH
+	   levelGT=>25
+	   class=>druid
+	   strip_script=>"cmacl20a"
+       END
+       LAF clone_creature STR_VAR creature=~bazliz01=>dw#lzsh1 bazliz01=>dw#lzsh2~ edits=patch_data END
+       LAF edit_creature STR_VAR creature="dw#lzsh1 dw#lzsh2" editstring="enforce_clericmage=>~accept_level druid_mage~" END
+       MAKE_PATCH
+           add_actor_inline=>~actor_baseline=>null actor_x_coord=>510 actor_y_coord=>605 actor_orientation=>9 actor_resource=>dw#lzsh1 actor_name=>lizsha1~
+           add_actor_inline'=>~actor_baseline=>null actor_x_coord=>823 actor_y_coord=>571 actor_orientation=>7 actor_resource=>dw#lzsh2 actor_name=>lizsha2~
+       END
+       LAF edit_area STR_VAR area=ar6008 edits=patch_data END
+     END
+
+
+     // replace lesser earth elementals with lizard men
+     
+     LAF swap_text STR_VAR files=~ar6001.are~ swaps=~elearl01=>bazliz03~ END
+
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_beholder BEGIN
+
+   // tyrant golems
+
+   LAF color INT_VAR blue=20 RET tygol_color=color END
+   MAKE_PATCH
+      say_both_names=>2201
+      resist_acid=>100
+      resist_fire=>100
+      resist_cold=>100
+      resist_electricity=>100
+      resist_magic=>100
+      xp_value=>20000
+      resist_crushing=>90
+      resist_slashing=>90
+      resist_piercing=>90
+      resist_missile=>90
+      hitpoints=>120
+      add_effect_inline=>~opcode=>193 parameter2=>1~ // detect invisible
+      add_effect_inline'=>~opcode=>52 parameter1=>%tygol_color% parameter2=>2~
+      add_items=>~immune3 irongol~
+   END
+   LAF clone_creature STR_VAR creature=~behold01=>dw#tygol~ edits=patch_data END
+
+
+   ACTION_IF !FILE_EXISTS_IN_GAME ~dw#tygol.bcs~ BEGIN  // no Smarter Beholders
+      COPY_EXISTING ~behold01.bcs~ ~override/dw#tygol.bcs~
+   END ELSE BEGIN
+      MAKE_PATCH
+         remove_spells=>all
+         add_spells=>"HIVE_MOTHER_ANTIMAGIC_RAY HIVE_MOTHER_DEATH_RAY HIVE_MOTHER_DISINTEGRATE
+         HIVE_MOTHER_CAUSE_SERIOUS_WOUNDS BEHOLDER_PARALYZATION BEHOLDER_CHARM_PERSON BEHOLDER_DOMINATION BEHOLDER_SLOW BEHOLDER_TELEKINESIS BEHOLDER_FEAR BEHOLDER_FLESH_TO_STONE"
+      END
+      LAF edit_creature STR_VAR creature=dw#tygol edits=patch_data END
+   END
+
+   // place them
+
+       MAKE_PATCH
+           add_actor_inline=>~actor_baseline=>null actor_x_coord=>1047 actor_y_coord=>962 actor_orientation=>0 actor_resource=>dw#tygol actor_name=>tygol1~
+           add_actor_inline'0=>~actor_baseline=>null actor_x_coord=>947 actor_y_coord=>1037 actor_orientation=>0 actor_resource=>dw#tygol actor_name=>tygol2~
+           add_actor_inline'1=>~actor_baseline=>null actor_x_coord=>1241 actor_y_coord=>1059 actor_orientation=>0 actor_resource=>dw#tygol actor_name=>tygol3~
+           add_actor_inline'2=>~actor_baseline=>null actor_x_coord=>1213 actor_y_coord=>936 actor_orientation=>0 actor_resource=>behund01 actor_name=>behund1~
+           add_actor_inline'3=>~actor_baseline=>null actor_x_coord=>1126 actor_y_coord=>914 actor_orientation=>0 actor_resource=>behund01 actor_name=>behund2~
+       END
+       LAF edit_area STR_VAR area=ar6003 edits=patch_data END
+
+
+   // eyes get the "Beholder" item and marginally-better scripts
+
+   LAF edit_creature STR_VAR creature=~eyesek01 eyeegl01 eyesnt01~ editstring=~add_items=>beholder~ END
+   LAF ssl_to_bcs STR_VAR script=~eyesnt01 eyesek01 eyeegl01~ location=ssl END
+
+
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_rope BEGIN
+
+	// Monk no longer supplies rope; Amkethran merchant does
+
+        LAF edit_creature STR_VAR creature=bazmonk editstring=~remove_items=>bazplo05~ END
+
+	OUTER_SPRINT ~monkreply~ @3001
+	OUTER_SPRINT ~monkjournal~ @3011
+	ADD_JOURNAL @3011
+
+        LAF install STR_VAR file=~monk.d~ location=resource END   // this also contains the changes to the merchant's dialogue
+
+	<<<<<<<< .../stratagems-inline/monk2.d
+
+	REPLACE_SAY bazmonk 8 @3000
+
+	>>>>>>>>
+
+	LAF install INT_VAR inline=1 STR_VAR file=~monk2.d~ END
+
+        // random peasant with rope
+
+        MAKE_PATCH
+           script_override=>wtrunsgt
+           dialog=>dw#abrop
+           add_items=>bazplo05
+        END
+        LAF clone_creature STR_VAR creature=~yscara01=>dw#abrop~ edits=patch_data END
+
+<<<<<<<< .../stratagems-inline/ar5501.baf
+
+IF
+	Dead("AMbar01")
+	Global("DMWWMonkRope","GLOBAL",1)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#abrop",[340.630],0)
+		SetGlobal("DMWWMonkRope","GLOBAL",2)
+		Continue()
+END
+
+>>>>>>>>
+
+        LAF extend_area_script INT_VAR inline=1 STR_VAR area=ar5501 top=ar5501 END
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_fourdragons BEGIN
+
+     // setup
+
+     LAF define_difficulty STR_VAR type=dragon RET difficulty_variable END
+     LAF abazigal_ar6000 END
+     LAF abazigal_rope END
+     COPY "%MOD_FOLDER%/%component_loc%/resource/dragon12.wav" override
+
+      // cutspy
+      
+      COPY_EXISTING "cutspy.cre" "override/dwcutctr.cre"
+          LPF DELETE_EFFECT INT_VAR match_opcode=268 END
+          WRITE_ASCII DEATHVAR dwcutctr (0x20)
+
+      // black dragons are clones of an unaltered Nizi
+      
+      COPY ~%MOD_FOLDER%/%component_loc%/unaltered/dragblac.cre~ ~override/dw#abbl1.cre~
+      
+      MAKE_PATCH
+       script_override=>~~
+       dialog=>dw#abbl1
+       script_override=>dw#abbld
+       dv=>dw#abbl1
+       allegiance=>enemy
+       dragon_general=>null
+       say_both_names=>3021
+       level_all=>23
+       immunity=>acid
+       immunity=>insects
+       immunity=>poison
+       remove_spells=>all
+       add_spells=>~MAGIC_MISSILE(2) MELF_ACID_ARROW(2) WIZARD_DISPEL_MAGIC WIZARD_HASTE
+                    WIZARD_DIRE_CHARM(2) DRAGON_STONE_SKIN DRAGON_ACID_ARROW_SEQUENCER~
+       remove_items=>~misc41 miscb2 misc42 amul11 amul12 amul13 chan16 dart04 bolt06 bull03 arow07 arow11~
+
+      END
+      LAF edit_creature STR_VAR creature=dw#abbl1 edits=patch_data END
+      LAF clone_creature STR_VAR creature=~dw#abbl1=>dw#abbl2~ editstring=~say_both_names=>3022 dialog=>dw#abbl2 dv=>dw#abbl2~ END
+
+      // green dragon is a clone of the WK dragon with minor variations
+
+   
+   COPY ~%MOD_FOLDER%/%component_loc%/unaltered/fsdragon.cre~ ~override/dw#abgre.cre~
+
+   MAKE_PATCH
+        script_override=>~~
+        script_class=>dw#abgre
+        dialog=>dw#abgre
+        dv=>dw#abgre
+        say_both_names=>3023
+         dragon_general=>null
+        level_all=>25
+        immunity=>poison
+        immunity=>insects
+        remove_spells=>all
+        add_spells=>~UNHOLY_BLIGHT(2) DEFENSIVE_HARMONY(2) CLERIC_TRUE_SIGHT HEAL
+                     MAGIC_MISSILE(4) MELF_ACID_ARROW(4) WIZARD_DISPEL_MAGIC(2)
+                     SPELL_THRUST(2) BREACH(2) DOMINATION DEATH_SPELL PROTECTION_FROM_MAGIC_WEAPONS
+                     WARDING_WHIP POWER_WORD_STUN DRAGON_STONE_SKIN(3) RIGHTEOUS_MAGIC
+                     GREEN_DRAGON_DEFENSIVE_SEQUENCER DRAGON_ACID_ARROW_SEQUENCER~
+        remove_items=>~plot05d sw1h70 rndtre04~
+        strip_script=>wtasight
+   END
+   LAF edit_creature STR_VAR creature=dw#abgre edits=patch_data END
+
+   // red dragon is basically a Saladrex clone
+
+   COPY ~%MOD_FOLDER%/%component_loc%/unaltered/gorsal.cre~ ~override/dw#abred.cre~
+
+   MAKE_PATCH
+         say_both_names=>3024
+         script_override=>~~
+         script_class=>dw#abred
+         dv=>dw#abred
+         dialog=>dw#abred
+         allegiance=>enemy
+         dragon_general=>null
+         level_all=>26
+         immunity=>fire
+         remove_spells=>all
+     add_spells=>~MAGIC_MISSILE(5) MELF_ACID_ARROW(3) WIZARD_DISPEL_MAGIC(2) SLOW
+                   GREATER_MALISON BREACH(3) DEATH_SPELL DRAGON_STONE_SKIN(3)
+                   DRAGON_SILENCE PROTECTION_MAGIC_WEAPON_NOEFF(2) POWER_WORD_BLIND DRAGON_LOWER_FIRE
+                   RUBY_RAY_OF_REVERSAL(2) SALADREX_TRIGGER DRAGON_MAGIC_MISSILE_SEQUENCER SALADREX_SEQUENCER~
+
+         remove_items=>~rndtre04 rndtre05 misc45 staf21~
+   END
+   LAF edit_creature STR_VAR creature=dw#abred edits=patch_data END
+
+   // scripts
+   
+   LAF install STR_VAR files=~dw#abct0.baf dw#abct1.baf dw#abct2.baf multidragon.d~ location=resource END
+   LAF ssl_to_bcs STR_VAR script=dw#abgre location=ssl END
+   LAF ssl_to_bcs STR_VAR script="gorsal=>dw#abred" locbase=dragon location=ssl END
+   LAF clone_extend STR_VAR arguments=~dragblac=>dw#abbld~ location=resource END
+   LAF extend_area_script STR_VAR area=ar6000 top=ar6000add location=resource END
+   LAF extend STR_VAR script=tp6001 top=tp6001add location=resource END
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_yellowdragon BEGIN
+
+     LAF define_difficulty STR_VAR type=dragon RET difficulty_variable END
+
+    // Create the yellow dragon Anadramatis
+    // Start with an unmodified version of the Yellow Dragon - we'll hot-modify
+
+ //  COPY ~%MOD_FOLDER%/%component_loc%/unaltered/dragyell.cre~ ~override/dw#abdgy.cre~
+    MAKE_PATCH
+        say_both_names=>16050
+        allegiance=>neutral
+        hitpoints=>250
+        thac0=>"-6"
+        level_all=>28
+        resist_magic=>65
+        resist_piercing=>75
+        resist_missile=>75
+        immunity=>fire
+        add_items=>~dragred1(WEAPON) minhp1 dw#abyds(INV)~
+        strip_script=>wtasight
+        script_override=>dw#abdgy
+        dialog=>dw#abdgy
+        dv=>Anadramatis
+        animation=>DRAGON_BROWN
+        remove_spells=>all
+        dragon_general=>null
+        add_spells=>~MAGIC_MISSILE(6) WIZARD_DISPEL_MAGIC(3) WIZARD_FLAME_ARROW(3) GREATER_MALISON BREACH(4)
+                     ORACLE(2) DEATH_SPELL(2) PROTECTION_MAGIC_WEAPON_NOEFF(3) IMPROVED_HASTE  RUBY_RAY_OF_REVERSAL(2)
+                     WARDING_WHIP(2) POWER_WORD_STUN(2) PIERCE_SHIELD(2) INCENDIARY_CLOUD ABI_DALZIMS_HORRID_WILTING(3)
+                     WAIL_OF_THE_BANSHEE(2) SPELL_TRAP(2) POWER_WORD_KILL(2) DRAGON_STONE_SKIN(6)~
+    END
+    LAF install_creature STR_VAR creature=~dragyell=>dw#abdgy~ location=unaltered edits=patch_data END
+
+    LAF check_label STR_VAR label=dw#mage RET value END // only use WISH if it's been built
+    ACTION_IF value BEGIN
+        LAF ssl_to_bcs STR_VAR script=dw#abdgy location=ssl booleans=WIZARD_WISH END
+    END ELSE BEGIN
+        LAF ssl_to_bcs STR_VAR script=dw#abdgy location=ssl END
+    END
+
+   // dialog and items
+
+   LAF install STR_VAR files=~yellow.d~ location=resource END
+
+   //COMPILE "%MOD_FOLDER%/abazigal/resource/inter_haerdalis.d" EVALUATE_BUFFER
+    LAF install STR_VAR files=inter_haerdalis.d location=resource END // these have to be after yellow.d - weidu seems to get upset if you do multiple I_C_T into the same block in one .d
+  
+   // dragon armour
+
+	itm.copy[leat19=>dw#abyda]
+	[
+		m_identified_name:=@3016
+		m_identified_description:=@3017
+		LPF handle_unusable STR_VAR arguments="%m_identified_description%" RET m_identified_description=value END
+		m.fx.delete{s_opcode=7} // remove existing color
+		m.fx.add{s_opcode=7 s_target=1 s_parameter1=50 s_parameter2=5 s_timing=2}
+		m.fx.add{s_opcode=7 s_target=1 s_parameter1=51 s_parameter2=4 s_timing=2}
+		m.fx.add{s_opcode=7 s_target=1 s_parameter1=50 s_parameter2=0 s_timing=2}
+		m.fx.add{s_opcode=7 s_target=1 s_parameter1=50 s_parameter2=2 s_timing=2}
+		m.fx.add{s_opcode=7 s_target=1 s_parameter1=51 s_parameter2=1 s_timing=2}
+		m.fx.alter{s_parameter1="-1"|match="s_opcode=0 AND s_parameter2=BIT4"}
+		m.fx.delete{s_opcode=27 OR s_opcode=142}
+		m.fx.add{s_opcode=88 s_target=1 s_parameter1=50 s_timing=2}
+		m.fx.add{s_opcode=89 s_target=1 s_parameter1=50 s_timing=2}
+	]
+
+   APPEND ~ITEMEXCL.2DA~ ~dw#abyda 1~
+
+   // dragon amulet
+   
+   COPY_EXISTING "amul02.itm" "override/dw#abamu.itm"
+		SAY 0xc @3018
+		SAY 0x54 @3019
+		LPF ADD_ITEM_EQEFFECT INT_VAR opcode=206 target=1 timing=2 STR_VAR resource="%DRAGON_WING_BUFFET%" END
+
+   // dragon scales
+   itm.copy[scaleb=>dw#abyds]
+   [
+	m_identified_name:=@3014
+	m_identified_description:=@3015
+   ]
+
+   // Cespenar addition
+   
+   LAF extend STR_VAR files=botsmith bottom=cespenar_add location=resource END
+
+   // AR6005 addition
+   
+   LAF extend_area_script STR_VAR area=ar6005 bottom=ar6005add location=resource END
+   
+   // 12POOL1 addition
+   
+   LAF extend STR_VAR files=12pool1 top=pooladd location=resource END
+
+END
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_wheels BEGIN
+
+    // Wheels compatibility
+    
+    LAF clone_creature STR_VAR creature=~bazliz03=>dw#viliz~ editstring=~script_override=>dw#vilat script_class=>"" gender=>EXTRA6~ END
+    LAF clone_creature STR_VAR creature=~eyesek01=>dw#visek eyeegl01=>dw#viegl~     editstring=~insert_script_high=>dw#vilat gender=>EXTRA7~ END
+
+
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+Make a new version of AR6008, based on AR1501 but with slightly tweaked tileset and animations/sounds.
+(Yes, this was a ridiculous amount of work given that it doesn't really matter and the only reason I
+wanted to change the boring vanilla one was so the exit went SE rather than SW, why do you ask?
+(But I think it's prettier, and more in-place, now - the previous one was just a reuse.)
+
+
+*/ 
+DEFINE_ACTION_FUNCTION abazigal_new_ar6008 BEGIN
+
+   // copy over the new TIS / PVRZ files
+   ACTION_IF enhanced_edition BEGIN
+      COPY "%MOD_FOLDER%/%component_loc%/ar6008/ar6008.tis" override
+      ACTION_BASH_FOR "%MOD_FOLDER%/%component_loc%/ar6008" ".*\.pvrz" BEGIN
+         COPY "%BASH_FOR_FILESPEC%" override
+      END
+   END ELSE BEGIN
+      COPY "%MOD_FOLDER%/%component_loc%/ar6008/ar6008v.tis" "override/ar6008.tis"
+   END
+
+   ACTION_FOR_EACH suffix IN sr lm ht BEGIN
+      COPY_EXISTING "ar1501%suffix%.bmp" "override/ar6008%suffix%.bmp"
+   END
+
+   // make the new WED file
+
+   COPY_EXISTING ar1501.wed "override/ar6008.wed"
+      WRITE_ASCII 0x24 ar6008 (8)
+
+   // collect some data on ambients and animations from ar6004
+   // (yes, we are screwed if someone systematically messes with ar6004's animations, but life is toooo short)
+
+   COPY_EXISTING ar6004.are override
+   READ_ASCII (SHORT_AT 0xb0) anim_data (0x4c)
+   READ_ASCII (SHORT_AT 0xb0)+0x4c anim_data_2 (0x4c)
+   READ_ASCII (SHORT_AT 0x84) amb_data (0xd4)
+   READ_ASCII (SHORT_AT 0x84)+0xd4 amb_data_2 (0xd4)
+
+   // main patches to area file (cloned from ar1501). First step: strip it down and add blank spaces for new ambients/animations
+   // along with new exit/entrance
+
+MAKE_PATCH
+   delete_container=>1
+   delete_actor=>1
+   add_ambient_inline=>~number_to_add=>10~ 
+   add_animation_inline=>~number_to_add=>13~
+   add_entrance_inline=>~entrance_name=>Exit6012 entrance_xloc=>1080 entrance_yloc=>730 entrance_orientation=>6~
+END
+LAF clone_area STR_VAR area="ar1501=>ar6008" edits=patch_data END
+
+   // second step: use WEIDU-standard code and some of my own stuff to add animations/ambients/triggers/etc (yes, this is a horrible
+   // hack: there is no really good solution for area editing in WEIDU, SFO is good for some things and the WEIDU function library
+   // is good for others)
+
+COPY_EXISTING ar6008.are override
+   WRITE_ASCII 0x94 ar6008 (8)
+   WRITE_ASCII 0x8 ar6008 (8)
+   READ_LONG 0xb0 anim_off
+   LPF abaz_add_animation INT_VAR xloc=886 yloc=290 number=0 END
+   LPF abaz_add_animation INT_VAR xloc=996 yloc=444 number=1 END
+   LPF abaz_add_animation INT_VAR xloc=1078 yloc=516 number=2 END
+   LPF abaz_add_animation INT_VAR xloc=241 yloc=430 number=3 END
+   LPF abaz_add_animation INT_VAR xloc=350 yloc=306 number=4 END
+   LPF abaz_add_animation INT_VAR xloc=446 yloc=328 number=5 END
+   LPF abaz_add_animation INT_VAR xloc=515 yloc=246 number=6 END
+   LPF abaz_add_animation INT_VAR xloc=846 yloc=299 number=7 END
+   LPF abaz_add_animation INT_VAR xloc=976 yloc=434 number=8 END
+   LPF abaz_add_animation INT_VAR xloc=1026 yloc=434 number=9 END
+   LPF abaz_add_animation INT_VAR xloc=503 yloc=311 number=10 END
+   LPF abaz_add_animation INT_VAR xloc=530 yloc=284 number=11 END
+   LPF abaz_add_animation INT_VAR xloc=286 yloc=438 number=12 END
+   LPF abaz_add_animation INT_VAR xloc=276 yloc=433 number=13 END
+   READ_LONG 0x84 amb_off
+   LPF abaz_add_ambient INT_VAR xloc=502 yloc=369 number=0 END
+   LPF abaz_add_ambient INT_VAR xloc=856 yloc=347 number=1 END
+   LPF abaz_add_ambient INT_VAR xloc=1002 yloc=494 number=2 END
+   LPF abaz_add_ambient INT_VAR xloc=1075 yloc=566 number=3 END
+   LPF abaz_add_ambient INT_VAR xloc=248 yloc=479 number=4 END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=342
+              ab_RT_BbHY=400
+              ab_RT_BbHX=540
+              ab_RT_BbLY=287
+              ab_RT_VxPr=15
+              ab_RT_Vx_X_0=497
+              ab_RT_Vx_Y_0=287
+              ab_RT_Vx_X_1=540
+              ab_RT_Vx_Y_1=326
+              ab_RT_Vx_X_2=533
+              ab_RT_Vx_Y_2=366
+              ab_RT_Vx_X_3=464
+              ab_RT_Vx_Y_3=399
+              ab_RT_Vx_X_4=423
+              ab_RT_Vx_Y_4=400
+              ab_RT_Vx_X_5=397
+              ab_RT_Vx_Y_5=392
+              ab_RT_Vx_X_6=361
+              ab_RT_Vx_Y_6=372
+              ab_RT_Vx_X_7=342
+              ab_RT_Vx_Y_7=340
+              ab_RT_Vx_X_8=363
+              ab_RT_Vx_Y_8=364
+              ab_RT_Vx_X_9=402
+              ab_RT_Vx_Y_9=384
+              ab_RT_Vx_X_10=426
+              ab_RT_Vx_Y_10=390
+              ab_RT_Vx_X_11=455
+              ab_RT_Vx_Y_11=390
+              ab_RT_Vx_X_12=484
+              ab_RT_Vx_Y_12=377
+              ab_RT_Vx_X_13=499
+              ab_RT_Vx_Y_13=361
+              ab_RT_Vx_X_14=501
+              ab_RT_Vx_Y_14=335
+              ab_RT_LPoX=518
+              ab_RT_LPoY=395
+              ab_RT_CuId=22
+              ab_RT_Fbit=0x400
+              ab_RT_Itxt=73099
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="PoolNowhere"
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+       INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=229
+              ab_RT_BbHY=506
+              ab_RT_BbHX=295
+              ab_RT_BbLY=451
+              ab_RT_VxPr=7
+              ab_RT_Vx_X_0=262
+              ab_RT_Vx_Y_0=451
+              ab_RT_Vx_X_1=295
+              ab_RT_Vx_Y_1=463
+              ab_RT_Vx_X_2=286
+              ab_RT_Vx_Y_2=494
+              ab_RT_Vx_X_3=269
+              ab_RT_Vx_Y_3=506
+              ab_RT_Vx_X_4=236
+              ab_RT_Vx_Y_4=493
+              ab_RT_Vx_X_5=229
+              ab_RT_Vx_Y_5=471
+              ab_RT_Vx_X_6=240
+              ab_RT_Vx_Y_6=453
+              ab_RT_LPoX=300
+              ab_RT_LPoY=471
+              ab_RT_CuId=22
+              ab_RT_Fbit=0x400
+              ab_RT_Itxt=73099
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="PoolNowhere2"
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=831
+              ab_RT_BbHY=365
+              ab_RT_BbHX=892
+              ab_RT_BbLY=316
+              ab_RT_VxPr=10
+              ab_RT_Vx_X_0=831
+              ab_RT_Vx_Y_0=353
+              ab_RT_Vx_X_1=833
+              ab_RT_Vx_Y_1=332
+              ab_RT_Vx_X_2=839
+              ab_RT_Vx_Y_2=317
+              ab_RT_Vx_X_3=859
+              ab_RT_Vx_Y_3=316
+              ab_RT_Vx_X_4=871
+              ab_RT_Vx_Y_4=316
+              ab_RT_Vx_X_5=888
+              ab_RT_Vx_Y_5=323
+              ab_RT_Vx_X_6=892
+              ab_RT_Vx_Y_6=346
+              ab_RT_Vx_X_7=886
+              ab_RT_Vx_Y_7=359
+              ab_RT_Vx_X_8=870
+              ab_RT_Vx_Y_8=365
+              ab_RT_Vx_X_9=846
+              ab_RT_Vx_Y_9=363
+              ab_RT_LPoX=830
+              ab_RT_LPoY=398
+              ab_RT_CuId=22
+              ab_RT_Fbit=0x400
+              ab_RT_Itxt=73099
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="PoolNowhere3"
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=969
+              ab_RT_BbHY=512
+              ab_RT_BbHX=1061
+              ab_RT_BbLY=443
+              ab_RT_VxPr=13
+              ab_RT_Vx_X_0=969
+              ab_RT_Vx_Y_0=487
+              ab_RT_Vx_X_1=971
+              ab_RT_Vx_Y_1=456
+              ab_RT_Vx_X_2=996
+              ab_RT_Vx_Y_2=443
+              ab_RT_Vx_X_3=1026
+              ab_RT_Vx_Y_3=445
+              ab_RT_Vx_X_4=1048
+              ab_RT_Vx_Y_4=450
+              ab_RT_Vx_X_5=1058
+              ab_RT_Vx_Y_5=459
+              ab_RT_Vx_X_6=1061
+              ab_RT_Vx_Y_6=476
+              ab_RT_Vx_X_7=1058
+              ab_RT_Vx_Y_7=493
+              ab_RT_Vx_X_8=1047
+              ab_RT_Vx_Y_8=504
+              ab_RT_Vx_X_9=1014
+              ab_RT_Vx_Y_9=512
+              ab_RT_Vx_X_10=994
+              ab_RT_Vx_Y_10=511
+              ab_RT_Vx_X_11=992
+              ab_RT_Vx_Y_11=510
+              ab_RT_Vx_X_12=979
+              ab_RT_Vx_Y_12=504
+              ab_RT_LPoX=993
+              ab_RT_LPoY=531
+              ab_RT_CuId=22
+              ab_RT_Fbit=0x400
+              ab_RT_Itxt=73099
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="PoolNowhere4"
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=1046
+              ab_RT_BbHY=581
+              ab_RT_BbHX=1104
+              ab_RT_BbLY=533
+              ab_RT_VxPr=12
+              ab_RT_Vx_X_0=1047
+              ab_RT_Vx_Y_0=560
+              ab_RT_Vx_X_1=1050
+              ab_RT_Vx_Y_1=543
+              ab_RT_Vx_X_2=1065
+              ab_RT_Vx_Y_2=535
+              ab_RT_Vx_X_3=1066
+              ab_RT_Vx_Y_3=534
+              ab_RT_Vx_X_4=1084
+              ab_RT_Vx_Y_4=533
+              ab_RT_Vx_X_5=1098
+              ab_RT_Vx_Y_5=541
+              ab_RT_Vx_X_6=1104
+              ab_RT_Vx_Y_6=558
+              ab_RT_Vx_X_7=1102
+              ab_RT_Vx_Y_7=574
+              ab_RT_Vx_X_8=1088
+              ab_RT_Vx_Y_8=577
+              ab_RT_Vx_X_9=1074
+              ab_RT_Vx_Y_9=581
+              ab_RT_Vx_X_10=1061
+              ab_RT_Vx_Y_10=580
+              ab_RT_Vx_X_11=1050
+              ab_RT_Vx_Y_11=573
+              ab_RT_LPoX=820
+              ab_RT_LPoY=468
+              ab_RT_CuId=22
+              ab_RT_Fbit=0x400
+              ab_RT_Itxt=73099
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="PoolNowhere5"
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=602
+              ab_RT_BbHY=306
+              ab_RT_BbHX=713
+              ab_RT_BbLY=232
+              ab_RT_VxPr=11
+              ab_RT_Vx_X_0=602
+              ab_RT_Vx_Y_0=274
+              ab_RT_Vx_X_1=615
+              ab_RT_Vx_Y_1=245
+              ab_RT_Vx_X_2=648
+              ab_RT_Vx_Y_2=235
+              ab_RT_Vx_X_3=663
+              ab_RT_Vx_Y_3=232
+              ab_RT_Vx_X_4=699
+              ab_RT_Vx_Y_4=245
+              ab_RT_Vx_X_5=712
+              ab_RT_Vx_Y_5=251
+              ab_RT_Vx_X_6=713
+              ab_RT_Vx_Y_6=266
+              ab_RT_Vx_X_7=707
+              ab_RT_Vx_Y_7=290
+              ab_RT_Vx_X_8=678
+              ab_RT_Vx_Y_8=306
+              ab_RT_Vx_X_9=644
+              ab_RT_Vx_Y_9=298
+              ab_RT_Vx_X_10=621
+              ab_RT_Vx_Y_10=297
+              ab_RT_LPoX=648
+              ab_RT_LPoY=360
+              ab_RT_ALPX=671
+              ab_RT_ALPY=353
+              ab_RT_CuId=8
+              ab_RT_Fbit=0x400
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="08Pool1"
+              ab_RT_Rbcs="08Pool1"
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=2
+              ab_RT_BbLX=931
+              ab_RT_BbHY=972
+              ab_RT_BbHX=1360
+              ab_RT_BbLY=604
+              ab_RT_VxPr=4
+              ab_RT_Vx_X_0=1232
+              ab_RT_Vx_Y_0=604
+              ab_RT_Vx_X_1=1360
+              ab_RT_Vx_Y_1=720
+              ab_RT_Vx_X_2=1078
+              ab_RT_Vx_Y_2=972
+              ab_RT_Vx_X_3=931
+              ab_RT_Vx_Y_3=863
+              ab_RT_LPoX=1080
+              ab_RT_LPoY=730
+              ab_RT_CuId=30
+              ab_RT_Fbit=0x4
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="Tran6012"
+              ab_RT_Dest=ar6012
+              ab_RT_EntN=Exit6008
+   END
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=0
+              ab_RT_BbLX=416
+              ab_RT_BbHX=1199
+              ab_RT_BbLY=267
+              ab_RT_BbHY=815
+              ab_RT_VxPr=4
+              ab_RT_Vx_X_0=1054
+              ab_RT_Vx_Y_0=267
+              ab_RT_Vx_X_1=1199
+              ab_RT_Vx_Y_1=381
+              ab_RT_Vx_X_2=599
+              ab_RT_Vx_Y_2=815
+              ab_RT_Vx_X_3=416
+              ab_RT_Vx_Y_3=783
+              ab_RT_LPoX=900
+              ab_RT_LPoY=550
+              ab_RT_CuId=30
+              ab_RT_Fbit=0x2
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="AbazBaatezu"
+              ab_RT_Rbcs="dwabazba"
+   END
+
+
+   
+  // sort out pool transition script into this area
+
+
+COPY_EXISTING 01pool4.bcs override
+   DECOMPILE_AND_PATCH BEGIN
+      REPLACE_TEXTUALLY ~ActionOverride(Player1,LeaveAreaLUAPanicEntry([^)]*))~ ~~
+      REPLACE_TEXTUALLY "Player1,LeaveAreaLUAEntry([^)]*)" ~Player1,LeaveAreaLUA("AR6008","",[637.384],S)~
+      REPLACE_TEXTUALLY "Player2,LeaveAreaLUAEntry([^)]*)" ~Player2,LeaveAreaLUA("AR6008","",[683.378],S)~
+      REPLACE_TEXTUALLY "Player3,LeaveAreaLUAEntry([^)]*)" ~Player3,LeaveAreaLUA("AR6008","",[607.364],S)~
+      REPLACE_TEXTUALLY "Player4,LeaveAreaLUAEntry([^)]*)" ~Player4,LeaveAreaLUA("AR6008","",[725.358],S)~
+      REPLACE_TEXTUALLY "Player5,LeaveAreaLUAEntry([^)]*)" ~Player5,LeaveAreaLUA("AR6008","",[586.325],S)~
+      REPLACE_TEXTUALLY "Player6,LeaveAreaLUAEntry([^)]*)" ~Player6,LeaveAreaLUA("AR6008","",[755.304],S)~
+   END
+BUT_ONLY
+
+
+END
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION abazigal_ar6000 BEGIN
+
+   COPY_EXISTING ar6000.are override
+   LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=0
+              ab_RT_BbLX=608
+              ab_RT_BbHX=1720
+              ab_RT_BbLY=608
+              ab_RT_BbHY=1542
+              ab_RT_VxPr=4
+              ab_RT_Vx_X_0=1720
+              ab_RT_Vx_Y_0=914
+              ab_RT_Vx_X_1=1580
+              ab_RT_Vx_Y_1=812
+              ab_RT_Vx_X_2=608
+              ab_RT_Vx_Y_2=1542
+              ab_RT_Vx_X_3=850
+              ab_RT_Vx_Y_3=1600
+              ab_RT_LPoX=1000
+              ab_RT_LPoY=1100
+              ab_RT_Fbit=0x2
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="FourDragons"
+              ab_RT_Rbcs="dwabaz4d"
+   END
+   BUT_ONLY
+
+<<<<<<<<  .../stratagems-inline/dwabaz4d.baf
+IF
+  IsOverMe([GOODCUTOFF])
+  Global("DMWWAbazBlacks","GLOBAL",1)
+THEN
+    RESPONSE #100
+       SetGlobal("DMWWAbazBlacks","GLOBAL",2)
+       StartCutSceneMode()
+       StartCutScene("dw#abct0")
+END
+>>>>>>>>
+
+COMPILE ".../stratagems-inline/dwabaz4d.baf"
+
+
+END
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+Make a new version of AR6012, based on AR6004 reflected and recolored.
+
+*/
+
+DEFINE_ACTION_FUNCTION abazigal_new_ar6012 BEGIN
+   // copy over old AR6004 for new version, removing all actors in the process
+
+   LAF clone_area STR_VAR area="ar6004=>ar6012" editstring="delete_actor=>1 area_script=>ar6012 wed=>ar6012" END
+
+   // make the new WED file
+
+   COPY_EXISTING ar6004.wed "override/ar6012.wed"
+      WRITE_ASCII 0x24 ar6012 (8)
+
+   // invert! adding recolored tis/pvrz and height maps in the process
+
+   LAF flip_area STR_VAR area=ar6012 file_loc="%MOD_FOLDER%/%component_loc%/ar6012" END
+
+   // convert LHS exit to AR6008 exit; redo blocked entrance
+
+   MAKE_PATCH
+      match=>"trigger_name=Tran6001"
+      trigger_dest=>AR6008
+      trigger_entrance=>Exit6012
+   END
+   LAF edit_area STR_VAR area=ar6012 editstring="patch_trigger=>patch_data" END
+   MAKE_PATCH
+      match=>"trigger_name=Info6001"
+      trigger_name=>"DMWWFYExit"
+      trigger_script=>"dw#anado"
+   END
+   LAF edit_area STR_VAR area=ar6012 editstring="patch_trigger=>patch_data" END
+   LAF install STR_VAR location=resource file="dw#anado.baf" END
+
+   // change string in RHS info point; remove RHS exit
+
+   OUTER_SET wind_info=RESOLVE_STR_REF (@3200)
+
+   MAKE_PATCH
+       match=>"trigger_name=NoLair"
+       trigger_info=>"%wind_info%"
+       trigger_cursor=>22
+   END
+   LAF edit_area STR_VAR area=ar6012 editstring="patch_trigger=>patch_data delete_trigger=>~trigger_name=Tran6005~" END
+
+   // update the map notes
+   
+   OUTER_SET mapnote_deeper = RESOLVE_STR_REF (@3201)
+   OUTER_SET mapnote_cliff = RESOLVE_STR_REF (@3202)
+
+   MAKE_PATCH
+      patch_mapnote_inline=>"match=>~mapnote_xloc=58~ mapnote_text=>%mapnote_deeper%"
+      patch_mapnote_inline'=>"match=>~mapnote_xloc=2097~ mapnote_text=>%mapnote_cliff%"
+   END
+   LAF edit_area STR_VAR area=ar6012 edits=patch_data END
+
+   // turn off all pool transitions
+   
+   MAKE_PATCH
+      delete_trigger=>"trigger_name is_in [04pool1 04pool2 04pool3 04pool4 04pool5]"
+   END
+   LAF edit_area STR_VAR area=ar6012 edits=patch_data END
+
+   // rename the entrances
+
+   MAKE_PATCH
+      patch_entrance_inline=>~match=>"entrance_name=exit6001" entrance_name=>exit6008~
+      delete_entrance=>~entrance_name=exit6005~
+   END
+   LAF edit_area STR_VAR area=ar6012 edits=patch_data END
+
+   // sort out ambient sounds
+   
+   // vBG2 requires ambients to match the area code, so we need to copy-rename. (EE doesn't, but it's harmless.)
+   
+   ACTION_CLEAR_ARRAY ambient_map
+   ACTION_DEFINE_ASSOCIATIVE_ARRAY ambient_map BEGIN
+		am6000=>am6012w
+		am6004=>am6012
+		am6000a1=>am6012a1
+		am6000a2=>am6012a2
+		am6000a3=>am6012a3
+   END
+   ACTION_PHP_EACH ambient_map AS old=>new BEGIN
+	COPY_EXISTING "%old%.wav" "override/%new%.wav"
+   END
+   
+   MAKE_PATCH
+      ambient_name=>"CaveEntranceWind"
+      ambient_xloc=>1900
+      ambient_yloc=>960
+      ambient_radius=>500
+      ambient_volume=>100
+      ambient_active=>"-1"
+      ambient_sound1=>AM6012W
+      ambient_sound_number=>1
+      ambient_enabled=>1
+      ambient_looping=>1
+   END
+   LAF edit_area STR_VAR area=ar6012 editstring="add_ambient=>patch_data" END
+   MAKE_PATCH
+      ambient_name=>"CaveEntranceRocks"
+      ambient_xloc=>1920
+      ambient_yloc=>960
+      ambient_radius=>500
+      ambient_volume=>100
+      ambient_active=>"-1"
+      ambient_sound1=>AM6012A1
+      ambient_sound2=>AM6012A2
+      ambient_sound3=>AM6012A3
+      ambient_sound_number=>3
+      ambient_enabled=>1
+      ambient_looping=>1
+      ambient_base_time=>25
+      ambient_time_deviation=>5
+   END
+   LAF edit_area STR_VAR area=ar6012 editstring="add_ambient=>patch_data" END
+
+	MAKE_PATCH
+		match=>"ambient_sound1=AM6004"
+		ambient_sound1=>AM6012
+	END
+   LAF edit_area STR_VAR area=ar6012 editstring="patch_ambient=>patch_data" END
+	
+
+   // recolor a cauldron; add it
+   
+   COPY_EXISTING "AM2201B.bam" "override/dw#ambbp.bam"
+   LAF patch_colors STR_VAR bam="dw#ambbp" condition=cauldron_condition action=cauldron_action END
+
+   MAKE_PATCH
+      animation_name=>"PotionCauldron"
+      animation_xloc=>1882
+      animation_yloc=>875
+      animation_resource=>"DW#AMBBP"
+      animation_enabled=>1
+      animation_not_cover=>1
+      animation_show_in_combat=>1
+      animation_active=>"-1"
+   END
+   LAF edit_area STR_VAR area=ar6012 editstring="add_animation=>patch_data" END
+
+   // add cauldron info trigger and Anadramatis proximity trigger
+   
+   COPY_EXISTING "ar6012.are" override
+    LPF ADD_AREA_REGION_TRIGGER
+      INT_VAR ab_RT_Type=1
+              ab_RT_BbLX=1838
+              ab_RT_BbLY=762
+              ab_RT_BbHX=1921
+              ab_RT_BbHY=824
+              ab_RT_VxPr=17
+              ab_RT_Vx_X_0=1885
+              ab_RT_Vx_Y_0=768
+              ab_RT_Vx_X_1=1895
+              ab_RT_Vx_Y_1=769
+              ab_RT_Vx_X_2=1914
+              ab_RT_Vx_Y_2=777
+              ab_RT_Vx_X_3=1921
+              ab_RT_Vx_Y_3=785
+              ab_RT_Vx_X_4=1926
+              ab_RT_Vx_Y_4=794
+              ab_RT_Vx_X_5=1919
+              ab_RT_Vx_Y_5=809
+              ab_RT_Vx_X_6=1906
+              ab_RT_Vx_Y_6=820
+              ab_RT_Vx_X_7=1895
+              ab_RT_Vx_Y_7=823
+              ab_RT_Vx_X_8=1883
+              ab_RT_Vx_Y_8=824
+              ab_RT_Vx_X_9=1862
+              ab_RT_Vx_Y_9=820
+              ab_RT_Vx_X_10=1852
+              ab_RT_Vx_Y_10=817
+              ab_RT_Vx_X_11=1844
+              ab_RT_Vx_Y_11=810
+              ab_RT_Vx_X_12=1838
+              ab_RT_Vx_Y_12=796
+              ab_RT_Vx_X_13=1843
+              ab_RT_Vx_Y_13=788
+              ab_RT_Vx_X_14=1848
+              ab_RT_Vx_Y_14=762
+              ab_RT_Vx_X_15=1855
+              ab_RT_Vx_Y_15=775
+              ab_RT_Vx_X_16=1865
+              ab_RT_Vx_Y_16=772
+              ab_RT_LPoX=1838
+              ab_RT_LPoY=762
+              ab_RT_ALPX=1838
+              ab_RT_ALPY=762
+              ab_RT_CuId=8
+              ab_RT_Fbit=0x400
+              ab_RT_TSet=1
+      STR_VAR ab_RT_Name="Cauldron"
+              ab_RT_Rbcs="12Pool1"
+   END
+  BUT_ONLY
+
+   // add Ana himself!
+   
+       MAKE_PATCH
+           actor_baseline=>null
+           actor_x_coord=>1630
+           actor_y_coord=>958
+           actor_orientation=>4
+           actor_resource=>DW#ABDGY
+           actor_name=>Anadramatis
+       END
+
+       LAF edit_area STR_VAR area=ar6012 editstring="add_actor=>patch_data" END
+
+   // update master area
+   // (not that I really understand this)
+   
+   COPY_EXISTING "mastarea.2da" override
+      REPLACE_TEXTUALLY "ar6010\( \|%TAB%\)+value\(%WNL%\|%LNL%\|%MNL%\)" "ar6010   value%WNL%ar6012   value%WNL%"
+
+   // area script
+   
+   LAF install STR_VAR location=resource file="ar6012.baf" END
+
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////// Helper functions for new_ar6008
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION abaz_add_animation
+   INT_VAR xloc=0
+           yloc=0
+           number=0
+BEGIN
+     PATCH_IF (number / 2) * 2 = number BEGIN
+        WRITE_ASCIIE anim_off + number*0x4c "%anim_data%"
+     END ELSE BEGIN
+        WRITE_ASCIIE anim_off + number*0x4c "%anim_data_2%"
+     END
+     WRITE_SHORT anim_off+0x20 + 0x4c*number xloc
+     WRITE_SHORT anim_off+0x22 + 0x4c*number yloc
+END
+
+DEFINE_PATCH_FUNCTION abaz_add_ambient
+   INT_VAR xloc=0
+           yloc=0
+           number=0
+BEGIN
+   WRITE_ASCIIE amb_off + number * 2 * 0xd4 "%amb_data%"
+   WRITE_ASCIIE amb_off + (number * 2 +1) * 0xd4 "%amb_data_2%"
+   WRITE_SHORT amb_off + number * 2 * 0xd4 + 0x20 xloc
+   WRITE_SHORT amb_off + number * 2 * 0xd4 + 0x22 yloc
+   WRITE_SHORT amb_off + (number * 2 + 1 ) * 0xd4 + 0x20 xloc
+   WRITE_SHORT amb_off + (number * 2 + 1 ) * 0xd4 + 0x22 yloc
+END
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////// Helper functions for new_ar6012
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DEFINE_PATCH_FUNCTION cauldron_condition
+   INT_VAR red=0
+           green=0
+           blue=0
+   RET value
+BEGIN
+   PATCH_IF (red>50 && green<200) BEGIN
+      SET value=1
+   END ELSE BEGIN
+      SET value=0
+   END
+END
+
+DEFINE_PATCH_FUNCTION cauldron_action
+   INT_VAR red=0
+           green=0
+           blue=0
+   RET red green blue
+BEGIN
+  SET red_old=red
+//  SET green=red_old/2
+  SET blue=green/4
+  SET red=red/6
+  SET green=(2*green)/3
+END

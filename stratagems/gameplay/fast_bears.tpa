@@ -1,0 +1,114 @@
+DEFINE_ACTION_FUNCTION fast_bears BEGIN
+
+	ACTION_IF enhanced_edition BEGIN
+		LAF fast_bears_ee END
+	END ELSE BEGIN
+		LAF fast_bears_vanilla END
+	END
+
+
+END
+
+DEFINE_ACTION_FUNCTION fast_bears_ee BEGIN
+
+	// make slowing spell
+	
+	spl.make[dw#bslw]
+	[
+		m.ab.add{}
+		m.ab_fx.add{s_opcode=126 s_target=2 s_timing=9 s_parameter1=50 s_parameter2=2}
+	]
+	
+	// make remover
+	
+	spl.make[dw#bslr]
+	[
+		m.ab.add{}
+		m.ab_fx.add{s_opcode=321 s_target=2 s_timing=1 s_resource:=dw#bslw}
+	]
+
+	// append script
+	
+	LAF extend STR_VAR script=bear top=bear_ee location=resource END
+
+
+
+
+
+
+
+END
+
+DEFINE_ACTION_FUNCTION fast_bears_vanilla BEGIN
+
+
+/////////////////////////////////////////////////////////////////////////
+/// speed spell
+/////////////////////////////////////////////////////////////////////////
+
+LAF install STR_VAR file=dw#bfst.spl location=resource END
+
+/////////////////////////////////////////////////////////////////////////
+/// script
+/////////////////////////////////////////////////////////////////////////
+
+<<<<<<<<.../scs-inline/bearadd.baf
+IF
+  !GlobalTimerNotExpired("fastbear","LOCALS")
+  Allegiance(Myself,ENEMY)
+  See(NearestEnemyOf(Myself))
+  DifficultyGT(EASY)
+THEN
+    RESPONSE #100
+             ApplySpellRES("dw#bfst",Myself)
+             SetGlobalTimer("fastbear","LOCALS",500)
+             Continue()
+END
+>>>>>>>>
+
+    ACTION_FOR_EACH script IN ~%tutu_var%cbear~ ~%tutu_var%bear~ BEGIN
+      EXTEND_TOP ~%script%.bcs~ ~.../scs-inline/bearadd.baf~
+    END
+
+/////////////////////////////////////////////////////////////////////////
+// find bears (we do this in code to speed things up)
+/////////////////////////////////////////////////////////////////////////
+
+OUTER_SPRINT bearlist ~~
+COPY_EXISTING_REGEXP GLOB ~.*\.cre~ ~override~
+	PATCH_TRY
+		READ_LONG 0x28 anim
+		PATCH_IF (anim=0x7200 || anim=0x7201 || anim=0x7202 || anim=0x7203) &&  INDEX_BUFFER ("%tutu_var%c?bear")>=0 BEGIN
+			LPF ADD_CRE_EFFECT INT_VAR opcode=176 target=1 parameter1=8 parameter2=1 timing=1 END
+		END
+	WITH DEFAULT
+		LPF regexp_warning STR_VAR parent=fast_bears END
+	END
+BUT_ONLY
+
+/////////////////////////////////////////////////////////////////////////
+// shapeshift spells
+/////////////////////////////////////////////////////////////////////////
+// this creates problems with a persistent effect; we could sectype around it on non-EE but it's a pain so I'll wait to do it on request
+
+/*
+    ACTION_IF enhanced_edition BEGIN
+		spl.edit[%DRUID_SHAPESHIFT_BROWNBEAR% %DRUID_SHAPESHIFT_BLACKBEAR% %WIZARD_POLYMORPH_BROWN_BEAR% %WIZARD_POLYMORPH_BLACK_BEAR%]
+		[
+			m.ab_fx.add{s_opcode=126 s_target=1 s_parameter1=8 s_parameter2=1 s_duration=3600000}
+		]
+		spl.edit[%WIZARD_POLYMORPH_NATURAL_FORM%]
+		[
+			m.ab_fx.add{s_opcode=321 s_target=1 s_resource:=%WIZARD_POLYMORPH_BLACK_BEAR%}
+			m.ab_fx.add{s_opcode=321 s_target=1 s_resource:=%WIZARD_POLYMORPH_BROWN_BEAR%}
+		]
+		spl.edit[spin123]
+		[
+			m.ab_fx.add{s_opcode=321 s_target=1 s_resource:=%DRUID_SHAPESHIFT_BLACKBEAR%}
+			m.ab_fx.add{s_opcode=321 s_target=1 s_resource:=%DRUID_SHAPESHIFT_BROWNBEAR%}
+		]
+    END
+	
+	*/
+END
+

@@ -1,0 +1,264 @@
+
+////////////////////////////////////////////////////////////////
+////	Poison sequencer
+////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,15)
+	TriggerBlock(SpellTurn|MR100|Enemy|SINecromancy)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Action(SequencerManualUnabbreviated,3X_POISON,CLERIC_POISON,CLERIC_POISON,CLERIC_POISON|400|100)
+END
+
+////////////////////////////////////////////////////////////////////
+////	Touch attacks
+////
+///////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	RequireBlock(IsIWDDivine)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,10)
+	TriggerBlock(SpellTurn|MR|Enemy|ResistMagicDamage|SINecromancy)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Combine()
+	Action(SpellL7,CLERIC_WITHER|100|50)
+END
+
+IF TRIGGER
+	RequireBlock(God:myrkul|God:velsharoon)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,10)
+	TriggerBlock(SpellTurn|MR|Enemy|ResistMagicDamage|SINecromancy)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Combine()
+	Action(SpellRES,"%INNATE_CLERIC_WITHER%"|100|50)
+END
+
+IF TRIGGER
+	TargetBlock(PCsInOrderShort)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage)
+	!HPPercentLT(scstarget,10)
+	Global("shapeshift","LOCALS",0)
+	!HasItem("harm",Myself)
+	!HasItem("critical",Myself)
+	!HasItem("serious",Myself)
+	!HasItem("slaylive",Myself)
+THEN DO
+	Action(SpellMyself,CLERIC_HARM)
+END
+
+IF TRIGGER
+	IgnoreBlock(SlayLivingIWD)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|Slay|SINecromancy)
+	TriggerBlock(DirectDamageSafe)
+	!HasItem("harm",Myself)
+	!HasItem("critical",Myself)
+	!HasItem("serious",Myself)
+	!HasItem("slaylive",Myself)
+THEN DO
+	Combine()
+	Action(SpellMyself,CLERIC_SLAY_LIVING|100|50)
+END
+
+IF TRIGGER
+	RequireBlock(SlayLivingIWD)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,10)
+	TriggerBlock(SpellTurn|MR|Enemy|Slay|SINecromancy)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Combine()
+	Action(Spell,CLERIC_SLAY_LIVING|100|50)
+END
+
+IF TRIGGER
+    RequireBlock(God:talona)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,6)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy)
+   !Range(Nearest([ENEMY.HUMANOID]),15)
+   !Range(Nearest([ENEMY.GIANTHUMANOID]),15)
+THEN DO
+	Action(SpellRES,"%INNATE_CLERIC_MOLD_TOUCH%"|100|100)
+END
+
+IF TRIGGER
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,6)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy)
+	!Class(scstarget,PALADIN)
+   !Range(Nearest([ENEMY.HUMANOID]),15)
+   !Range(Nearest([ENEMY.GIANTHUMANOID]),15)
+THEN DO
+	Action(SpellRESBoolean,CLERIC_CONTAGION|100|100)
+END
+
+
+IF TRIGGER
+    RequireBlock(IsIWDDivine)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,6)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy)
+THEN DO
+	Action(Spell,CLERIC_CAUSE_DISEASE|100|50)
+END
+
+IF TRIGGER
+    RequireBlock(God:talona)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,6)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy)
+THEN DO
+	Action(SpellRES,"%INNATE_CLERIC_CAUSE_DISEASE%"|100|50)
+END
+
+////////////////////////////////////////////////////////////////
+////	Poison
+////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,15)
+	TriggerBlock(SpellTurn|MR100|Enemy|SINecromancy)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Action(Spell,CLERIC_POISON|100|50)
+END
+/////////////////////////////////////////////////////////////////////
+////Vampiric Touch
+/////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	TargetBlock(CloseEnemies)
+	Range(scstarget,5)
+	TriggerBlock(MinorGlobe|MirrorImage|MR|Enemy|NotUndead)
+THEN DO
+	Action(SpellRESBoolean,CLERIC_VAMPIRIC_TOUCH)
+END
+
+////////////////////////////////////////////////////////////////
+////	Poison
+////////////////////////////////////////////////////////////////
+
+
+
+IF TRIGGER
+    TriggerBlock(CorePlus)
+	RequireBlock(God:bhaal|God:cyric|God:talona)
+	TriggerBlock(ILackPoison)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+THEN DO
+	Action(Ability,ASSASSIN_POISON)
+END
+
+////////////////////////////////////////////////////////////////
+////	More touch
+////////////////////////////////////////////////////////////////
+
+
+IF TRIGGER
+	TargetBlock(PCsInOrderShort)
+	RequireBlock(Demivrgvs)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage)
+	!HasItem("harm",Myself)
+	!HasItem("critical",Myself)
+	!HasItem("serious",Myself)
+	!HasItem("slaylive",Myself)
+THEN DO
+        Combine()
+	Action(SpellMyself,CLERIC_CAUSE_SERIOUS_WOUNDS)
+	Action(SpellMyself,CLERIC_CAUSE_MEDIUM_WOUNDS)
+END
+
+IF TRIGGER
+	TargetBlock(PCsInOrderShort)
+	IgnoreBlock(Demivrgvs)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage)
+	!HasItem("harm",Myself)
+	!HasItem("critical",Myself)
+	!HasItem("serious",Myself)
+	!HasItem("slaylive",Myself)
+THEN DO
+        Combine()
+	Action(SpellMyself,CLERIC_CAUSE_CRITICAL_WOUNDS)
+	Action(SpellMyself,CLERIC_CAUSE_SERIOUS_WOUNDS)
+END
+
+IF TRIGGER
+	TargetBlock(PCsInOrderShort)
+	IgnoreBlock(Demivrgvs)
+	RequireBlock(IsIWDDivine)
+        RequireBlock(CauseWoundsIWD)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage|Helpless)
+THEN DO
+        Combine()
+	Action(Spell,CLERIC_CAUSE_CRITICAL_WOUNDS_IWD|100|50)
+	Action(Spell,CLERIC_CAUSE_SERIOUS_WOUNDS_IWD|100|50)
+	Action(Spell,CLERIC_CAUSE_MEDIUM_WOUNDS|100|50)
+END
+
+IF TRIGGER
+	TargetBlock(PCsInOrderShort)
+	IgnoreBlock(Demivrgvs)
+	RequireBlock(IsIWDDivine)
+        IgnoreBlock(CauseWoundsIWD)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage|Helpless)
+THEN DO
+        Combine()
+	Action(Spell,CLERIC_CAUSE_MEDIUM_WOUNDS|100|50)
+END
+
+IF TRIGGER
+   RequireBlock(God:kossuth)
+   TargetBlock(EnemiesInOrderShort)
+   Range(scstarget,7)
+   TriggerBlock(Enemy|Helpless|MinorGlobe)
+     !CheckStatGT(scstarget,59,RESISTFIRE)
+THEN DO
+	Action(SpellRES,"%INNATE_WIZARD_COMBUST%"|100|50)
+END
+
+
+IF TRIGGER
+   TargetBlock(EnemiesInOrderShort)
+   Range(scstarget,7)
+   TriggerBlock(Enemy|Helpless|MinorGlobe)
+     !CheckStatGT(scstarget,59,RESISTELECTRICITY)
+THEN DO
+	Action(SpellRESBoolean,CLERIC_SHOCKING_GRASP|100|50)
+END
+
+IF TRIGGER
+	RequireBlock(God:kossuth)
+     TargetBlock(EnemiesInOrderShort)
+     Range(scstarget,7)
+     !Range(NearestAllyOf(Myself),7)
+     TriggerBlock(Enemy|Helpless|MinorGlobe)
+     !CheckStatGT(scstarget,59,RESISTFIRE)
+THEN DO
+     Combine()
+     Action(SpellAreaRESBoolean,CLERIC_BURNING_HANDS|100|50)
+END
+
+

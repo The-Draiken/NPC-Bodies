@@ -1,0 +1,42 @@
+// script for PC-summoned melee creatures with two weapon slots
+
+INCLUDE FILE(%MOD_FOLDER%/lib/ssl/shared_definitions.ssl)
+
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/summon_initial.ssl)
+
+BEGIN_ACTION_DEFINITION
+	Name(AttackIfEmpty)
+	TRIGGER
+                Global("gh_AIOffSwitch","LOCALS",0)
+		ActionListEmpty()
+	ACTION
+		RESPONSE #60
+		SetGlobal("melee","LOCALS",1)
+		SelectWeaponAbility(SLOT_WEAPON,0)
+		AttackReevaluate(scstarget,15)
+	        RESPONSE #40
+		SetGlobal("melee","LOCALS",1)
+		SelectWeaponAbility(SLOT_WEAPON1,0)
+		AttackReevaluate(scstarget,15)
+END
+
+IF TRIGGER
+        Global("gh_AIOffSwitch","LOCALS",0)
+        IgnoreBlock(IsBG1Only)
+        Target(LastAttackerOf(Myself))
+	TargetBlock(EnemiesInOrder)
+	Allegiance(scstarget,EVILCUTOFF)
+	TriggerBlock(PlusUnknownSafe|MultipleDamageTypeSafe)
+THEN DO
+	Action(AttackIfEmpty)
+END
+
+IF TRIGGER
+        Global("gh_AIOffSwitch","LOCALS",0)
+        RequireBlock(IsBG1Only)
+        Target(LastAttackerOf(Myself))
+        Target(NearestEnemyOf(Myself))
+	Allegiance(scstarget,EVILCUTOFF)
+THEN DO
+	Action(AttackIfEmpty)
+END

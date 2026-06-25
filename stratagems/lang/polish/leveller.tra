@@ -1,0 +1,71 @@
+@1 = "Ta postać stała się dwuklasowcem; jej nowa klasa to MAG."
+@2 = "Ta postać stała się dwuklasowcem; jej nowa klasa to KAPŁAN."
+@3 = "Ta postać stała się dwuklasowcem; jej nowa klasa to WOJOWNIK."
+@4 = "Ta postać stała się dwuklasowcem; jej nowa klasa to ZŁODZIEJ."
+@5 = "Ta postać stała się dwuklasowcem; jej nowa klasa to ŁOWCA."
+@6 = "Ta postać stała się dwuklasowcem; jej nowa klasa to DRUID."
+@7 = ~Awansuj na wyższy poziom w starej klasie do chwili, aż nie będzie to już możliwe, następnie natychmiast wybierz dwuklasowość i awansuj na wyższy poziom w nowej klasie.~
+@8 = ~+5% do Krycia się w cieniu~
+@9 = ~+5% do Wykrywania iluzji~
+@10 = ~+5% do Zastawiania pułapek~
+@11 = ~+5% do Cichego chodzenia~
+@12 = ~+5% do Otwierania zamków~
+@13 = ~+5% do Znajdowania pułapek~
+@14 = ~+5% do Kradzieży kieszonkowej~ 
+@15 = ~Przydziel umiejętności złodziejskie~
+@16 = ~Ta postać posiada niewykorzystane punkty umiejętności złodziejskich, które mogą być rozdysponowane przy użyciu zdolności specjalnych.~
+@17 = ~Mikstura doświadczenia~
+@18 = ~Ta fiolka zawiera skroploną wiedzę zbieraną przez wieki. Każdy, kto ją wypije, zdobędzie wystarczająco doświadczenia, aby awansować na kolejny poziom.
+
+Postacie wieloklasowe otrzymują wystarczająco doświadczenia do zdobycia następnego poziomu w jednej z klas, według poniższej kolejności:
+Złodziej > Wojownik=Łowca > Kapłan=Druid > Mag.
+
+PARAMETRY:
+
+Waga: 1~
+@19 = ~Dostępne są następujące podklasy:~
+@20 = ~Klasa podstawowa (tj. bez podklasy)~
+@21 = ~Możesz wybrać klasę i podklasę dla tej postaci.
+
+Wymagania dotyczące charakteru i cech postaci nie są weryfikowane ani wymuszane. Liczymy na twój honor! Ograniczenia rasowe/klasowe są aktywne, ale można je wyłączyć, jeśli chcesz.
+
+UWAGA: jeżeli grasz z wyłączoną SI drużyny, włącz ją na czas awansowania swojej postaci, jeśli zamierzasz zmienić jej klasę.~
+@22 = ~Zakończ bez dokonywania dalszych zmian.~
+@23 = ~Możesz ponownie użyć tej zdolności. Możesz to robić, dopóki nie awansujesz postaci na pierwszy poziom.~
+@24 = ~Wybierz klasę.~
+@25 = ~Wybierz podklasę.~
+@26 = ~Klasa została ustawiona.~
+@27 = ~Podklasa została ustawiona.~
+@28 = ~Dostępne są następujące klasy:~
+@29 = ~Dostosuj klasę/podklasę~
+@30 = ~Ta postać jest dwuklasowcem. Możesz zmienić jej starą podklasę, ale nie możesz zmienić starej ani nowej klasy (chyba że porzucisz starą klasę całkowicie).~
+@31 = ~Porzuć pierwszą klasę (postać przestanie być dwuklasowcem).~
+@32 = ~Czy na pewno chcesz kontynuować? Tej czynności nie można cofnąć.~
+@33 = ~Tak, porzuć pierwszą klasę.~
+@34 = ~Nie, pozostaw dwuklasowość.~
+@36 = ~Przydziel umiejętności złodziejskie
+
+Ta jednorazowa zdolność pozwala na przydzielenie dodatkowych 5 punktów umiejętności złodziejskich.~
+@37 = ~Dostosuj klasę/podklasę
+
+Skorzystanie z tej zdolności pozwala na dostosowanie klasy i podklasy postaci. Należy pamiętać, że gra może mieć różne założenia odnośnie do postaci i ewentualne zmiany mogą być z nimi sprzeczne. Ponadto postać może utracić możliwość korzystania z niektórych przedmiotów po skorzystaniu z tej zdolności.
+
+Ta zdolność może być użyta tylko przed awansowaniem postaci na wyższy poziom.~
+@38 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Krycia się w cieniu o 5%.~
+@39 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Wykrywania iluzji o 5%.~
+@40 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Zastawiania pułapek o 5%.~
+@41 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Cichego chodzenia o 5%.~
+@42 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Otwierania zamków o 5%.~
+@43 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Znajdowania pułapek o 5%.~
+@44 = ~Ta jednorazowa zdolność na stałe zwiększa umiejętność Kradzieży kieszonkowej o 5%.~
+@45 = ~Aby aktywować zaklęcia dzikiej magii, zapisz i wczytaj ponownie grę.~
+@46 = ~Właściwie to nie wprowadzaj na razie żadnych zmian.~
+@47 = ~Znieś ograniczenia rasowe/klasowe i pozwól na wybór niedozwolonych klas.~
+@48 = ~Przywróć ograniczenia rasowe/klasowe i zabroń wyboru niedozwolonych klas.~
+@49 = ~Możesz wybrać klasę i podklasę dla tej postaci.
+
+Wymagania dotyczące charakteru i cech postaci nie są weryfikowane ani wymuszane. Liczymy na twój honor! Ograniczenia rasowe/klasowe nie są aktywne, ale można je włączyć, jeśli chcesz.
+
+UWAGA: jeżeli grasz z wyłączoną SI drużyny, włącz ją na czas awansowania swojej postaci, jeśli zamierzasz zmienić jej klasę.~
+@50 = ~Ograniczenia rasowe/klasowe zostały zniesione. Nie pozwól nikomu przeszkodzić w spełnianiu twoich marzeń!~
+@51 = ~Ograniczenia rasowe/klasowe przywrócone. Witaj z powrotem w AD&D, brakowało nam ciebie.~

@@ -1,0 +1,71 @@
+IF
+	RandomNum(9,1)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich1",[-1.-1],0)
+		DestroySelf()
+END
+
+IF
+	RandomNum(9,2)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich2",[-1.-1],0)
+		DestroySelf()
+END
+
+IF
+	RandomNum(9,3)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich3",[-1.-1],0)
+		DestroySelf()
+END
+
+IF
+	RandomNum(9,4)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich4",[-1.-1],0)
+		DestroySelf()
+END		
+
+IF
+	RandomNum(9,5)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich5",[-1.-1],0)
+		DestroySelf()
+END
+
+IF
+	RandomNum(9,6)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich6",[-1.-1],0)
+		DestroySelf()
+END
+
+IF
+	RandomNum(9,7)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich7",[-1.-1],0)
+		DestroySelf()
+END		
+
+IF
+	RandomNum(9,8)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich8",[-1.-1],0)
+		DestroySelf()
+END
+
+IF
+	RandomNum(9,9)
+THEN
+	RESPONSE #100
+		CreateCreature("dw#lich9",[-1.-1],0)
+		DestroySelf()
+END

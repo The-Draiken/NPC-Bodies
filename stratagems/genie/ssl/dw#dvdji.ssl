@@ -1,0 +1,2 @@
+VARIABLE(IsSummoned=True)
+INCLUDE FILE(%MOD_FOLDER%/genie/ssl/djinni01.ssl)

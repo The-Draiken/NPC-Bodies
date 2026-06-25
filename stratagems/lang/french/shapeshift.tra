@@ -1,0 +1,229 @@
+
+@13120 = ~Symbole du loup-garou mineur~
+@13121 = ~Symbole du loup-garou~
+@13122 = ~Symbole du loup-garou majeur~
+@13123 = ~Symbole de métamorphose en ours~
+@13124 = ~Symbole de métamorphose en loup~
+@13125 = ~Symbole de métamorphose en wiverne~
+@13126 = ~Symbole de métamorphose en salamandre~
+@13127 = ~Symbole de métamorphose en araignée~
+@13128 = ~Symbole de l'élémentaire de feu~
+@13129 = ~Symbole de l'élémentaire de terre~
+@13140 = ~Ce symbole permet au druide métamorphe qui l'a créé de se métamorphoser à volonté en un loup-garou mineur. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts, mais il gagne la force et la vitesse prodigieuses du loup-garou. Cependant, contrairement à un vrai loup-garou, le druide est toujours affecté par les armes non-magiques.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 18/76
+Dextérité : 16
+
+Classe d'armure de base : 4
+Attaques par round : 1
+Dégâts : 1d6 (tranchant)
+
+Capacités spéciales :
+- Résistance à la magie : 10 %
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13141 = ~Ce symbole permet au druide métamorphe qui l'a créé de se métamorphoser à volonté en loup-garou. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts, mais il gagne la force et la vitesse prodigieuses du loup-garou. Cependant, contrairement à un vrai loup-garou, le druide est toujours affecté par les armes non-magiques.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 19
+Dextérité : 17
+
+Classe d'armure de base : 1
+Attaques par round : 2
+Dégâts : 1d8 (tranchant), frappe comme une arme d'enchantement +1
+
+Capacités spéciales :
+- Résistance à la magie : 20 %
+- Sous l'effet d'un sort de Hâte
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13142 = ~Ce symbole permet au druide métamorphe qui l'a créé de se métamorphoser à volonté en loup-garou majeur. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts, mais il gagne la force et la vitesse prodigieuses du loup-garou. Cependant, contrairement à un vrai loup-garou, le druide est toujours affecté par les armes non-magiques.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 21
+Dextérité : 20
+
+Classe d'armure de base : -4
+Attaques par round : 2
+Dégâts : 2d6 (tranchant), frappe comme une arme d'enchantement +3
+
+Capacités spéciales :
+- Résistance à la magie : 40 %
+- Résistance au feu : 50 %
+- Résistance à l'électricité : 50 %
+- Résistance à l'acide : 50 %
+- Résistance au froid : 50 %
+- Sous l'effet d'un sort de Hâte
+- Régénère 6 points de vie par round
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13143 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en ours brun. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 18/00
+Dextérité : 12
+
+Classe d'armure de base : 7
+Attaques par round : 2
+Dégâts : 1d6 (tranchant)
+
+Capacités spéciales :
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13144 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en loup. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 17
+Dextérité : 18
+
+Classe d'armure de base : 6
+Attaques par round : 2
+Dégâts : 1d8 (perforant)
+
+Capacités spéciales :
+- Vitesse de déplacement augmentée
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13145 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en wiverne. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 18/76
+Dextérité : 17
+
+Classe d'armure de base : 3
+Attaques par round : 2
+Dégâts : 2d4 (perforant), + 25% de chance d'infliger 3 points de dégâts supplémentaires (poison), frappe comme une arme d'enchantement +2
+
+Capacités spéciales :
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13146 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en salamandre de feu. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 18/76
+Dextérité : 19
+
+Classe d'armure de base : 2
+Attaques par round : 1
+Dégâts : 1d8 (perforant), frappe comme une arme d'enchantement +2
+
+Capacités spéciales :
+- Résistance au feu : 100 %
+- Sous l'effet d'un sort de Hâte
+- Sous l'effet d'un sort de Bouclier de feu
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13147 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en araignée géante. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 16
+Dextérité : 16
+
+Classe d'armure de base : 2
+Attaques par round : 3
+Dégâts : 1d4 (perforant), +2 par round pendant 6 rounds (poison, jet de sauvegarde contre les poisons pour annuler), frappe comme une arme d'enchantement +2
+
+Capacités spéciales :
+- Sous l'effet d'un sort de Hâte
+- Immunité au sort Toile d'araignée
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13148 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en élémentaire de feu. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 22
+Dextérité : 25
+
+Classe d'armure de base : -5
+Attaques par round : 2
+Dégâts : 1d10 (contondant), +1d10 (feu), frappe comme une arme d'enchantement +4
+
+Capacités spéciales :
+- Vitesse de déplacement augmentée
+- Résistance au feu : 100 %
+- Résistance au feu magique : 100 %
+- Sous l'effet d'un sort de Bouclier de feu
+- Immunité contre tout effet qui modifie la Force ou la Dextérité
+
+Utilisable par :
+ Créateur~
+@13149 = ~Ce symbole permet au druide qui l'a créé de se métamorphoser à volonté en élémentaire de terre. Lorsqu'il est sous cette forme, le druide est incapable de parler ou de lancer des sorts.
+
+PARAMÈTRES :
+
+Sous métamorphose (équipez-le comme une arme pour l'utiliser) :
+
+Force : 25
+Dextérité : 10
+
+Classe d'armure de base : -5
+Attaques par round : 2
+Dégâts : 2d10 (contondant), frappe comme une arme d'enchantement +4
+
+Capacités spéciales :
+- Vitesse de déplacement diminuée
+- Résistance aux dégâts tranchants : 50 %
+- Résistance aux dégâts contondants : 50 %
+- Résistance aux dégâts perforants : 50 %
+- Résistance aux dégâts de projectiles : 50 %
+- Immunité contre tout effet qui modifie la Force, la Dextérité ou la résistance aux dégâts physiques
+
+Utilisable par :
+ Créateur~
+@13150 = ~Transformation en élémentaire de feu
+
+En déchaînant les pouvoirs du feu, le druide se transforme en un élémentaire de feu (24 dés de vie) d'une force colossale.
+
+Il obtient une classe d'armure de -5, un TAC0 de 2 et inflige 1d10 points de dégâts contondants et 1d10 points de dégâts de feu à chaque attaque. La forme élémentaire possède une Force de 22, une Dextérité de 25, a une résistance de 100 % au feu et inflige des dégâts de feu à tous ceux qui le touchent.~
+
+@13151 = ~Transformation en élémentaire de terre
+
+En déchaînant les pouvoirs de la terre, le druide se transforme en un élémentaire de terre (24 dés de vie) d'une force colossale.
+
+Il obtient une classe d'armure de -5, un TAC0 de 2 et inflige 2d10 points de dégâts contondants à chaque attaque. La forme élémentaire possède une Force de 25, une Dextérité de 10 et a une résistance de 50 % aux dégâts physiques.~
+
+@13152 = ~Résistance d'acier n'a pas d'effet lorsque vous êtes en forme d'élémentaire de terre~

@@ -1,0 +1,91 @@
+///////////////////////////////////////////////////////////////
+/////	Start by going invisible. Strategy 1: find a good target
+/////	even if they're a little way away. Strategy 2: backstab a near
+/////	target right away, before they have a chance to react.
+/////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        RequireBlock(IsThief|IsAssassin|IsStalker)
+	TriggerBlock(CorePlus)
+	IgnoreBlock(Demivrgvs)
+	!StateCheck(Myself,STATE_INVISIBLE)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(TruesightSafe)
+THEN DO
+	Action(Potion,"dw#ptn10",@101010|200|100)
+	Action(Potion,"%tutu_var%potn10",@101010|200|100)
+	Action(ScrollMyself,"scrl90") // invisibility
+	Wait(1)
+	SetGlobal("backstabplan","LOCALS",1)
+	SetGlobalTimer("backstabtimer","LOCALS",6)
+END
+
+IF TRIGGER
+        RequireBlock(IsThief|IsAssassin|IsStalker)
+	TriggerBlock(CorePlus)
+	RequireBlock(Demivrgvs)
+	!Global("dvgldust","LOCALS",1)
+	!StateCheck(Myself,STATE_INVISIBLE)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(TruesightSafe)
+THEN DO
+	Action(Potion,"dw#ptn10",@101010|200|100)
+	Action(Potion,"%tutu_var%potn10",@101010|200|100)
+	Action(ScrollMyself,"scrl90") // invisibility
+	Wait(1)
+	SetGlobal("backstabplan","LOCALS",1)
+	SetGlobalTimer("backstabtimer","LOCALS",6)
+END 
+
+IF TRIGGER
+        RequireBlock(IsThief|IsAssassin|IsStalker)
+	TriggerBlock(CorePlus)
+	IgnoreBlock(Demivrgvs)
+	!StateCheck(Myself,STATE_INVISIBLE)
+	See(NearestEnemyOf(Myself))
+THEN DO
+	Action(Potion,"dw#ptn10",@101010)
+	Action(Potion,"%tutu_var%potn10",@101010)
+	Action(ScrollMyself,"scrl90") // invisibility
+	SetGlobal("backstabplan","LOCALS",2)
+END
+
+IF TRIGGER
+        RequireBlock(IsThief|IsAssassin|IsStalker)
+	TriggerBlock(CorePlus)
+	RequireBlock(Demivrgvs)
+	!Global("dvgldust","LOCALS",1)
+	!StateCheck(Myself,STATE_INVISIBLE)
+	See(NearestEnemyOf(Myself))
+THEN DO
+	Action(Potion,"dw#ptn10",@101010)
+	Action(Potion,"%tutu_var%potn10",@101010)
+	Action(ScrollMyself,"scrl90") // invisibility
+	SetGlobal("backstabplan","LOCALS",2)
+END
+
+IF TRIGGER
+        RequireBlock(IsThief|IsAssassin|IsStalker)
+	TriggerBlock(CorePlus)
+	GlobalGT("backstabplan","LOCALS",0)
+	!HasItem("dw#ptn10",Myself)
+	!HasItem("%tutu_var%potn10",Myself)
+	!StateCheck(Myself,STATE_INVISIBLE)
+THEN DO
+                Action(Literal)
+		SetGlobal("backstabplan","LOCALS",0)
+END
+
+IF TRIGGER
+        RequireBlock(IsThief|IsAssassin|IsStalker)
+	TriggerBlock(CorePlus)
+	See(NearestEnemyOf(Myself))
+	Global("backstabplan","LOCALS",0)
+	StateCheck(Myself,STATE_INVISIBLE)
+THEN DO
+                Action(Literal)
+		SetGlobal("backstabplan","LOCALS",1)
+		SetGlobalTimer("backstabtimer","LOCALS",6)
+END
+
+

@@ -1,0 +1,81 @@
+
+@214 = ~, otrzymuje Niewidzialność~
+@215 = ~Niewidzialność~
+
+@4100 = ~Święty Mściciel: „Karsomir”
+
+Karsomir jest legendarną bronią, być może jedną z najpotężniejszych, jakie kiedykolwiek powstały w Faerunie, choć jego historia i pochodzenie zostały celowo zapomniane, by miecz nigdy nie przyćmił teraźniejszych zmagań. Jest wypełniony czystą esencją cnoty, i tyleż jej wymaga od władającego nim paladyna. Gdy pojawia się ta broń, zło Faerunu musi ustąpić, jego magia rozwiewana za pomocą jednego słowa i odpierana z łatwością. Karsomir pała wielka nienawiścią do sił zła i chaosu, więc takie istoty muszą obawiać się dodatkowych obrażeń, gdy zostaną przez niego trafione w walce.
+
+PARAMETRY:
+
+Specjalne:
+– Odporność na magię: 50%
+– Rozproszenie magii, poziomu 30., po trafieniu (rzut obronny przeciw czarom neguje)
+
+Właściwości ładunków:
+– Rozproszenie magii, poziomu 15., trzy razy dziennie
+Zasięg: 13 metrów
+Obszar działania: w promieniu 5 metrów
+
+Obrażenia: 1k12 +5, +5 obrażeń przeciw chaotycznym złym
+TraK0: +5
+Typ obrażeń: sieczne
+Opóźnienie: 5
+Rodzaj biegłości: miecz oburęczny
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 14
+
+Waga: 7
+
+Może używać:
+ Paladyn~
+
+@4101 = ~Święty Mściciel: „Karsomir”
+
+Karsomir jest legendarną bronią, być może jedną z najpotężniejszych, jakie kiedykolwiek powstały w Faerunie, choć jego historia i pochodzenie zostały celowo zapomniane, by miecz nigdy nie przyćmił teraźniejszych zmagań. Jest wypełniony czystą esencją cnoty, i tyleż jej wymaga od władającego nim paladyna. Gdy pojawia się ta broń, zło Faerunu musi ustąpić, jego magia rozwiewana za pomocą jednego słowa i odpierana z łatwością. Karsomir pała wielka nienawiścią do sił zła i chaosu, więc takie istoty muszą obawiać się dodatkowych obrażeń, gdy zostaną przez niego trafione w walce.
+
+Nawet święty relikt tak potężny, jak Karsomir, nabywa jeszcze większej mocy, jeśli połączy się go z Okiem Tyra.
+
+PARAMETRY:
+
+Specjalne:
+– Odporność na magię: 50%
+– Rozproszenie magii, poziomu 30., po trafieniu (rzut obronny przeciw czarom z modyfikatorem -2 neguje)
+
+Właściwości ładunków:
+– Rozproszenie magii, poziomu 15., trzy razy dziennie
+Zasięg: 13 metrów
+Obszar działania: w promieniu 5 metrów
+
+Obrażenia: 1k12 +6, +6 obrażeń przeciw chaotycznym złym
+TraK0: +6
+Typ obrażeń: sieczne
+Opóźnienie: 4
+Rodzaj biegłości: miecz oburęczny
+Typ broni: 2-ręczna
+
+Wymagania:
+– Siła: 14
+
+Waga: 6
+
+Może używać:
+ Paladyn~
+
+@5100 = ~Berło zmartwychwstania
+
+Berło to umożliwia kapłanowi przywrócenie martwej osoby do życia, tak jakby posiadał on poziom wymagany do rzucenia zaklęcia o takim działaniu. Nie wymaga żadnego odpoczynku, ponieważ to berło obdarza życiem. Każde użycie wymaga jednego ładunku.
+
+PARAMETRY:
+
+Właściwości ładunków:
+– Wskrzeszenie
+Zasięg: nieograniczony
+Obszar działania: 1 istota
+– Uzdrownienie
+Zasięg: nieograniczony
+Obszar działania: 1 istota
+
+Waga: 3~

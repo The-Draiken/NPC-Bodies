@@ -1,0 +1,214 @@
+DEFINE_ACTION_FUNCTION genie STR_VAR version="" BEGIN
+
+       LAF define_difficulty STR_VAR type=genie RET difficulty_variable END
+
+         LAF genie_scripts END
+         LAF genie_resources END
+         LAF make_efreeti END
+         LAF make_djinni END
+         LAF make_dao END
+         LAF genie_compatibility END
+
+END
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+////   compile scripts
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DEFINE_ACTION_FUNCTION genie_scripts BEGIN
+
+   // efreeti
+
+   LAF ssl_to_bcs STR_VAR script="efreet01" location=ssl END
+   LAF clone_script STR_VAR script=~efreet01=>efreet04~ END
+   LAF ssl_to_bcs STR_VAR script="efreet01=>ddguard" location=ssl variables=~NoCloud=True~ END
+   LAF clone_script STR_VAR script=~ddguard=>dw#efree~ END
+
+
+   // djinni
+   
+   LAF ssl_to_bcs STR_VAR script=~djinni01 sumdj01~ location=ssl END
+   LAF clone_script STR_VAR script=~djinni01=>djinni04~ END
+   LAF ssl_to_bcs STR_VAR script="djinni01=>ppdjinn2" location=ssl variables=~NoCloud=True~ END
+
+   // dao
+   
+   LAF ssl_to_bcs STR_VAR script=dao01 location=ssl END
+
+END
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+////   assemble needed resources
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DEFINE_ACTION_FUNCTION genie_resources BEGIN
+
+    ////////////////
+    // difficulty
+    ////////////////
+    
+    LAF innate_casting_effects END
+    LAF check_ini STR_VAR ini=genie_staying_power RET mult=value END
+    LAF hitpoint_boost_effects INT_VAR mult STR_VAR spell=dw#gnihp END
+
+	////	Copy over Demi's gas-form stuff and the djinni innate ring
+
+        LAF install STR_VAR files=~dvgasfrm.spl dvgasfrm.itm dw#djinn.itm~ location=resource END
+
+        // the Wave Halberd targets Efreeti by class, which is broken by them becoming FMCs in non-EE instlals.
+        // We retarget by Race=Genie, Align=LE, which is extensionally equivalent
+        
+        ACTION_IF !enhanced_edition BEGIN
+         MAKE_PATCH
+           type=>effect
+           match=>"opcode=55 and parameter1=195 and parameter2=5"
+           parameter1=>147
+           parameter2=>4
+         END
+         LAF edit_item STR_VAR item=halb09 editstring=~patch_effect=>patch_data~ END
+        END
+
+END
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+////   efreeti CRE files
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION make_efreeti BEGIN
+
+        // generics
+
+        MAKE_PATCH
+            class=>"if enhanced_edition then no_change else FIGHTER_MAGE"
+            gender=>MALE
+            levelGT=>12
+            level2GT=>12
+            remove_spells=>all
+            add_spells=>~FLAME_STRIKE FIREBALL(2) FLAME_ARROW(2) INVISIBILITY(3) MAGIC_MISSILE(3)~
+            strip_scs_scripts=>null
+            strip_script=>bdsum00
+        END
+        LAF edit_creature STR_VAR creature=~efreetsu sumefree ddguard1 ddguard2 ddguard3 ddguard4 ddguard5 ddguard6 genefr01~  edits=patch_data END
+
+	/// nobles
+
+        MAKE_PATCH
+            class=>"if enhanced_edition then no_change else FIGHTER_MAGE"
+            gender=>MALE
+            levelGT=>14
+            level2GT=>14
+            remove_spells=>all
+            add_spells=>~FIRE_STORM
+                         FLAME_STRIKE(2)
+                         SHADOW_DOOR(2)
+                         FIREBALL(3) 
+                         FLAME_ARROW(3) 
+                         INVISIBILITY(3) 
+                         MAGIC_MISSILE(5)~
+            strip_scs_scripts=>null
+        END
+        LAF edit_creature STR_VAR creature=~genefn01 obsfir01~  edits=patch_data  END
+
+	// on non-EE installs, the efreeti summoned by the efreeti bottle needs a script (it only gets WTASIGHT)
+
+        LAF edit_creature STR_VAR creature=sumefree editstring=~strip_script=>efreet01 insert_script_low=>efreet01~ END
+
+END
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+////  djinni CRE files
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION make_djinni BEGIN
+
+
+	// general
+
+        MAKE_PATCH
+            class=>"if enhanced_edition then no_change else FIGHTER_MAGE"
+            gender=>MALE
+            levelGT=>11
+            level2GT=>11
+            remove_spells=>all
+            add_spells=>~PROTECTION_FROM_MAGIC_WEAPONS
+                         GLOBE_OF_INVULNERABILITY
+                         SHADOW_DOOR
+                         WIZARD_LIGHTNING_BOLT
+                         STINKING_CLOUD(2)
+                         MAGIC_MISSILE(4)~
+            strip_scs_scripts=>null
+            add_items=>dw#djinn
+        END
+        LAF edit_creature STR_VAR creature=~gendji01 sumdjinn djinnisu~  edits=patch_data  END
+
+        // noble
+
+        MAKE_PATCH
+            class=>"if enhanced_edition then no_change else FIGHTER_MAGE"
+            gender=>MALE
+            levelGT=>13
+            level2GT=>13
+            remove_spells=>all
+            add_spells=>~PROTECTION_FROM_MAGIC_WEAPONS(2)
+                         GLOBE_OF_INVULNERABILITY(2)
+                         CLOUDKILL
+                         SHADOW_DOOR(2)
+                         WIZARD_LIGHTNING_BOLT(3)
+                         STINKING_CLOUD(3)
+                         INVISIBILITY(3)
+                         MAGIC_MISSILE(4)~
+            strip_scs_scripts=>null
+            add_items=>dw#djinn
+        END
+        LAF edit_creature STR_VAR creature=~gendjn01 ppdjinn2~  edits=patch_data END
+
+	// Install and customise
+
+        LAF edit_creature STR_VAR creature=ppdjinn2 editstring=~insert_script=>"djinni01 below gensht01~ END
+
+
+
+
+END
+
+////////////////////////
+///// Dao
+/////////////////////////
+
+DEFINE_ACTION_FUNCTION make_dao BEGIN
+
+        MAKE_PATCH
+            class=>"if enhanced_edition then no_change else FIGHTER_MAGE"
+            gender=>MALE
+            levelGT=>12
+            level2GT=>12
+            remove_spells=>all
+            add_spells=>~IMPROVED_HASTE FLESH_TO_STONE STONE_SKIN(2) INVISIBILITY(3)~
+            strip_scs_scripts=>null
+        END
+        LAF edit_creature INT_VAR allow_missing=1 STR_VAR creature=~trgeni01 trgeni02 trgeni03 ohhdjinn ohnwish~ edits=patch_data END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+///   third-party compatibility
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DEFINE_ACTION_FUNCTION genie_compatibility BEGIN
+
+   ACTION_IF FILE_EXISTS_IN_GAME ~d0sumefr.bcs~ BEGIN
+      LAF clone_script STR_VAR script=~efreet01=>d0sumefr~ END
+   END
+
+	// Allow for Spell Revisions [note 10-9-12: we have a dw#dvdji but don't currently use it]
+
+   ACTION_IF FILE_EXISTS_IN_GAME ~dvimhere.mrk~ THEN BEGIN
+         LAF ssl_to_bcs STR_VAR script=~dvefreet~ location=~ssl~ END
+   END
+
+END
+

@@ -1,0 +1,28 @@
+
+@501 = ~Czarodziej sługa~
+@502 = ~Wojownik sługa~
+@503 = ~Chodźcie moi słudzy... zbudźcie się i zakosztujcie świeżej krwi.~
+@700 = ~Katana drowów +3~
+@701 = ~Katana to lekko zakrzywiony miecz o jednym ostrzu. Są to prawdopodobnie najostrzejsze miecze, jakie kiedykolwiek wykuto, proces ich tworzenia jest długi, trzymany w tajemnicy i jest prawdziwą sztuką. To ostrze jest chyba najważniejszą częścią kultury Kara-Tur i wykonywane jest jedynie przez tamtejszych mistrzów rzemiosła. W jaki sposób drowy odkryły sposób tworzenia tej broni, nie wiadomo.
+
+Ten przedmiot, podobnie jak większość ekwipunku drowów, stworzony został za pomocą adamantyny, stopu adamantytu, który szybko zmienia się w pył, kiedy zostanie wystawiony na promienie słońca.
+
+PARAMETRY:
+
+Obrażenia: 1k10 +3
+TraK0: +3
+Typ obrażeń: sieczne
+Opóźnienie: 1
+Rodzaj biegłości: katana
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 6
+
+Waga: 6
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag
+ Władca zwierząt~

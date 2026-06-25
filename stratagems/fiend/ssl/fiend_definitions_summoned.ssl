@@ -1,0 +1,159 @@
+INCLUDE FILE(%MOD_FOLDER%/lib/ssl/shared_definitions.ssl)
+BEGIN_ACTION_DEFINITION
+	Name(Attack)
+	TRIGGER
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobal("validtarget","LOCALS",1)
+		EquipMostDamagingMelee()
+		AttackOneRound(scstarget)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(AttackIfEmpty)
+	TRIGGER
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobal("validtarget","LOCALS",1)
+		EquipMostDamagingMelee()
+		AttackOneRound(scstarget)
+END
+
+
+BEGIN_ACTION_DEFINITION
+	Name(AttackRanged)
+	TRIGGER
+	ACTION
+		RESPONSE #scsprob1
+		EquipRanged()
+		AttackOneRound(scstarget)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(AttackRangedIfEmpty)
+	TRIGGER
+	ACTION
+		RESPONSE #scsprob1
+		EquipRanged()
+		AttackOneRound(scstarget)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(Spell)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+		!CheckSpellState(scstarget,DO_NOT_TARGET_SPELLS)
+		HaveSpell(scsargument1)
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		Spell(scstarget,scsargument1)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(SpellNoDec)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+		!CheckSpellState(scstarget,DO_NOT_TARGET_SPELLS)
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		SpellNoDec(scstarget,scsargument1)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(SpellNoDecRES)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+		!CheckSpellState(scstarget,DO_NOT_TARGET_SPELLS)
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		SpellNoDecRES(scsargument1,scstarget)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(SpellNoDecRESMyself)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		SpellNoDecRES(scsargument1,Myself)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(ForceSpell)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+		!CheckSpellState(scstarget,DO_NOT_TARGET_SPELLS)
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		ForceSpell(scstarget,scsargument1)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(ForceSpellRES)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+		!CheckSpellState(scstarget,DO_NOT_TARGET_SPELLS)
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		ForceSpellRES(scsargument1,scstarget)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(SpellNoDecMyself)
+	TRIGGER
+		!GlobalTimerNotExpired("castspell","LOCALS")
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobalTimer("castspell","LOCALS",6)
+		SpellNoDec(Myself,scsargument1)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(MoronAttack)
+	TRIGGER
+		False()
+	ACTION
+		RESPONSE #100
+		NoAction()
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(MoveIfEmpty)
+	TRIGGER
+		ActionListEmpty()
+	ACTION
+		RESPONSE #scsprob1
+		MoveToObject(scstarget)
+END
+
+IF
+	HotKey(E)
+	Global("ai_inactive","LOCALS",1)
+	Allegiance(Myself,GOODCUTOFF)
+THEN
+	RESPONSE #100
+		DisplayStringHead(Myself,@100403)
+		SetGlobal("ai_inactive","LOCALS",0)
+END
+
+IF
+	HotKey(E)
+	Global("ai_inactive","LOCALS",0)
+	Allegiance(Myself,GOODCUTOFF)
+THEN
+	RESPONSE #100
+		DisplayStringHead(Myself,@100402)
+		SetGlobal("ai_inactive","LOCALS",1)
+END
+
+
+DEFAULT TRIGGER(OR(2)ActionListEmpty()!Allegiance(Myself,GOODCUTOFF)OR(2)Global("ai_inactive","LOCALS",0)!Allegiance(Myself,GOODCUTOFF))
+
+VARIABLE(IsNotThief=True)
+VARIABLE(DoesNotRest=True)

@@ -1,0 +1,271 @@
+////////////////////////////// based on race //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_race_preparatory
+    STR_VAR race=""
+            spells=""
+    RET spells
+BEGIN
+    TO_LOWER race
+    // immunity to non-magical weapons
+    PATCH_MATCH ~%race%~ WITH
+      vampire lich rakshasa demilich demonic immune_generic BEGIN
+         LPF substitute_spells STR_VAR spells swap_out=~IMPROVED_MANTLE MANTLE ABSOLUTE_IMMUNITY~ swap_in=PROTECTION_FROM_MAGIC_WEAPONS RET spells END
+         LPF substitute_spells STR_VAR spells swap_out=~PROTECTION_FROM_NORMAL_MISSILES~ swap_in="" RET spells END
+      END
+      DEFAULT END
+    // immunity to cold and electricity
+    PATCH_MATCH ~%race%~ WITH
+      vampire lich demilich BEGIN
+         LPF substitute_spells STR_VAR spells swap_out=PROTECTION_FROM_COLD swap_in=PROTECTION_FROM_FIRE RET spells=spells END
+         LPF substitute_spells STR_VAR spells swap_out=PROTECTION_FROM_ELECTRICITY swap_in=PROTECTION_FROM_ACID RET spells=spells END
+      END
+      DEFAULT END
+    // immunity to low-level spells
+    PATCH_MATCH ~%race%~ WITH
+       lich rakshasa demilich BEGIN
+         LPF substitute_spells STR_VAR spells swap_out=~GLOBE_OF_INVULNERABILITY MINOR_GLOBE_OF_INVULNERABILITY~ swap_in="" RET spells END
+       END
+       DEFAULT END
+    // immunity to silence
+    PATCH_MATCH ~%race%~ WITH
+       rakshasa BEGIN
+                  LPF substitute_spells STR_VAR spells swap_out=~VOCALIZE~ swap_in="" RET spells END
+           
+       END
+       DEFAULT END
+    // see invisible
+    PATCH_MATCH "%race%" WITH
+       lich demonic BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=~DETECT_INVISIBILITY~ swap_in="" RET spells END
+       END
+       DEFAULT END
+END
+
+////////////////////////////// based on specific creature type //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_specific_preparatory
+     STR_VAR filename=""
+             spells=""
+     RET spells
+BEGIN
+     TO_LOWER filename
+     PATCH_MATCH "%filename%" WITH
+          firlch01 BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="PROTECTION_FROM_FIRE" swap_in="PROTECTION_FROM_COLD" RET spells END
+          END
+          gorlic01 BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="PROTECTION_FROM_FIRE" swap_in="PROTECTION_FROM_ACID" RET spells END          
+          END
+          hellslay BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="TRG_O TRG_D2 TRG_AM" swap_in="TRG_D1" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="SEQ_O SEQ_D1 SEQ_D2" swap_in="SEQ_DSP" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="CCN_O CCN_MX" swap_in="CCN_D" RET spells END
+          END
+          malavon BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="CCN_O CCN_MX" swap_in="CCN_D" RET spells END
+          END
+          uddrow17 BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="DIMENSION_DOOR" swap_in="" RET spells END
+          END
+          davaeo _davaeo BEGIN // Davaeorn is a special case - set his defensive spell set directly
+             PATCH_IF demivrgvs BEGIN
+                  SPRINT spells "DIMENSION_JUMP DIMENSION_JUMP DIMENSION_JUMP MINOR_GLOBE_OF_INVULNERABILITY STONE_SKIN PROTECTION_FROM_NORMAL_MISSILES MIRROR_IMAGE MIRROR_IMAGE FIREBALL FIREBALL LIGHTNING_BOLT DISPEL_MAGIC MINOR_SPELL_TURNING"
+             END ELSE BEGIN
+                  SPRINT spells "DIMENSION_DOOR DIMENSION_DOOR DIMENSION_DOOR MINOR_GLOBE_OF_INVULNERABILITY STONE_SKIN_PRECAST PROTECTION_FROM_NORMAL_MISSILES MIRROR_IMAGE MIRROR_IMAGE FIREBALL FIREBALL LIGHTNING_BOLT DISPEL_MAGIC MINOR_SPELL_TURNING"
+             END
+          END
+          drowsor dw2sor dw2ssw BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="HASTE" swap_in="" RET spells END // because these appear in groups, and we don't want to overindulge
+          END
+          finabaz BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="TIME_STOP" swap_in="BLACK_BLADE_OF_DISASTER" RET spells END // because extra Timestops muck with the Ascension endgame logic
+          END
+     DEFAULT END
+END
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_alignment
+     STR_VAR filename=""
+             spells=""
+     RET spells
+BEGIN
+     TO_LOWER filename
+     PATCH_IF is_bg2 && (BYTE_AT 0x234>=18) BEGIN    
+		 LPF CRE_is_good RET is_good=value END
+		 PATCH_IF is_good BEGIN
+				REPLACE_TEXTUALLY "%WIZARD_SUMMON_PLANATAR_EVIL%" "%WIZARD_SUMMON_PLANATAR_GOOD%" (8)
+				REPLACE_TEXTUALLY "%WIZARD_SUMMON_ULTROLOTH%" "%WIZARD_SUMMON_PLANATAR_GOOD%" (8)
+		 END
+	 END
+END
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_specific
+     STR_VAR filename=""
+             spells=""
+     RET spells
+BEGIN
+     TO_LOWER filename
+     PATCH_MATCH "%filename%" WITH
+          firlch01 BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="ICE_STORM" swap_in="FLAME_ARROW" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="CONE_OF_COLD" swap_in="SUN_FIRE" RET spells END
+          END
+          kontik BEGIN
+             LPF substitute_spells STR_VAR spells swap_out="BURNING_HANDS" swap_in="MAGIC_MISSILE" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="FIREBALL" swap_in="ICELANCE" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="FLAME_ARROW" swap_in="ICELANCE" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="SUN_FIRE" swap_in="CONE_OF_COLD" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="CONJURE_FIRE_ELEMENTAL" swap_in="CONJURE_AIR_ELEMENTAL" RET spells END
+             LPF substitute_spells STR_VAR spells swap_out="DELAYED_BLAST_FIREBALL" swap_in="PRISMATIC_SPRAY" RET spells END
+          END
+     DEFAULT END
+END
+
+////////////////////////////// based on level //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_level
+     INT_VAR level=0
+     STR_VAR spells=""
+             kit=""
+     RET spells
+BEGIN
+
+     PATCH_IF (level>8 && ~%kit%~ STRING_EQUAL_CASE enchanter && !demivrgvs) BEGIN
+         LPF substitute_spells STR_VAR spells swap_out=SLEEP swap_in=SPOOK RET spells END
+     END
+
+     PATCH_IF (level>6 && (~%kit%~ STRING_EQUAL_CASE necromancer || ~%kit%~ STRING_EQUAL_CASE conjurer) && !demivrgvs) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=~CHARM_PERSON SLEEP~ swap_in=~MAGIC_MISSILE CHROMATIC_ORB~ RET spells END
+     END
+
+     PATCH_IF (level>6 && ~%kit%~ STRING_EQUAL_CASE invoker) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=HORROR swap_in=~HORROR WEB STINKING_CLOUD~ RET spells END
+     END
+
+     PATCH_IF (level>10 && ~%kit%~ STRING_EQUAL_CASE enchanter) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=GLITTERDUST swap_in=~GLITTERDUST MELF_ACID_ARROW~ RET spells END
+     END
+
+     PATCH_IF (level>9 && ~%kit%~ STRING_EQUAL_CASE enchanter && !demivrgvs) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=DIRE_CHARM swap_in=~DIRE_CHARM FLAME_ARROW~ RET spells END
+     END
+
+     PATCH_IF (level>9 && (~%kit%~ STRING_EQUAL_CASE conjurer || ~%kit%~ STRING_EQUAL_CASE fighter_mage) && !demivrgvs) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=~DIRE_CHARM MONSTER_SUMMONING_1~ swap_in=~DIRE_CHARM FLAME_ARROW FLAME_ARROW~ RET spells END
+        LPF substitute_spells STR_VAR spells swap_out=HOLD_PERSON swap_in=SKULL_TRAP RET spells END
+     END
+
+     PATCH_IF (level>9 && ~%kit%~ STRING_EQUAL_CASE necromancer) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=SKULL_TRAP swap_in=~SKULL_TRAP FLAME_ARROW~ RET spells END
+        LPF substitute_spells STR_VAR spells swap_out=VAMPIRIC_TOUCH swap_in=~VAMPIRIC_TOUCH FLAME_ARROW~ RET spells END
+     END
+
+     PATCH_IF (level>11 && !demivrgvs && !iwd_arcane) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=MONSTER_SUMMONING_2 swap_in=CONFUSION RET spells END
+     END
+
+     PATCH_IF (level>11 && iwd_arcane) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=MONSTER_SUMMONING_2 swap_in=~CONFUSION VITRIOLIC_SPHERE~ RET spells END
+     END
+
+     PATCH_IF (level>15 && !demivrgvs) BEGIN
+        LPF substitute_spells STR_VAR spells swap_out=SPIDER_SPAWN swap_in=EMOTION_HOPELESSNESS RET spells END
+        LPF substitute_spells STR_VAR spells swap_out=MONSTER_SUMMONING_3 swap_in=CHAOS RET spells END
+     END
+
+
+END
+
+
+////////////////////////////// based on BG1 //////////////////////////////////////
+
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_bg1_preparatory
+     STR_VAR spells=""
+     RET spells
+BEGIN
+         LPF substitute_spells STR_VAR spells swap_out=~FIRE_SHIELD_BLUE FIRE_SHIELD_RED STONE_SKIN TELEPORT_FIELD SECRET_WORD SPELL_THRUST BREACH DISPEL_MAGIC~ swap_in=~~ RET spells END
+END
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_bg1
+     STR_VAR spells=""
+     RET spells
+BEGIN
+         LPF substitute_spells STR_VAR spells swap_out=SPIDER_SPAWN swap_in=MONSTER_SUMMONING_2 RET spells END
+         LPF substitute_spells STR_VAR spells swap_out=POWER_WORD_SLEEP swap_in=MELF_ACID_ARROW RET spells END
+         LPF substitute_spells STR_VAR spells swap_out=GLITTERDUST swap_in=INVISIBILITY RET spells END
+         LPF substitute_spells STR_VAR spells swap_out=STONE_SKIN swap_in=IMPROVED_INVISIBILITY RET spells END
+END
+
+////////////////////////////// based on vanilla IWD //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_iwd
+     STR_VAR spells=""
+     RET spells
+BEGIN
+	PATCH_FOR_EACH element IN AIR EARTH FIRE WATER BEGIN
+		PATCH_IF !VARIABLE_IS_SET "WIZARD_CONJURE_LESSER_%element%_ELEMENTAL" BEGIN
+			LPF substitute_spells STR_VAR spells swap_out="CONJURE_LESSER_%element%_ELEMENTAL" swap_in="CONJURE_%element%_ELEMENTAL" RET spells END
+		END
+	END
+END
+
+
+////////////////////////////// based on SR //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_sr
+     STR_VAR spells=""
+     RET spells
+BEGIN
+         LPF substitute_spells STR_VAR spells swap_out="CACOFIEND" swap_in=SUMMON_FIEND RET spells END  // catches the small number of wizards who (via override) get allocated Cacofiend
+																										// also the ones who get it if we use IWD spells
+																										// they are mostly liches anyway so NBD
+		 PATCH_IF !VARIABLE_IS_SET "%WIZARD_CONJURE_WATER_ELEMENTAL%" BEGIN // allow for old version of IWDspells
+			LPF substitute_spells STR_VAR spells swap_out="CONJURE_WATER_ELEMENTAL" swap_in="CONJURE_AIR_ELEMENTAL" RET spells END
+		 END
+END
+
+////////////////////////////// based on Talents of Faerun - swaps out the new spells if not present //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_tof
+     STR_VAR spells=""
+     RET spells
+BEGIN
+	DEFINE_ASSOCIATIVE_ARRAY swap_array BEGIN
+		STONEFIST=>MAGIC_MISSILE
+		ICE_KNIFE=>MAGIC_MISSILE
+		MINOR_LIGHTNING_BOLT=>MELF_ACID_ARROW
+		COMBUST=>HORROR
+		TURN_PEBBLE_TO_BOULDER=>LANCE_OF_DISRUPTION
+		TELEKINESIS=>CONE_OF_COLD
+		TELEKINETIC_STORM=>ABI_DALZIMS_HORRID_WILTING
+		STORMBOLTS=>METEOR_SWARM
+		VERIDONS_ICY_RAY=>BIGBYS_CRUSHING_HAND
+		CREATE_BONEGUARD=>POWER_WORD_KILL
+	END
+	PHP_EACH swap_array AS swap_out=>swap_in BEGIN
+         LPF substitute_spells STR_VAR spells swap_out swap_in RET spells END  
+	END
+END
+
+////////////////////////////// swap a few illegal/unsuitable spells for elementalists //////////////////////////////////////
+
+DEFINE_PATCH_FUNCTION mage_spell_swap_elementalist
+     STR_VAR spells="" kit=""
+     RET spells
+BEGIN
+	PATCH_MATCH "%kit%" WITH
+	earth BEGIN
+		LPF substitute_spells STR_VAR spells swap_out="FIRE_SHIELD_RED FIRE_SHIELD_BLUE" swap_in="" RET spells END
+	END
+	air BEGIN
+		LPF substitute_spells STR_VAR spells swap_out="FIRE_SHIELD_RED STONE_SKIN FIRE_SHIELD_BLUE" swap_in="" RET spells END
+	END
+	fire BEGIN
+		LPF substitute_spells STR_VAR spells swap_out="FIRE_SHIELD_BLUE" swap_in="" RET spells END	
+	END
+	water BEGIN
+		LPF substitute_spells STR_VAR spells swap_out="FIRE_SHIELD_RED" swap_in="" RET spells END		
+	END
+	DEFAULT
+	END
+END

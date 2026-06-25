@@ -1,0 +1,106 @@
+@0    = ~Aaachhhhhh...! Zatrzymajcie jego krzyki, zatrzymajcie... Błagam! Nie zniosę tego dłużej!~
+@1    = ~Możemy je zatrzymać, po prostu musisz oddać nam słój.~
+@4    = ~Szepty... krzyki... zniknęły... Myślałam, że nikt nie może ich zatrzymać...~
+@5    = ~Wciąż jest tu tyle krwi, tyle martwych ciał... Co biedna Carsa ma teraz uczynić? Jak mogłaby zasnąć?~
+@6    = ~Na północy jest wioska, Gullykin. To tylko kilka godzin stąd. Mogłabyś się tam udać, a my damy ci trochę naszych zapasów. Niziołki przypilnują cię do momentu, aż wydobrzejesz po tych przejściach.~
+@7    = ~A co nas to obchodzi? Idź precz. Mamy ważniejsze rzeczy zaprzątające nam teraz głowy.~
+@8    = ~To nie będzie żaden problem, po tym jak skrócimy cię o głowę za narażanie nas na śmierć.~
+@9    = ~Tak... tak, mogę to zrobić. Dziękuję! Dziękuję za uwolnienie mnie!~
+@10   = ~Aaaachhh!~
+@11   = ~Aaaachhh!~
+
+@50   = ~Udało mi się dotrzeć do Gullykin, i to dzięki wam. Mieszkańcy tutaj są bardzo mili, a ja zaczynam odzyskiwać swoje zmysły. Trochę jednak minie zanim przestanę mieć koszmary.~
+@51   = ~Dziękuję jeszcze raz za wyzwolenie mnie od Kahrka i za pozbycie się tego potwora z Krain.~
+@52   = ~Nigdy nie zapomną co dla mnie zrobiliście, choć teraz potrzebuję pobyć sama. Ciężko mi rozmawiać.~
+
+@10000 = ~Aaaaachhhh!~
+@10001 = ~Słój wyślizguje się z rąk Carsy i rozbija o kamienie leżące na ziemi.~
+@10002 = ~Nie zrobię tego! Zamilcz!~
+@10003 = ~Niech to się skończy! Niech już przestanie!~
+@10004 = ~Nie wypowiem tego imienia!~
+@10005 = ~Tak dużo krwi...~
+@10006 = ~Katana maga +KATANA_BONUS~
+@10007 = ~Pochodzenie tej przepięknej broni jest owiane tajemnicą. Niezwykle duża rękojeść i dobrodziejstwa, które zapewnia magom, mogą sugerować, iż ta katana została wytworzona specjalnie dla ogrzego maga. Jednakże, nic nie wiadomo o tym, aby brutalni ogrzy magowie opanowali delikatną i tajemną sztukę wykuwania katan. W końcu większość katan jest wykuwana dla samurajów, a ci niezrównani wojownicy rzadko kiedy, jeśli w ogóle, uczą się tej sztuki. Niezależnie od tego czy to ostrze wykonał ogrzy kowal z jakiegoś zapomnianego zakonu samurajów-magów, czy po prostu ta historia jest jeszcze dziwniejsza, to wiedza o pochodzeniu tej katany prawdopodobnie przepadła na zawsze.
+
+PARAMETRY:
+
+Specjalne:
+– Poziom czarującego: +1 (w przypadku maga)
+– Szybkość rzucania zaklęć: +1
+
+Obrażenia: 1k10 +KATANA_BONUS
+TraK0: +KATANA_BONUS
+Typ obrażeń: sieczne
+Opóźnienie: KATANA_SPEED
+Rodzaj biegłości: katana
+Typ broni: 1-ręczna
+
+Wymagania:
+– Siła: 6
+
+Waga: 4
+
+Nie może używać:
+ Kapłan
+ Druid
+ Mag~
+@10011 = ~Carsa zamiera w bezruchu, a słój wypada z jej rąk, rozbijając się o kamienie leżące na ziemi.~
+@10012 = ~Przez moment Carsa walczy z twoją kontrolą umysłu, jak gdyby była rozdarta między dwójką kontrolujących ją osób, a w tym czasie słój wypada z jej rąk, rozbijając się o kamienie leżące na ziemi.~
+@10013 = ~Carsa upada nieprzytomna, a słój wypada z jej rąk, rozbijając się o kamienie leżące na ziemi.~
+@10020 = ~Szalona kobieta nieopodal mostu Firewine
+
+Napotkaliśmy szaloną kobietę błąkającą się po dziczy niedaleko mostu Firewine. Wydaje się mieć obsesję na punkcie kogoś szepczącego do niej, albo raczej krzyczącego na nią.~
+@10021 = ~Szalona kobieta nieopodal mostu Firewine
+
+Wygląda na to, że szaleństwo Carsy jest związane z jakimś słojem znalezionym przez nią i jej, nieżyjących już, kompanów w ruinach Firewine. Carsa odmówiła oddania nam tego naczynia.~
+@10022 = ~Szalona kobieta nieopodal mostu Firewine
+
+Zabraliśmy słój Carsy siłą, po czym wezwała ona istotę znajdującą się w tym słoju: potężnego ogrzego maga o imieniu Kahrk. Za wypowiedzenie tego imienia, Carsa zapłaciła najwyższą cenę – życie.~
+@10023 = ~Szalona kobieta nieopodal mostu Firewine
+
+Udało nam się dostać słój od Carsy i pokonać Kahrka, potężnego ogrzego maga znajdującego się w tym słoju. Przekazaliśmy Carsie trochę naszych zapasów i zaproponowaliśmy udanie się do Gullykin. Od teraz, powinno być z nią wszystko dobrze.~
+
+@10024 = ~Szalona kobieta nieopodal mostu Firewine
+
+Udało nam się dostać słój od Carsy i pokonać Kahrka, potężnego ogrzego maga znajdującego się w tym słoju. Co do Carsy, prawdopodobnie umrze z głodu w tej dziczy, choć to nas w ogóle nie obchodzi.~
+
+@10025 = ~Szalona kobieta nieopodal mostu Firewine
+
+Udało nam się dostać słój od Carsy i pokonać Kahrka, potężnego ogrzego maga znajdującego się w tym słoju. Co do Carsy, zdecydowaliśmy, że ją zabijemy za jej zuchwałość i głupotę w całej tej sprawie.~
+
+@21113 = ~Arghh~
+@21114 = ~Ughh~
+@21401 = ~Taak, spójrzmy, co my tu mamy...~
+@21402 = ~Tazok powiedział, abym miał na was oko, patrzył, byście nie zrobili czego złego. Rzekłbym, że przyłapanie was, jak przekradacie się do jego namiotu, właśnie tego dowodzi, co?~
+@21403 = ~Czekaj! To nie to, co myślisz.~
+@21404 = ~Oto co ja myślę. Uważam, że jesteście tymi wścibskimi osóbkami z Nashkel, które to zabiły Mulaheya i powstrzymały zanieczyszczanie żelaza. Myślę, że jesteście tu po to, aby zatrzymać niedobór żelaza i sądzę też, że jesteście świeżo po zabiciu grubych ryb Tronu w namiocie Tazoka.~
+@21405 = ~W porządku. Właściwie to masz rację, ale bez walki mnie nie dostaniesz, a moje imię to <CHARNAME>!~
+@21406 = ~<CHARNAME>, hę? Do mnie, ludzie! Jest nagroda za tę tutaj głowę, wystarczająco wysoka do podziału dla nas wszystkich!~
+@21407 = ~Wszystko to kłamstwa! Wszyscy tu jesteśmy twymi przyjaciółmi, wejdź do namiotu, a wytłumaczymy wszystko.~
+@21408 = ~Nie sądzę. Nie potrafię uwierzyć w ani jedno słowo, nawet gdybym to zrobił, to i tak byliście w namiocie szefa i wiecie za wiele. Do mnie, ludzie! Zaserwujemy te ścierwa na tacy dla Chłodu!~
+@21409 = ~Niech i tak będzie. Ale bez walki mnie nie dostaniesz, a moje imię to <CHARNAME>!~
+@21413 = ~Pomimo tych wrogo nastawionych bandytów, zorganizowanych przeciwko tobie, samobójstwem byłoby wycofać się do namiotu Tazoka, zbudowanego z łatwopalnego drewna. Musisz walczyć lub uciekać.~
+@21414 = ~Bije na alarm!~
+@21415 = ~<CHARNAME>... powinienem był się domyślić. Po raz ostatni pokrzyżowaliście plany Żelaznego Tronu.~
+@21416 = ~Odejdź!~
+@21417 = ~Ludzkie ścierwo.~
+@21418 = ~Wynocha stąd, Szpony!~
+@21501 = ~Mahroku,
+
+Choć bardzo wysoka twa cena jest, to przystanę na nią. Mimo wszystko, zasługujesz na nią. <CHARNAME> i pozostali sprzymierzeńcy dowiedli, że są niezwykle utalentowani i przetrwali już sporo. Ale ciebie, pewien jestem, że nie przeżyją.
+
+Jeśli przyniesiesz mi ich głowy, dziesięć tysięcy sztuk złota jest twoje. A oprócz tego, być może, znacznie więcej, bo jak już wiesz, przeznaczone mi są wielkie rzeczy, zapamiętam tych, którzy pomogli mi za mego śmiertelnego żywota.
+
+S.~
+@21502 = ~Mali, różowi ludkowie, spotkaliście wasz koniec. Syn Mordu oferuje dziesięć tysięcy sztuk złota za twoją głowę, <CHARNAME>, i zamierzamy zdobyć tę nagrodę.~
+@21503 = ~Ogrzy zabójcy
+
+Te ataki stają się coraz okrutniejsze. Tym razem było pięciu ogrzych magów! A nagroda, jaką mieli otrzymać (zaoferowana została przez kogoś, kto nazywa siebie ni mniej, ni więcej, jak „Synem Mordu”!) była ogromna. Mam tylko nadzieję, że może w Candlekeep znajdę jakieś odpowiedzi, dlaczego to wszystko akurat mi się przytrafia.~
+@21901 = ~Shennara~
+@21902 = ~Kaalos~
+@21903 = ~Zgoda, ale nie będę się długo rozwodził. Akolici, o których wspomniałem, zostają z Thaldornem na piątym piętrze. Jest ich ośmiu, a ich szaleństwo chodzi widać parami – dwu kapłanów, dwu magów, dwu zabójców i dwu twardych oprychów. Jest w nich coś szczególnie złego – gdyby przyszli tu z miłości do pieniędzy, wcale bym się z nimi nie sprzeczał. Ale nie, oni nie zniżają się do tak ludzkich uczuć. Jest coś jeszcze, jakiś sekretny plan i... sam nie wiem. Nawet teraz czuję na sobie ich badawcze spojrzenia. Obawiam się, że niczym mnie tu już nie zatrzymacie.~
+@21904 = ~Hmm, witajcie. Musicie być tymi negocjatorami... Niechaj spojrzę na listę... Emisariusz... Emisariusz Tar? W samą porę i miło mi cię powitać. Jestem Gestus Durn, Zastępca Rachmistrza operacji Żelaznego Tronu na Wybrzeżu Mieczy. Zanim wejdziecie na górę, szybko zaznajomię was z procedurą negocjacji: Thaldornowi towarzyszy zespół ośmiu doradców Tronu przysłanych z zagranicy: Zhalimar Cloudwulfe, Gardush, Naaman, Diyab, Shennara, Kaalos, Aasim i Alai, wszyscy ludzie szanowani i gotowi się z wami spotkać. Dziś będzie i dziewiąty członek rady, pan Lyle Espejo. Przybył, by się upewnić, że wszystko pójdzie gładko. Co się tyczy porządku obrad...~
+@21905 = ~Ci, którzy byli tu przed nami to głupcy, tak jak wy. Ci przed nami byli słabi, tak jak wy. Nie byli to Zhaalimar czy Gardush, Naaman ani Diyab, Shennara ani Kaalos, Aasim ani Alai. Ci przed nami są już martwi, tak jak wy będziecie. Zostało postanowione i zostanie wykonane. To rozkaz Sarevoka!~
+@21906 = ~Przykro mi, że przywiodłem tak bolesne wspomnienia. Chcę pomóc i uczynię to, by zakończyć te koszmary, które mnie nękają. Proszę, weź to. Gdy będziesz toczyć walkę z ośmioma, którzy służą zabójcy twego ojca, przeczytaj ten zwój, a ochroni cię on przed ich gniewem. A teraz żegnaj, być może znowu się spotkamy.~
+@22506 = ~Mogłeś oczyścić Most Firewine, ale jest więcej, niż jeden ogrzy mag na Wybrzeżu Mieczy, który rozumie czemu Jenkal jest wart, by trzymać go blisko siebie!~ ~Mogłaś oczyścić Most Firewine, ale jest więcej, niż jeden ogrzy mag na Wybrzeżu Mieczy, który rozumie czemu Jenkal jest wart, by trzymać go blisko siebie!~
+@22507 = ~W dół prowadzi krótki i wąski korytarz, zablokowany jest przez solidne, żelazne drzwi, które zabarykadowano z drugiej strony. Musisz poszukać innej drogi.~

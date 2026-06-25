@@ -1,0 +1,256 @@
+
+// general AI
+@101 = "Przeciwnicy mają dość niską inteligencję, wykazują niewielką roztropność w korzystaniu ze swoich ataków i umiejętności. Ludzie i półludzie nie używają swoich zdolności klasowych ani przedmiotów magicznych. Grupy stworzeń będą atakować wspólnie jednak nie będą wzywać pomocy innych grup."
+@102 = "Przeciwnicy stają się nieco mądrzejsi, unikają niebezpiecznych terenów i wybierają swoje cele inteligentnie. Wciąż nie korzystają z przedmiotów i zdolności klasowych. Złodzieje spróbują ukryć się w cieniu jeśli będą poza zasięgiem wzroku drużyny."
+@103 = "Przeciwnicy korzystają z mikstur i zdolności klasowych jeśli je posiadają; w szczególności złodzieje wypiją miksturę niewidzialności podczas walki, aby zniknąć z pola widzenia. Wrogowie będą preferować walkę z dystansu niż podejście do drużyny, żeby porozmawiać. Inteligentni przeciwnicy będą czasem wołać o pomoc inne grupy w pobliżu. Wybrani wysokopoziomowi wojownicy i złodzieje użyją swoich wysokopoziomowych zdolności."
+@104 = "Wszyscy złodzieje i wojownicy użyją swoich wysokopoziomowych zdolności jeśli je posiadają."
+
+// mage AI
+@111 = "Magowie mają dość ograniczoną inteligencję, będą cyklicznie odnawiać swoje czary ochronne i będą unikać nierozważnego użycia magii do pewnego stopnia, ale nic po za tym. Będą korzystać tylko z obronnych sekwencerów i wyzwalaczy zaklęć."
+@112 = "Magowie korzystają ze swoich zaklęć w sposób inteligentny, wybierając najbardziej odpowiednie cele i zwracając uwagę na swoje własne ochrony magiczne. W większości przypadków będą się powstrzymywać od korzystania z ofensywnych sekwencerów i wyzwalaczy zaklęć."
+@113 = "Magowie będą już korzystać z ofensywnych sekwencerów i wyzwalaczy zaklęć. Mogą także wyczuwać obecność niewidzialnych przeciwników i używać magii, aby ich ujawnić."
+@114 = "Magowie będą używać Miniaturowych Meteorów Melfa i podobnych zaklęć (o ile mogą je rzucać) pomiędzy rzucaniem innych czarów."
+
+// mage buffing
+@121 = "Magowie nie rzucają zaklęć przed rozpoczęciem walki (mogą jednak korzystać z sekwencerów i wyzwalaczy zaklęć, gdy walka się rozpoczyna)."
+@122 = "Magowie rzucają z góry kilka zaklęć trwających przynajmniej kilka godzin (tj. Kamienna skóra)."
+@123 = "Magowie rzucają z góry zaklęcia ochronne trwające przynajmniej jedną turę na poziom. Jeśli będą w zasięgu wzroku drużyny to będą rzucać z góry zaklęcia ochronne trwające przynajmniej trzy rundy na poziom. Jeśli będą poza zasięgiem wzroku drużyny to mogą także rzucić zawczasu niektóre długotrwające zaklęcia przywołujące."
+@124 = "Magowie rzucają z góry zaklęcia ochronne trwające przynajmniej trzy rundy na poziom. Jeśli będą w zasięgu wzroku drużyny to będą rzucać z góry zaklęcia ochronne trwające przynajmniej jedną rundę na poziom."
+@125 = "Magowie rzucają z góry zaklęcia ochronne trwające przynajmniej jedną rundę na poziom."
+
+// mage HLAs
+@133 = "Magowie nie używają wysokopoziomowych zdolności."
+@134 = "Szczególnie potężni magowie będą korzystać z wysokopoziomowych zdolności, jednak tylko w dodatku Tron Bhaala."
+@135 = "Szczególnie potężni magowie będą korzystać z wysokopoziomowych zdolności, w obu częściach gry."
+@136 = "W Tronie Bhaala, wszyscy magowie mogący rzucać zaklęcia dziewiątego poziomu będą używać zdolności wysokopoziomowych. W pozostałej części gry, jedynie szczególnie potężni magowie będą korzystać z tych zdolności."
+@137 = "Każdy mag w grze mogący rzucać zaklęcia dziewiątego poziomu będzie korzystać ze zdolności wysokopoziomowych."
+
+// priest AI
+@141 = "Kapłani i druidzi mają dość ograniczoną inteligencję, będą cyklicznie odnawiać swoje czary ochronne i będą unikać nierozważnego użycia magii do pewnego stopnia, ale nic po za tym."
+@142 = "Kapłani i druidzi korzystają ze swoich zaklęć w sposób inteligentny, wybierając najbardziej odpowiednie cele, zwracając uwagę na swoje własne ochrony magiczne oraz lecząc swoich rannych sojuszników. Kapłani będą odpędzać lub kontrolować nieumarłych. Druidzi będą używać ich zdolności zmiany kształtu."
+@143 = "Kapłani i druidzi mogą wyczuwać obecność niewidzialnych przeciwników i używać magii, aby ich ujawnić."
+
+// priest buffing
+@151 = "Kapłani i druidzi nie rzucają zaklęć przed rozpoczęciem walki."
+@152 = "Kapłani i druidzi rzucają z góry kilka zaklęć trwających przynajmniej kilka godzin (tj. Żelazna skóra)."
+@153 = "Kapłani i druidzi rzucają z góry zaklęcia ochronne trwające przynajmniej jedną turę na poziom. Jeśli będą w zasięgu wzroku drużyny to będą rzucać z góry zaklęcia ochronne trwające przynajmniej trzy rundy na poziom. Jeśli będą poza zasięgiem wzroku drużyny to mogą także rzucić zawczasu niektóre długotrwające zaklęcia przywołujące."
+@154 = "Kapłani i druidzi rzucają z góry zaklęcia ochronne trwające przynajmniej trzy rundy na poziom. Jeśli będą w zasięgu wzroku drużyny to będą rzucać z góry zaklęcia ochronne trwające przynajmniej jedną rundę na poziom."
+@155 = "Kapłani i druidzi rzucają z góry zaklęcia ochronne trwające przynajmniej jedną rundę na poziom."
+
+// priest HLAs
+@163 = "Kapłani i druidzi nie używają wysokopoziomowych zdolności."
+@164 = "Szczególnie potężni kapłani i druidzi będą korzystać z wysokopoziomowych zdolności, jednak tylko w dodatku Tron Bhaala."
+@165 = "Szczególnie potężni kapłani i druidzi będą korzystać z wysokopoziomowych zdolności, w obu częściach gry."
+@166 = "W Tronie Bhaala, wszyscy kapłani i druidzi mogący rzucać zaklęcia siódmego poziomu będą używać zdolności wysokopoziomowych. W pozostałej części gry, jedynie szczególnie potężni kapłani i druidzi będą korzystać z tych zdolności."
+@167 = "Wszyscy kapłani i druidzi w grze mogący rzucać zaklęcia siódmego poziomu będzie korzystać ze zdolności wysokopoziomowych."
+
+// spiders
+@171 = "Pająki zachowują się tak samo jak w niezmodyfikowanej grze."
+@172 = "Pająki przenikające używają swojej umiejętności przenikania do przeciwnika w sposób inteligentny, czasami nawet będąc poza zasięgiem wzroku."
+@173 = "Olbrzymie pająki uzyskują zdolność tkania pajęczyny."
+@174 = "Olbrzymie pająki uzyskują modyfikację ataku, polegającą na zadawaniu mniej obrażeń od trucizny i możliwości oplątania przeciwnika w pajęczą sieć."
+
+// vampires
+@181 = "Wampiry walczą w niezbyt inteligentny sposób i nie korzystają ze swoich wrodzonych zdolności, poza sporadycznymi zmianami kształu."
+@182 = "Wampiry dbają o wybór swojego celu, aktywnie wyszukując podatnych przeciwników. Korzystają ze swojego dominującego spojrzenia przeciwko wrogom."
+@183 = "Niektóre wampiry przywołują do pomocy szczury, nietoperze i wilki. Wszystkie wampiry potrafią wysysaać energię jak również pić krew (wyssanie Kondycji). Niektóre potężne wampiry otrzymują inne zdolności naturalne."
+@184 = "Inne jeszcze potężniejsze wampiry otrzymują kolejne zdolności naturalne, mogą hipnotyzować przeciwnika lub zmieniać się w formę gazową, aby podkraść się do niego."
+
+// Bodhi
+@191 = "Bodhi korzysta z kilku zdolności naturalnych. Jest chroniona tylko przez młode wampiry i kilku innych nieumarłych."
+@192 = "Bodhi korzysta ze swoich umiejętności: Pogrzebanie żywcem (spowolnienie i osłabienie), Dotyk śmierci (wampiryczne dotknięcie) i Wezwanie Pani (kontrola nieumarłych). Jej szeregi zasilają dwa dorosłe wampiry."
+@193 = "Bodhi także używa zdolności Chmura nietoperzy (działa podobnie jak Plaga owadów), Ciemność otchłani (ociemniałość) i Sepulkralny sen (nieprzytomność). Jej armia składa się z czterech dorosłych wampirów."
+@194 = "Bodhi także używa zdolności Chłód zza grobu (obrażenia od zimna). Służą jej dwaj wampirzy magowie."
+@195 = "Umiejętności fizyczne Bodhi i jej odporoności są znacząco ulepszone. Stale chroni ją Całun śmierci (tarcza lodowych płomieni) i jest odporna na zaklęcia pierwszego i drugiego poziomu. Dwa starsze wampiry dołączą do jej obrony."
+
+// Dragons
+@201 = "Smoki zachowują się praktycznie tak samo jak w niezmodyfikowanej grze. Nie korzystają z sekwencerów i wyzwalaczy zaklęć."
+@202 = "Smoki używają sekwencerów i wyzwalaczy zaklęć. Są na tyle inteligentne żeby zapobiegawczo zaatakować jeśli drużyna jest ewidentnie przygotowana do zaatakowania smoka."
+@203 = "Smoki mogą rzucać swoje czary natychmiastowo i bez ryzyka ich przerwania."
+@204 = "Smoki zyskują znaczącą (+200%) premię do punktów życia."
+@205 = "Smoki mają co rundę 50% szans na odzyskanie swojego zionącego ataku."
+
+// Drow
+@211 = "Ust Natha jest bronione przez dwie zdezorganizowane grupy drowów i jedną grupę elitarnych magów i kapłanów."
+@212 = "Ust Natha jest bronione przez cztery zdezorganizowane grupy drowów i jedną grupę elitarnych magów i kapłanów."
+@213 = "Ust Natha jest bronione przez cztery zdezorganizowane grupy drowów, jedną zorganizowaną drużynę wojowników i trzy grupy elitarne."
+@214 = "Ust Natha jest bronione przez cztery zdezorganizowane grupy drowów, trzy zorganizowane drużyny wojowników, grupę elitarnych magów i matkę przełożoną wraz z jej demonicznymi sprzymierzeńcami."
+@215 = "Ust Natha jest bronione przez cztery zdezorganizowane grupy drowów, siedem zorganizowanych drużyn wojowników, dwie grupy elitarnych magów i kapłanów, grupę elitarnych magów i matkę przełożoną wraz z jej demonicznymi sprzymierzeńcami."
+
+// Durlag's Tower
+@221 = "Strażnicy pierwszego poziomu Wieży Durlaga (Miłość, Duma itd.) nie używają zdolności naturalnych."
+@222 = "Strażnicy używają swoich zdolności naturalnych, jednak niezbyt często."
+@223 = "Strażnicy używają swoich zdolności naturalnych dość często."
+@224 = "Strażnicy używają swoich zdolności naturalnych praktycznie cały czas. Lustro Demonicznego Rycerza tworzy kopię drużyny zamiast zwykłych lustrzanych kopii. Demon sam w sobie też jest znacząco ulepszony."
+
+// Beholders
+@231 = "Obserwatorzy używają głównie swoich nieśmiercionośnych czułków ocznych (zauraczania, zastraszania, dominacji, paraliżowania, zadawania ran, spowalniania) i nie korzystają ze swojego centralnego oka tłumienia magii. Matki ula używają tylko słabej magii."
+@232 = "Obserwatorzy używają także centralnego oka przeciwko magom i ochronom drużyny. Matki ula używają swoich wszystkich zaklęć."
+@233 = "Obserwatorzy używają swoich czułków ocznych promienia śmierci, petryfikacji i telekinezy."
+@234 = "Obserwatorzy używają swoich czułków ocznych telekinezy, aby wyrwać niektóre przedmioty drużyny (szczególnie Tarczę Baldurana, jeśli drużyna ją posiada)."
+@235 = "Obserwatorzy używają swoich czułków ocznych dezintegracji."
+
+// Illithids
+@241 = "Illithidzi korzystają tylko z kilku zdolności, raczej w sposób mało inteligentny."
+@242 = "Illithidzi używają ataków telekinetycznych i Labiryntu. Wybierają swoje cele w sposób inteligentny."
+@243 = "Nieludzko wysoka inteligencja illithidów umożliwia im ignorowanie zaklęć opartych o niewidzialność. Używają podróży astralnej, aby szybko poruszać się po obszarze walki, chowają się za pomocą psionicznej niewidzialności i są zbyt czujni, żeby odpoczynek w ich miastach był możliwy."
+@244 = "Dziwna fizjologia i ochrona psioniczna illithidów zapewnia im 50% odporności na obrażenia fizyczne. Illithidzi używają swojej psioniki, żeby szybko zniszczyć nieżyjących przeciwników, takich jak szkielety."
+
+// Spawns
+@252 = "Losowe potwory pojawiają się tak samo, jak w niezmodyfikowanej grze (w zależności od poziomu i postępu fabuły)."
+@253 = "Losowo pojawiające się potwory zostały nieznacznie ulepszone w stosunku do niezmodyfikowanej gry."
+@254 = "Losowo pojawiające się potwory zostały znacząco ulepszone w stosunku do niezmodyfikowanej gry."
+@255 = "Losowo pojawiające się potwory zostały naprawdę znacząco ulepszone w stosunku do niezmodyfikowanej gry. Ponadto, wyjątkowo niebezpieczne potwory będzie można spotkać w dalszej części gry."
+@256 = "Losowo pojawiające się potwory są bardzo silne podczas całej gry, a wyjątkowo niebezpieczne potwory mogą pojawić się na wcześniejszym etapie gry."
+@257 = "W grze pojawiać się będą najbardziej niebezpieczne potwory, niezależnie od etapu gry."
+
+// Fiends
+@261 = "Demony i biesy będą atakować niezbyt inteligentnie. Będą korzystać z niektórych ofensywnych zdolności magicznych, jednak nie z tych najbardziej śmiercionośnych. Nie będą się teleportować, atakować magicznych osłon drużyny ani odnawiać swoich własnych osłon magicznych."
+@262 = "Demony i biesy będą wybierać swoje cele w sposób inteligentny. Będą atakować magiczne osłony drużyny i korzystać z większości ofensywnych zdolności magicznych."
+@263 = "Demony i biesy mogą rzucać swoje czary natychmiastowo i bez ryzyka ich przerwania. Będą teleportować się po obszarze walki, aby zyskać przewagę taktyczną, będą odnawiać swoje zaklęcia ochronne i korzystać ze swoich wszystkich magicznych zdolności. Książę Demonów będzie przyzywać demony raz na trzy rundy."
+@264 = "Demony i biesy uzyskują skromną (+50%) premię do swoich punktów życia. Balory będą korzystać z Implozji, ale tylko w Tronie Bhaala. Książę Demonów będzie przyzywać demony raz na dwie rundy."
+@265 = "Balory będą korzystać z Implozji niezależnie od miejsca spotkania. Książę Demonów będzie przyzywać demony raz na rundę."
+
+// Genies
+@271 = "Geniusze będą atakować niezbyt inteligentnie i raczej nie będą używać niewidzialności czy zaklęć ochronnych."
+@272 = "Geniusze będą atakować inteligentnie oraz będą korzystać ze wszystkich swoich magicznych mocy."
+@273 = "Geniusze mogą rzucać swoje czary natychmiastowo i bez ryzyka ich przerwania."
+@274 = "Geniusze uzyskują skromną (+50%) premię do swoich punktów życia."
+
+// Beholder hive
+@281 = "Prastara kula zostanie przeniesiona do rozsądniejszego miejsca w ulu. Poza tym nie ma żadnych innych zmian."
+@282 = "W ulu będzie można spotkać dodatkowo jednego obserwatora."
+@283 = "W ulu będzie można spotkać dodatkowo obserwatora i matkę ula."
+@284 = "W ulu będzie można spotkać dodatkowo obserwatora, matkę ula i dwóch tyranów śmierci."
+@285 = "W ulu będzie można spotkać dodatkowo trzech obserwatorów, matkę ula, dwóch tyranów śmierci i dwóch gautów."
+
+// Spellholditems
+@293 = "Gliniany golem (ciężko go zranić oraz posiada przeklęte rany w SCS) został usunięty z Przytułku."
+@294 = "Gliniany golem został na swoim miejscu."
+
+// d'Arnise trolls
+@301 = "W okolicy Warowni można spotkać dodatkowe grupy trolli. Duchowe trolle mają zwiększoną odporność na obrażenia."
+@302 = "Umbrowy kolos będzie bronił TorGala."
+@303 = "Sprzymierzeńcem TorGala będzie także mag yuan-ti. TorGal może rzucać Płaszcz Strachu. Duchowe trolle posiadają niszczycielskie kapłańskie moce, których mogą używać raz na 10 rund."
+@304 = "Razem z TorGalem będzie teraz dwóch magów yuan-ti. Duchowe trolle mogą używać swoich mocy co 3-4 rundy."
+@305 = "Magowie i umbrowy kolos TorGala są jeszcze potężniejsi. Duchowe trolle mogą używać swoich mocy co 2-3 rundy."
+
+// doppelgangers
+@313 = "Sobowtórniaki są na swoim bazowym poziomie."
+@314 = "Niektóre sobowtórniaki otrzymują premię do swoich umiejętności."
+
+// Ascension
+@321 = "Zdolności Melissany są mocno ograniczone. Pojawia się bardzo późno podczas finałowej walki. Drużyna odzyska zaklęcia i zdolności trzykrotnie przed finałową walką. Piątka raczej będzie unikać korzystania ze swoich najpotężniejszych zdolności."
+@322 = "Ograniczenia zdolności Melissany oraz Piątki są nieco złagodzone."
+@323 = "Melissana i Piątka skorzystają z większości swoich zdolności. Melissana może wzywać demony. Melissana pojawi się w połowie walki z Piątą. Drużyna odzyska zaklęcia i zdolności dwukrotnie przed finałową walką."
+@324 = "Melissana i Piątka wykorzystują wszystkie swoje umiejętności. Yaga-Shura rozpoczyna walkę z 100% odpornością na różne rodzaje obrażeń, która będzie maleć z czasem. Melissana pojawia się na wczesnym etapie walki z Piątką i może przyzywać demony szybciej. Sarevok będzie rozważał zdradę, jeśli jest członkiem drużyny. Drużyna odzyskuje zaklęcia i zdolności tylko raz przed finałową walką."
+@325 = "Melissana pojawi się, jak tylko ktoś z Piątki zostanie zabity, może przyzywać demony jeszcze szybciej oraz może sprowadzić upadłe solary. Nie można odpoczywać podczas całego 10 rozdziału."
+
+// dragons (IWD)
+@401 = "Smoki zachowują się praktycznie tak samo, jak w niezmodyfikowanej grze. Unikają korzystania ze swoich magicznych zdolności."
+@402 = "Smoki mogą używać niektórych zaklęć i magicznych zdolności."
+@403 = "Smoki mogą rzucać swoje czary natychmiastowo i bez ryzyka ich przerwania. Ponadto, liczba zaklęć i ich moc wzrosła."
+@404 = "Smoki mogą korzystać z sekwencerów zaklęć."
+@405 = "Smoki mają co rundę 50% szans na odzyskanie swojego zionącego ataku."
+
+@1010 = ~Poziom trudności jest obecnie ustawiony jako DOMYŚLNY (ustawienia dokonywane są poprzez suwak z menu opcji).~
+@1011 = ~Poziom trudności dla tego elementu gry jest ustawiony na PODSTAWOWY.~
+@1012 = ~Poziom trudności dla tego elementu gry jest ustawiony na ULEPSZONY.~
+@1013 = ~Poziom trudności dla tego elementu gry jest ustawiony na TAKTYCZNY.~
+@1014 = ~Poziom trudności dla tego elementu gry jest ustawiony na TRUDNY.~
+@1015 = ~Poziom trudności dla tego elementu gry jest ustawiony na SZALONY.~
+@1016 = ~Poziom trudności dla tego elementu gry jest ustawiony na SZALONY PLUS.~
+@1017 = ~Poziom trudności dla tego elementu gry jest ustawiony na DZIEDZICTWO BHAALA.~
+@1018 = ~Dostrajanie ustawień poziomu trudności gry~
+@1019 = ~Nie zmieniaj ustawień poziomu trudności dla tego elementu gry.~
+@1020 = ~Zmień poziom trudności na DOMYŚLNY (ustawienia dokonywane są poprzez suwak z menu opcji).~
+@1021 = ~Zmień poziom trudności na PODSTAWOWY: ~
+@1022 = ~Zmień poziom trudności na ULEPSZONY: ~
+@1023 = ~Zmień poziom trudności na TAKTYCZNY: ~
+@1024 = ~Zmień poziom trudności na TRUDNY: ~
+@1025 = ~Zmień poziom trudności na SZALONY: ~
+@1026 = ~Zmień poziom trudności na SZALONY PLUS: ~
+@1027 = ~Zmień poziom trudności na DZIEDZICTWO BHAALA: ~
+@1028 = ~Poziom trudności dla tego elementu gry jest ustawiony na SERCE FURII.~
+@1029 = ~Zmień poziom trudności na SERCE FURII: ~
+@1030 = ~Które ustawienia poziomu trudności chcesz zmienić?~
+@1031 = ~Nie chcę wprowadzać w tej chwili żadnych zmian .~
+@1032 = ~Możesz dokonać dalszych zmian w dowolnym momencie, a także możesz użyć suwaka (z menu opcji) do zmiany globalnych ustawień poziomu trudności tych składników, dla których ustawienia nie zostały wybrane indywidualnie.~
+@1033 = ~Usuń umiejętność ustawiania poziomu trudności ze zdolności specjalnych.~
+@1034 = ~Przywróć umiejętność ustawiania poziomu trudności jako zdolność specjalną.~
+@1035 = ~Możliwość ustawiania poziomu trudności została usunięta. Dostęp do tego menu wciąż jest dostępny przez konsolę, wpisz: C:CreateCreature("dw#diffi").~
+@1036 = ~Możliwość ustawiania poziomu trudności została przywrócona.~
+
+@1040 = ~Magowie (ogólna SI; rzucanie czarów z wyprzedzeniem i zdolności wysokopoziomowe są ustawiane oddzielnie).~
+@1041 = ~Magowie (rzucanie czarów z wyprzedzeniem przed bitwą).~
+@1042 = ~Magowie (korzystanie ze zdolności wysokopoziomowych).~
+@1043 = ~Kapłani (ogólna SI; rzucanie czarów z wyprzedzeniem i zdolności wysokopoziomowe są ustawiane oddzielnie).~
+@1044 = ~Kapłani (rzucanie czarów z wyprzedzeniem przed bitwą).~
+@1045 = ~Kapłani (korzystanie ze zdolności wysokopoziomowych).~
+@1046 = ~Wojownicy, złodzieje i ogólna SI.~
+@1047 = ~Biesy i inne pozaplanarne stworzenia.~
+@1048 = ~Smoki.~
+@1049 = ~Wieża Durlaga.~
+
+@1050 = ~Poziom trudności dla tego elementu gry został ustawiony na DOMYŚLNY.~
+@1051 = ~Poziom trudności dla tego elementu gry został ustawiony na PODSTAWOWY.~
+@1052 = ~Poziom trudności dla tego elementu gry został ustawiony na ULEPSZONY.~
+@1053 = ~Poziom trudności dla tego elementu gry został ustawiony na TAKTYCZNY.~
+@1054 = ~Poziom trudności dla tego elementu gry został ustawiony na TRUDNY.~
+@1055 = ~Poziom trudności dla tego elementu gry został ustawiony na SZALONY.~
+@1056 = ~Poziom trudności dla tego elementu gry został ustawiony na SZALONY PLUS.~
+@1057 = ~Poziom trudności dla tego elementu gry został ustawiony na DZIEDZICTWO BHAALA.~
+@1058 = ~Poziom trudności dla tego elementu gry został ustawiony na SERCE FURII.~
+
+@1060 = ~Łupieżcy umysłu.~
+@1061 = ~Ogromne pajątki.~
+@1062 = ~Modyfikacja Ascension.~
+@1063 = ~Bodhi.~
+@1064 = ~Wampiry (inne niż Bodhi jeśli zainstalowano składnik "Ulepszona Bodhi").~
+@1065 = "Miasto drowów."
+@1066 = "Obserwatorzy."
+@1067 = "Obserwatorzy z ula znajdującego się w Podmroku."
+@1068 = "Geniusze (dżiny, ifryty i tym podobne)."
+@1069 = "Finałowa potyczka w Tronie Bhaala."
+@1070 = ~Składnik "Przedmioty drużyny zostają odebrane w Czarowięzach".~
+@1071 = "Sobowtórniaki."
+@1072 = "Losowo pojawiające się grupy przeciwników."
+@1073 = "Warownia d'Arnise."
+
+@1100 = "Podstawowy" 
+@1101 = "Ulepszony" 
+@1102 = "Taktyczny" 
+@1103 = "Trudny" 
+@1104 = "Szalony"
+@1105 = "Suwak ten pozwala zmienić poziom trudności gry. Dostępne są następujące ustawienia:
+SZALONY (do końca w prawo): wrogowie korzystają z najbardziej wyrafinowanej SI i ze wszystkich swoich umiejętności, wielu z nich ma dodatkową premię do swoich mocy, a jeśli tylko potrafią, to rzucają wiele zaklęć ochronnych przed bitwą.
+TRUDNY (lekko w prawo): wrogowie korzystają z najbardziej wyrafinowanej SI oraz prawie ze wszystkich swoich umiejętności, niektórzy mają dodatkową premię do swoich mocy, a jeśli tylko potrafią, to rzucają niektóre zaklęcia ochronne przed bitwą.
+TAKTYCZNY (na środku): wrogowie korzystają z najbardziej wyrafinowanej SI oraz większości swoich umiejętności, a jeśli tylko potrafią, to rzucają kilka zaklęć ochronnych z wyprzedzeniem.
+ULEPSZONY (lekko w lewo): wrogowie korzystają z wyszukanej SI ale wstrzymują się od używania swoich najpotężniejszych zdolności i nie wołają o pomoc, a jeśli tylko potrafią, to rzucają jedynie długotrwałe zaklęcia ochronne z wyprzedzeniem.
+PODSTAWOWY (do końca w lewo): wrogowie korzystają z rudymentarnej SI (podobnej do poziomu z niezmodyfikowanej gry) i nie korzystają z wielu zdolności (w tym klasowych).
+UWAGA: ustawienia trudności dla poszczególnych składników można dostrajać korzystając z menu ustawień gry lub kontrolki dostępnej jako zdolność specjalna (w zależności od gry)."
+
+@1110 = "Suwak ten pozwala zmienić poziom trudności gry. Dostępne są następujące ustawienia:\nSZALONY (do końca w prawo): wrogowie korzystają z najbardziej wyrafinowanej SI i ze wszystkich swoich umiejętności, wielu z nich ma dodatkową premię do swoich mocy, a jeśli tylko potrafią, to rzucają wiele zaklęć ochronnych przed bitwą.\nTRUDNY (lekko w prawo): wrogowie korzystają z najbardziej wyrafinowanej SI oraz prawie ze wszystkich swoich umiejętności, niektórzy mają dodatkową premię do swoich mocy, a jeśli tylko potrafią, to rzucają niektóre zaklęcia ochronne przed bitwą.\nTAKTYCZNY (na środku): wrogowie korzystają z najbardziej wyrafinowanej SI oraz większości swoich umiejętności, a jeśli tylko potrafią, to rzucają kilka zaklęć ochronnych z wyprzedzeniem.\nULEPSZONY (lekko w lewo): wrogowie korzystają z wyszukanej SI ale wstrzymują się od używania swoich najpotężniejszych zdolności i nie wołają o pomoc, a jeśli tylko potrafią, to rzucają jedynie długotrwałe zaklęcia ochronne z wyprzedzeniem.\nPODSTAWOWY (do końca w lewo): wrogowie korzystają z rudymentarnej SI (podobnej do poziomu z niezmodyfikowanej gry) i nie korzystają z wielu zdolności (w tym klasowych).\nUWAGA: ustawienia trudności dla poszczególnych składników można dostrajać korzystając z menu ustawień gry lub kontrolki dostępnej jako zdolność specjalna (w zależności od gry)."
+@1111 = "Wrogowie wciąż będą inteligentnie wyszukiwać swoje cele ataku. Będą korzystać z większości swoich mocy, a także często wzywać po pomoc pobliskich sojuszników. Przeciwnicy mogący rzucać zaklęcia będą to robić zawczasu przed walką, zwłaszcza wtedy gdy będą w zasięgu wzroku drużyny. Niektóre nadprzyrodzone stworzenia uzyskują możliwość natychmiastowego i nieprzerywalnego używania swoich umiejętności."
+@1112 = "Wrogowie wybierają swoje cele ataku i korzystają z zaklęć w mało inteligentny sposób. Wstrzymują się od używania niektórych bardziej niebezpiecznych zdolności specjalnych i zaklęć. Kilku najpotężniejszych magów będzie mogło korzystać ze swoich wysokopoziomowych umiejętności na późniejszym etapie gry. Ten poziom trudności jest zbliżony do poziomu „Podstawowe Zasady” z niezmodyfikowanej gry."
+@1113 = "Wrogowie korzystają prawie ze wszystkich swoich umiejętności i robią to najlepiej, jak potrafią. Wrogowie są liczniejsi, a niektóre rodzaje stworzeń otrzymują premię do punktów życia. Przeciwnicy mogący rzucać zaklęcia będą je rzucać z wyprzedzeniem i robią to jeszcze bardziej agresywnie."
+@1114 = "Wrogowie są jeszcze liczniejsi i uzyskują kolejne premie do swoich punktów życia i umiejętności. Przeciwnicy mogący rzucać zaklęcia robią to agresywnie i zawczasu przed walką. Przez całą grę najpotężniejsi wrogowie będą korzystać z umiejętności wysokopoziomowych."
+@1115 = "Inteligentni wrogowie atakują i korzystają ze swoich mocy całkiem rozsądnie. Większość z nich nie będzie używać zdolności klasowych i swoich najniebezpieczniejszych zdolności specjalnych."
+
+@1116 = "TAKTYCZNY"
+@1117 = "Taktyczny"
+@1118 = "PODSTAWOWY"
+@1119 = "Podstawowy"
+@1120 = "TRUDNY"
+@1121 = "Trudny"
+@1124 = "ULEPSZONY"
+@1125 = "Ulepszony"
+
+@1126 = "Nie zmieniaj obrażeń na podstawie poziomu trudności (zalecane)"
+@1127 = "Włączenie tej opcji powoduje, że suwak poziomu trudności nie wprowadza zaprogramowanych zmian do obrażeń zadawanych przez wrogów (modyfikacja Sword Coast Stratagems zakłada, że ta opcja jest włączona)."
+@1128 = "DOSTRAJANIE POZIOMU TRUDNOŚCI"
+
+@1133 = "Wrogowie korzystają prawie ze wszystkich swoich umiejętności i robią to najlepiej, jak potrafią. Wrogowie są liczniejsi, a niektóre rodzaje stworzeń otrzymują premię do punktów życia. Przeciwnicy mogący rzucać zaklęcia będą je rzucać z wyprzedzeniem i robią to jeszcze bardziej agresywnie."
+@1134 = "Wrogowie są jeszcze liczniejsi i uzyskują kolejne premie do swoich punktów życia i umiejętności. Przeciwnicy mogący rzucać zaklęcia robią to agresywnie i zawczasu przed walką."
+@1135 = "Wrogowie zachowują wszelkie korzyści, jakie odnosili na poziomie trudności Szalony, jak również otrzymują znacznie więcej punktów życia, poprawione TraK0, lepsze rzuty obronne oraz więcej ataków na rundę. Każdy wystarczająco potężny przeciwnik będzie korzystać z umiejętności wysokopoziomowych.\n\nUWAGA: poziom trudności Dziedzictwo Bhaala może zostać wybrany tylko na początku gry i nie może być zmieniony w jej trakcie!"
+@1136 = "Drużyna uzyskuje wszelkie korzyści wynikające z poziomu trudności Podstawowy, a ponadto jej członkowie nie mogą zginąć podczas walki."

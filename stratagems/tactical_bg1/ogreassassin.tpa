@@ -1,0 +1,26 @@
+LAF include STR_VAR file=caster_shared.tph locbase=caster_shared END
+LAUNCH_ACTION_MACRO read_in_instant_prebuff_spells
+
+DEFINE_ACTION_FUNCTION ogreassassin BEGIN
+
+      // delete them from the area
+
+      LAF edit_area STR_VAR area= ~%BaldursGateDocks_OgreMagiHouse_L1%~ editstring="delete_actor=>~actor_resource is_in [%tutu_var%ogrema %tutu_scripto%grema_a %tutu_scripto%grema_b %tutu_scripto%grema_c %tutu_scripto%grema_d]~" END
+
+      // tweak eltan's script; make ogre dialog
+      
+      LAF install STR_VAR files=~eltan.d ogreambush.d~ location=resource END
+      ADD_JOURNAL @21503
+
+      // give scroll to ogre leader
+      
+      LAF clone_item STR_VAR item=~scrl2x=>dw#ogscr~ editstring=~say_both_descriptions=>21501~ END
+      LAF edit_creature STR_VAR creature= ~%tutu_scripto%grema_d~ editstring=~add_items=>dw#ogscr~ END
+
+      // extend area script
+
+      LAF extend_area_script STR_VAR area= ~%Candlekeep_Ch6%~ top=ogreambush location=resource END
+
+END
+
+

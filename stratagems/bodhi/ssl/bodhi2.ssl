@@ -1,0 +1,57 @@
+INCLUDE FILE(%MOD_FOLDER%/lib/ssl/shared_definitions.ssl)
+INCLUDE FILE(%MOD_FOLDER%/vampire/ssl/vampire_definitions.ssl)
+
+VARIABLE(IsNotMoron=True)
+
+/// Initialise
+
+IF
+	!Global("initialise","LOCALS",1)
+THEN
+	RESPONSE #100
+		SetGlobal("initialise","LOCALS",1)
+		SetGlobalTimer("educational","LOCALS",60)
+		Continue()
+END
+
+/////////////////////////////////////////////////////////////////
+/////	Block pro/undead scrolls
+/////////////////////////////////////////////////////////////////
+
+IF                                                               
+       !GlobalTimerNotExpired("blockproundead","LOCALS")
+       See(NearestEnemyOf(Myself))
+THEN
+       RESPONSE #100
+           ApplySpellRES("dw#nprun",Player1)
+           ApplySpellRES("dw#nprun",Player2)
+           ApplySpellRES("dw#nprun",Player3)
+           ApplySpellRES("dw#nprun",Player4)
+           ApplySpellRES("dw#nprun",Player5)
+           ApplySpellRES("dw#nprun",Player6)
+           SetGlobalTimer("blockproundead","LOCALS",300)
+           Continue()
+END
+
+
+/// end fight, resume chat
+
+IF
+	HPPercentLT(Myself,25)
+THEN
+	RESPONSE #100
+		StartDialogueNoSet(Player1)
+END
+
+
+IF
+	Global("initialise","LOCALS",1)
+	!GlobalTimerNotExpired("educational","LOCALS")
+THEN
+	RESPONSE #100
+		StartDialogueNoSet(Player1)
+END
+
+INCLUDE FILE (%MOD_FOLDER%/bodhi/ssl/bodhi_sleep.ssl)
+INCLUDE FILE (%MOD_FOLDER%/bodhi/ssl/bodhi_touch.ssl)
+INCLUDE FILE (%MOD_FOLDER%/vampire/ssl/vampire_melee.ssl)

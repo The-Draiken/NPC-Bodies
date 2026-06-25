@@ -1,0 +1,76 @@
+
+INCLUDE FILE(%MOD_FOLDER%\genie\ssl\genie_definitions.ssl)
+
+BEGIN LOOP(scscloudmelee||!Range([PC],8))
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/initial.ssl)
+END LOOP
+
+
+IF
+	StateCheck(Myself,STATE_INVISIBLE)
+	GlobalTimerNotExpired("inviswander","LOCALS")
+THEN
+	RESPONSE #100
+		RandomWalkContinuous()
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	!CheckStatGT(Myself,2,STONESKINS)
+THEN DO
+	Action(SpellMyself,WIZARD_STONE_SKIN)
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	!CheckStatGT(Myself,0,IMPROVEDHASTE)
+THEN DO
+	Action(SpellMyself,WIZARD_IMPROVED_HASTE)
+END
+
+
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	!StateCheck(Myself,STATE_INVISIBLE)
+	TriggerBlock(TruesightSafe|EasyPlus)
+	Target(Myself)
+THEN DO
+	SetGlobalTimer("inviswander","LOCALS",4)
+	Action(SpellMyself,WIZARD_INVISIBILITY|100|100)
+END
+
+IF TRIGGER
+	IgnoreBlock(RevisedMassiveDamage)
+	ConditionalTargetBlock(PCsInOrder;CheckStatGT(scstarget,4,SAVEVSSPELL)&!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(PCsInOrder)
+	TriggerBlock(MR100|SpellDeflect|Enemy|Petrify|EasyPlus)
+	OR(2)
+	        GlobalGT("DMWWPetrifyPlayer","GLOBAL",0)
+		!InPartySlot(scstarget,0) // isn't Player 1
+THEN DO
+	Action(Spell,WIZARD_FLESH_TO_STONE|100|50)
+END
+
+IF TRIGGER
+	RequireBlock(RevisedMassiveDamage)
+	ConditionalTargetBlock(PCsInOrder;CheckStatGT(scstarget,4,SAVEVSSPELL)&!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(PCsInOrder)
+	TriggerBlock(MR100|SpellDeflect|Enemy|Petrify|EasyPlus)
+THEN DO
+	Action(Spell,WIZARD_FLESH_TO_STONE|100|50)
+END
+
+//////////////////////////////////////////////////////////////////////////////
+////	Core combat block
+///////////////////////////////////////////////////////////////////////////////
+
+
+BEGIN LOOP(MyWeaponStrength||3)
+BEGIN LOOP(MyWeaponDamageType||Crushing)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/easy_melee.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/dw#wtacor.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/move.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/chase.ssl)
+END LOOP
+END LOOP

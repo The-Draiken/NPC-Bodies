@@ -1,0 +1,24 @@
+IF
+	Global("IMPRISON","LOCALS",1)
+	Global("GromnirImprisoned","AR6200",0)
+THEN
+	RESPONSE #100
+		ClearActions(Myself)
+		SetInterrupt(FALSE)
+		SetGlobal("IMPRISON","LOCALS",0)
+		SetGlobal("GromnirImprisoned","AR6200",1)
+		DisplayStringHead(Myself,46151) // help!
+		SetInterrupt(TRUE)
+END
+
+/////////////////////////////////////////////////////
+///	Find the party if you lose them
+/////////////////////////////////////////////////////////////
+
+IF
+	!See(NearestEnemyOf(Myself))
+THEN
+	RESPONSE #100
+		MoveToObject(Player1)
+END
+

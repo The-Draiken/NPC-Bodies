@@ -1,0 +1,64 @@
+INCLUDE ~%MOD_FOLDER%/lib/ai_wrap.tph~
+
+DEFINE_ACTION_FUNCTION c4end BEGIN
+
+     // create Davaeorn's special battle horrors
+
+     MAKE_PATCH
+        delete_opcodes=>206
+        immunity_to_spell=>~%WIZARD_WEB% %WIZARD_FIREBALL% %WIZARD_LIGHTNING_BOLT%~
+        strip_script=>dw#davho
+        insert_script_high=>dw#davho
+     END
+     LAF clone_creature STR_VAR creature= ~%tutu_var%battho=>dw#davho~ edits=patch_data END
+     LAF ssl_to_bcs STR_VAR script=dw#davho location=~ssl~ END
+
+     // create Davaeorn's flunkies
+
+    MAKE_PATCH
+       level=>5
+       genai=>prof
+       enforce_hp=>at_worst
+       enforce_thac0=>at_worst
+       enforce_saves=>at_worst
+       xp_value=>420
+       insert_script_high=>dw#davfl
+    END
+
+    LAF clone_creature STR_VAR creature=~%tutu_scripti%ronelit=>dw#dafla %tutu_var%irongu=>dw#daflu~ edits=patch_data END
+
+    LAF ssl_to_bcs STR_VAR script=dw#davfl location=~ssl~ END
+
+
+     // edit the script in Davaeorn's traps
+
+     LAF compile_rename STR_VAR file=~battleho=>%tutu_scriptb%attleho~ location=resource END
+
+     // edit the area files to create horrors next to Davaeorn
+
+     MAKE_PATCH
+        actor_name=>"{literal:Battle Horror}"
+        actor_resource=>dw#davho
+        actor_x_coord_start=>871
+        actor_y_coord_start=>873
+        actor_x_coord_dest=>871
+        actor_y_coord_dest=>873
+        actor_orientation=>10
+     END
+     LAF edit_area STR_VAR area=~%CloakwoodMines_L4%~ editstring="add_actor=>patch_data" END
+     MAKE_PATCH
+        actor_name=>"{literal:Battle Horror}"
+        actor_resource=>dw#davho
+        actor_x_coord_start=>787
+        actor_y_coord_start=>800
+        actor_x_coord_dest=>787
+        actor_y_coord_dest=>800
+        actor_orientation=>10
+     END
+     LAF edit_area STR_VAR area=~%CloakwoodMines_L4%~ editstring="add_actor=>patch_data" END
+
+     // edit the area script to spawn flunkies
+     
+     LAF extend_area_script INT_VAR ssl=1 STR_VAR area=~%CloakwoodMines_L4%~ top=ar1803add location=ssl END
+
+END

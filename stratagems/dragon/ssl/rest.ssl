@@ -1,0 +1,8 @@
+////////////////////////////////////////////////////////////
+////	This is a rest-and-recover step for when
+////	enemies leave you alone...
+////    (In current incarnations there's no difference from 
+////    common version)
+////////////////////////////////////////////////////////////
+
+INCLUDE FILE (%MOD_FOLDER%\lib\ssl\common_rest.ssl)

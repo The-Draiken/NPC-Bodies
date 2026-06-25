@@ -1,0 +1,33 @@
+IF
+	Die()
+THEN
+	RESPONSE #100
+		ReallyForceSpell(Myself,FIREBALL_DEATH)
+END
+
+IF TRIGGER
+	Dead("GOODDEAT")
+THEN DO
+                Action(Literal)
+		ChangeAIScript("dw#death",OVERRIDE)
+END
+
+IF
+	See("GOODDEAT")
+THEN
+	RESPONSE #100
+		Attack("GOODDEAT")
+END
+
+IF
+     See(NearestEnemyOf(Myself))
+THEN
+     RESPONSE #100
+              Attack(NearestEnemyOf(Myself))
+END
+
+IF
+  True()
+THEN
+    RESPONSE #100
+END

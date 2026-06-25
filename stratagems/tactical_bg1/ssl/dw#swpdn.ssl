@@ -1,0 +1,20 @@
+ // legacy, unused fragment from old SCS-in-BGEE
+
+BEGIN_ACTION_DEFINITION
+Name(Swap)
+TRIGGER
+        !Detect([PC])       
+   !GlobalGT("AI_override","GLOBAL",2)
+        OR(3)
+           DifficultyLT(HARD)
+           Global("AI_override","GLOBAL",1)
+           Global("AI_override","GLOBAL",2)
+
+   Name("scsargument3",Myself)
+ACTION
+   RESPONSE #100
+    CreateCreatureObject("scsargument1",Myself,0,0,0)
+    DestroySelf()
+END
+
+INCLUDE FILE(%MOD_FOLDER%/tactical_bg1/ssl/swap_core.ssl)

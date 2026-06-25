@@ -1,0 +1,188 @@
+
+
+BEGIN LOOP(!StateCheck\(scstarget,STATE_INVISIBLE\)|| )
+BEGIN LOOP(!StateCheck\(scstarget,STATE_NOT_TARGETABLE\)|| )
+BEGIN LOOP(CheckStatLT\(Myself,60,SPELLFAILUREMAGE\) || )
+INCLUDE FILE (%MOD_FOLDER%\lib\ssl\shared_definitions.ssl)
+END LOOP
+END LOOP
+END LOOP
+
+BEGIN LOOP(scscloudmelee||!Range([PC],8))
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/initial.ssl)
+END LOOP
+
+BEGIN_ACTION_DEFINITION
+	Name(Attack)
+	TRIGGER
+	ACTION
+		RESPONSE #scsprob1
+		SetGlobal("validtarget","LOCALS",1)
+		EquipMostDamagingMelee()
+		AttackOneRound(scstarget)
+END
+
+BEGIN_ACTION_DEFINITION
+	Name(AttackIfEmpty)
+	TRIGGER
+		ActionListEmpty()
+	ACTION
+		RESPONSE #scsprob1
+		EquipMostDamagingMelee()
+		AttackOneRound(scstarget)
+END
+
+/////////////////////////////////////////////////////////////////////////
+///////// Mechanics
+/////////////////////////////////////////////////////////////////////////
+
+IF
+        IgnoreBlock(YagaFinale)
+	!HasItem("sureHP1",Myself) // No such index
+	CheckStatGT(Myself,20,RESISTCOLD)
+	!GlobalTimerNotExpired("WeakenYaga","LOCALS")
+THEN
+	RESPONSE #100
+		SetGlobalTimer("WeakenYaga","LOCALS",6)
+		ReallyForceSpellRES("yagweak",Myself) // No such index
+END
+
+
+IF
+        IgnoreBlock(YagaFinale)
+	!Detect([GOODCUTOFF])
+	HasItem("sureHP1",Myself) // No such index
+THEN
+	RESPONSE #100
+	    NoAction()
+END
+
+IF
+	!Detect([GOODCUTOFF])
+	!HasItem("sureHP1",Myself) // No such index
+THEN
+	RESPONSE #100
+		MoveToObject(Player1)
+END
+		
+
+/////////////////////////////////////////////////////////////////////////
+///// Keep Aura of Flaming Death active whenever someone's in range for it
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	!GlobalTimerNotExpired("aurafire","LOCALS")
+	!CheckStatGT(scstarget,75,RESISTFIRE)
+	!CheckStatGT(scstarget,75,RESISTMAGIC)
+	TargetBlock(EnemiesInOrderShort)
+	Range(scstarget,5)
+	TriggerBlock(EasyPlus)
+THEN DO
+	SetGlobalTimer("aurafire","LOCALS",60)
+	Action(ForceSpellMyself,CLERIC_AURA_OF_FLAMING_DEATH|100|50)
+END
+
+/////////////////////////////////////////////////////////////////////////
+///// Lava bombs- first of all at places where PCs cluster and allies don't,
+///// but failing that, try anywhere
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	TargetBlock(PCsInOrder)
+	TargetBlock(Celestials)
+	TriggerBlock(Enemy|Helpless|AoEFire)
+	!CheckStatGT(scstarget,80,RESISTFIRE)
+	!GlobalTimerNotExpired("LavaBomb","LOCALS")
+	TriggerBlock(CorePlus)
+THEN DO
+	Combine()
+	SetGlobalTimer("castspell","LOCALS",6)
+	SetGlobalTimer("Lavabomb","LOCALS",30)
+	DisplayStringHead(Myself,68229) // Fire!
+	ForceSpellRES("yaga01",scstarget)
+	Action(Literal|100|100)
+END
+
+IF TRIGGER
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	TargetBlock(PCsInOrder)
+	TargetBlock(Celestials)
+	TriggerBlock(Enemy|Helpless)
+	!CheckStatGT(scstarget,80,RESISTFIRE)
+	!GlobalTimerNotExpired("LavaBomb","LOCALS")
+	TriggerBlock(CorePlus)
+THEN DO
+	Combine()
+	SetGlobalTimer("castspell","LOCALS",6)
+	SetGlobalTimer("Lavabomb","LOCALS",30)
+	DisplayStringHead(Myself,68229) // Fire!
+	ForceSpellRES("yaga01",scstarget)
+	Action(Literal|100|200)
+END
+
+/////////////////////////////////////////////////////////////////////////
+///// Firestorm, center self
+/////////////////////////////////////////////////////////////////////////
+
+
+IF TRIGGER
+	!Global("firestorm","LOCALS",1)
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	Range(NearestEnemyOf(Myself),10)
+	Range(SecondNearestEnemyOf(Myself),10)
+	HPPercentLT(Myself,75)
+	TriggerBlock(EasyPlus|AoESunfire)
+	Target(Myself)
+THEN DO
+        Action(Literal|100|100)
+        SetGlobalTimer("castspell","LOCALS",6)
+        SetGlobal("firestorm","LOCALS",1)
+        ForceSpell(Myself,CLERIC_FIRE_STORM)
+END
+
+IF TRIGGER
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	Range(LastSeenBy(Myself),15)
+	OR(2)
+           !Range("yaga02",15)
+           HPPercentLT(Myself,50)
+	OR(2)
+           !Range("yaga03",15)
+           HPPercentLT(Myself,50)
+	OR(2)
+           !Range("yaga04",15)
+           HPPercentLT(Myself,50)
+	OR(2)
+           !Range("yaga05",15)
+           HPPercentLT(Myself,50)
+	!GlobalTimerNotExpired("Sunray","LOCALS")
+	TriggerBlock(EasyPlus)
+THEN DO
+                Action(Literal|100|100)
+		SetGlobalTimer("castspell","LOCALS",6)
+		SetGlobalTimer("Sunray","LOCALS",30)
+		ForceSpell(Myself,CLERIC_SUNRAY)
+END
+
+
+
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/potionuse.ssl)
+
+
+BEGIN LOOP(scscloudmelee||See([PC]) !Range([PC],8))
+BEGIN LOOP(scscloudresponse||MoveToObject([PC]))
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/fleecloud.ssl)
+END LOOP
+END LOOP
+
+BEGIN LOOP(MyWeaponStrength||5)
+BEGIN LOOP(MyWeaponDamageType||Crushing)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/chase.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/dw#wtacor.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/move.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/chase.ssl)
+END LOOP
+END LOOP
+

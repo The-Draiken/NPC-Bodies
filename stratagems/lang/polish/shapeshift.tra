@@ -1,0 +1,210 @@
+
+@13120 = ~Symbol pomniejszego wilkołaka~
+@13121 = ~Symbol wilkołaka~
+@13122 = ~Symbol większego wilkołaka~
+@13123 = ~Symbol przemiany w niedźwiedzia~
+@13124 = ~Symbol przemiany w wilka~
+@13125 = ~Symbol przemiany w wiwernę~
+@13126 = ~Symbol przemiany w salamandrę~
+@13127 = ~Symbol przemiany w pająka~
+@13128 = ~Symbol żywiołaka ognia~
+@13129 = ~Symbol żywiołaka ziemi~
+
+@13140 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w pomniejszego wilkołaka w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć, ale zdobywa niezwykłą siłę i szybkość wilkołaka. W odróżnieniu od prawdziwego wilkołaka druid jest wciąż podatny na broń niemagiczną.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: 4
+– Siła: 18/76
+– Zręczność: 16
+– Jeden atak na rundę
+– Obrażenia: 1k6
+– Typ obrażeń: sieczne
+– Odporność na magię: +10%
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13141 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w wilkołaka w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć, ale zdobywa niezwykłą siłę i szybkość wilkołaka. W odróżnieniu od prawdziwego wilkołaka druid jest wciąż podatny na broń niemagiczną.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: 1
+– Siła: 19
+– Zręczność: 17
+– Dwa ataki na rundę
+– Obrażenia: 1k8 (uderza jak broń +1)
+– Typ obrażeń: sieczne
+– Odporność na magię: +20%
+– Przyspieszenie
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13142 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w wilkołaka w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć, ale zdobywa niezwykłą siłę i szybkość wilkołaka. W odróżnieniu od prawdziwego wilkołaka druid jest wciąż podatny na broń niemagiczną.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: -4
+– Siła: 21
+– Zręczność: 20
+– Dwa ataki na rundę
+– Obrażenia: 2k6 (uderza jak broń +3)
+– Typ obrażeń: sieczne
+– Odporność na magię: +40%
+– Odporność na ogień, elektryczność, kwas i zimno: +50%
+– Przyspieszenie
+– Regeneracja punktów życia: 6/rundę
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13143 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w brunatnego niedźwiedzia w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: 7
+– Siła: 18/00
+– Zręczność: 12
+– Dwa ataki na rundę
+– Obrażenia: 1k6
+– Typ obrażeń: sieczne
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13144 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w wilka w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY: 
+
+W zmienionej formie:
+– Klasa Pancerza: 6
+– Siła: 17
+– Zręczność: 18
+– Dwa ataki na rundę
+– Obrażenia: 1k8
+– Typ obrażeń: kłute
+– Zwiększona szybkość poruszania
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13145 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w małą wiwernę w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: 3
+– Siła: 18/76
+– Zręczność: 17
+– Dwa ataki na rundę
+– Obrażenia: 2k4 (uderza jak broń +2)
+– Typ obrażeń: kłute
+– 25% szans na dodatkowe 3 obrażenia od trucizny
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13146 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w ognistą salamandrę w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: 2
+– Siła: 18/76
+– Zręczność: 19
+– Jeden atak na rundę
+– Obrażenia: 1k8 (uderza jak broń +2)
+– Typ obrażeń: kłute
+– Odporność na ogień: 100%
+– Przyspieszenie
+– Ognista tarcza
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13147 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w olbrzymiego pająka w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: 2
+– Siła: 16
+– Zręczność: 16
+– Trzy ataki na rundę
+– Obrażenia: 1k4 (uderza jak broń +2)
+– Typ obrażeń: kłute
+– Szansa na zatrucie przeciwnika powodując 2 obrażenia na rundę przez sześć rund (rzut obronny przeciw truciznom neguje)
+– Przyspieszenie
+– Odporność na Pajęczynę
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13148 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w większego żywiołaka ognia w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: -5
+– Siła: 22
+– Zręczność: 25
+– Dwa ataki na rundę
+– Obrażenia: 1k10 (uderza jak broń +4)
+– Typ obrażeń: obuchowe
+– Zadaje dodatkowe 1k10 obrażeń od ognia
+– Zwiększona szybkość poruszania
+– Odporność na ogień: 100%
+– Ognista tarcza
+– Odporność na modyfikację Siły i Zręczności
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13149 = ~Symbol ten pozwala zmiennokształtnemu druidowi, który go stworzył, na przemianę w większego żywiołaka ziemi w dowolnej chwili. Druid w tej formie nie może rozmawiać ani rzucać zaklęć.
+
+PARAMETRY:
+
+W zmienionej formie:
+– Klasa Pancerza: -5
+– Siła: 25
+– Zręczność: 10
+– Dwa ataki na rundę
+– Obrażenia: 2k10 (uderza jak broń +4)
+– Typ obrażeń: obuchowe
+– Zmniejszona szybkość poruszania
+– Odporność na obrażenia fizyczne: +50%
+– Odporność na modyfikację Siły, Zręczności i odporności na obrażenia fizyczne
+
+Użycie: włóż do przegródki Podręcznej broni
+
+Może używać:
+ Twórca symbolu~
+@13150 = ~Przemiana w żywiołaka ognia
+
+Czerpiąca ze sfery ognia, ta potężna zdolność zmiany kształtu umożliwia druidowi przemianę w żywiołaka ognia o 24 kostkach, dysponującego ogromną siłą. Żywiołak taki ma KP -5, TraK0 2 i może wyrządzić 1k10 obrażeń obuchowych i dodatkowo 1k10 obrażeń od ognia. Żywiołak ma Siłę 22, Zręczność 25 i 100% odporności na ogień, a także zadaje obrażenia od ognia każdemu, kto go zaatakuje.~
+@13151 = ~Przemiana w żywiołaka ziemi
+
+Czerpiąca ze sfery ziemi, ta potężna zdolność zmiany kształtu umożliwia druidowi przemianę w żywiołaka ziemi o 24 kostkach, dysponującego ogromną siłą. Żywiołak taki ma KP -5, TraK0 2 i może wyrządzić 2k10 obrażeń obuchowych. Żywiołak ma Siłę 25, Zręczność 10 i 50% odporności na wszystkie ataki wręcz, jak i przed pociskami.~
+@13152 = ~Wytrzymałość nie daje żadnych efektów, gdy jest się w postaci żywiołaka ziemi.~

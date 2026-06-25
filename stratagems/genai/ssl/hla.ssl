@@ -1,0 +1,791 @@
+
+/////////////////////////////////////////////////////
+////	If you've got a defence potion, take it right
+////	away. For crude convenience, we just use a 
+////	global to record if we've done so.
+////
+////	DON'T prioritise this over going invisible/buffing if you're
+////	already at least 14th level. (We repeat the block later)
+/////////////////////////////////////////////////////
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+	See(NearestEnemyOf(Myself))
+	!StateCheck(Myself,STATE_INVISIBLE)
+	!Global("takendefence","LOCALS",1)
+	!CheckStatGT(Myself,13,Level)
+	IgnoreBlock(IsHighLevel)
+THEN DO
+	Action(Potion,"dw#ptn34",@101034)
+	Action(Potion,"dw#ptn35",@101035)
+	Action(Potion,"dw#ptn21",@101021)
+	Action(Potion,"dw#ptn45",@101045)
+	Action(Potion,"%tutu_var%potn34",@101034)
+	Action(Potion,"%tutu_var%potn35",@101035)
+	Action(Potion,"%tutu_var%potn21",@101021)
+	Action(Potion,"%tutu_var%potn45",@101045)
+	SetGlobal("takendefence","LOCALS",1)
+END
+
+IF TRIGGER
+	IgnoreBlock(Talents)
+	See(NearestEnemyOf(Myself))
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsThief|IsAssassin)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	!GlobalTimerNotExpired("evasion_timer","LOCALS")
+THEN DO
+	SetGlobalTimer("evasion_timer","LOCALS",6)
+	Action(Ability,ROGUE_GREATER_EVASION|200|100)
+	Action(Ability,ROGUE_EVASION|200|100)
+END
+
+IF TRIGGER
+	RequireBlock(Talents)
+	See(NearestEnemyOf(Myself))
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsThief|IsAssassin)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	!GlobalTimerNotExpired("evasion_timer","LOCALS")
+THEN DO
+	SetGlobalTimer("evasion_timer","LOCALS",6)
+	Action(AbilityRES,"%ROGUE_AVOID_DEATH%"|200|100)
+END
+	
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsFighter|IsRanger|IsPaladin)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	!CheckStatGT(Myself,50,RESISTMAGIC)
+THEN DO
+	Action(Ability,WARRIOR_RESIST_MAGIC|200|100)
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	RequireBlock(IsHighLevel)
+	RequireBlock(Talents)
+	RequireBlock(IsPaladin)
+	IgnoreBlock(IsBlackguard)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	!GlobalTimerNotExpired("shieldoflaw","LOCALS")
+THEN DO
+	Action(AbilityRES,"%PALADIN_SHIELD_OF_LAW%"|200|100)
+	SetGlobalTimer("shieldoflaw","LOCALS",60)
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	 !GlobalTimerNotExpired("summondeva","LOCALS")
+        RequireBlock(IsPaladin)
+		IgnoreBlock(IsBlackguard)
+	RequireBlock(IsHighLevel)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+THEN DO
+        SetGlobalTimer("summondeva","LOCALS",1000)
+        Action(SpellArea,PALADIN_SUMMON_DEVA|300|100)
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+        !GlobalTimerNotExpired("summondeva","LOCALS")
+        RequireBlock(IsBlackguard)
+	RequireBlock(IsHighLevel)
+	IgnoreBlock(Talents)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+THEN DO
+        SetGlobalTimer("summondeva","LOCALS",1000)
+        Action(SpellArea,BLACKGUARD_SUMMON_FALLEN_DEVA|300|100)
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellAreaRES,"%BLACKGUARD_SUMMON_BALOR%"|300|100)
+        Action(SpellAreaRES,"%BLACKGUARD_SUMMON_PIT_FIEND%"|300|100)
+END
+
+IF TRIGGER
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TargetBlock(Fiends)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+	!Allegiance(scstarget,ENEMY)
+	Alignment(scstarget,CHAOTIC_EVIL)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellRES,"%BLACKGUARD_ABYSSAL_PACT%")
+END
+
+IF TRIGGER
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TargetBlock(Fiends)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+	!Allegiance(scstarget,ENEMY)
+	Alignment(scstarget,LAWFUL_EVIL)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellRES,"%BLACKGUARD_INFERNAL_CONTRACT%")
+END
+
+IF TRIGGER
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TargetBlock(PCsInOrderShort)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage)
+	!HPPercentLT(scstarget,10)
+	!HasItem("harm",Myself)
+THEN DO
+	Action(AbilityRES,"%BLACKGUARD_HARM%"|200|100)
+END
+
+
+IF TRIGGER
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+	TargetBlock(Celestials)
+	TargetBlock(PCsPreferringWeak)
+	!Allegiance(scstarget,ENEMY)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellRES,"%BLACKGUARD_PROFANE_FIRE%"|300|100)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsMonk)
+        IgnoreBlock(IsDarkMoon)
+        Target(Myself)
+        TargetBlock(HumanoidVillains)
+        Allegiance(scstarget,ENEMY)
+        HPPercentLT(scstarget,50)
+THEN DO
+       Action(Spell,MONK_LAY_ON_HANDS|100|50)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsPaladin)
+		IgnoreBlock(IsBlackguard)
+        Target(Myself)
+        TargetBlock(HumanoidVillains)
+        Allegiance(scstarget,ENEMY)
+        HPPercentLT(scstarget,50)
+THEN DO
+       Action(Spell,PALADIN_LAY_ON_HANDS|100|50)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(Refinements)
+	RequireBlock(IsBarbarian)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),15)
+THEN DO
+	Action(AbilityRES,"%BARBARIAN_GREATER_WAR_CRY%"|100|100)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(Talents)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),15)
+THEN DO
+	Action(AbilityRES,"%WARRIOR_GREATER_WAR_CRY%"|100|50)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),15)
+THEN DO
+	Action(Ability,WARRIOR_WAR_CRY|100|100)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(Talents)
+	RequireBlock(IsMonk)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+	!StateCheck(Myself,STATE_IMPROVEDINVISIBILITY)
+THEN DO
+	Action(AbilityRES,"%MONK_ETHEREAL%")
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(Talents)
+	RequireBlock(IsMonk)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+	OR(2)
+		!CheckStatGT(Myself,75,RESISTCRUSHING)
+		!CheckStatGT(Myself,75,RESISTSLASHING)
+THEN DO
+	Action(AbilityRES,"%MONK_CHANT%")
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+	OR(2)
+		!CheckStatGT(Myself,39,RESISTCRUSHING)
+		!CheckStatGT(Myself,39,RESISTSLASHING)
+THEN DO
+	Action(Ability,WARRIOR_HARDINESS)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsDwarvenDefender)
+	TriggerBlock(CorePlus)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+	OR(2)
+		!CheckStatGT(Myself,39,RESISTCRUSHING)
+		!CheckStatGT(Myself,39,RESISTSLASHING)
+THEN DO
+	Action(AbilityRES,"%DWARVEN_DEFENDER_DEFENSIVE_STANCE%")
+END
+
+IF TRIGGER
+        RequireBlock(IsBarbarian)
+        RequireBlock(IsHighLevel)
+        RequireBlock(Refinements)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(IAmNotRaging)
+THEN DO
+	Action(AbilityRES,"%BARBARIAN_TIRELESS_RAGE%")
+END
+
+IF TRIGGER
+        RequireBlock(IsKensai)
+        RequireBlock(IsHighLevel)
+        RequireBlock(Refinements|Talents)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackKai)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(AbilityRES,"%KENSAI_TRUE_KAI%")
+END
+
+IF TRIGGER
+        RequireBlock(IsMonk)
+        RequireBlock(IsHighLevel)
+        RequireBlock(Talents)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TriggerBlock(Enemy|Disabled)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(SpellRES,"%MONK_SHADOWLESS_KICK%"|100|100)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(Talents)
+	RequireBlock(IsPaladin)
+	IgnoreBlock(IsBlackguard)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+	Range(NearestEnemyOf(Myself),5)
+	!GlobalTimerNotExpired("wotr","LOCALS")
+THEN DO
+	Action(AbilityRES,"%PALADIN_EXORCISM%")
+	SetGlobalTimer("wotr","Myself",12)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	IgnoreBlock(Talents)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackGreaterWhirlwind)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+	Range(NearestEnemyOf(Myself),5)
+THEN DO
+	Action(Ability,WARRIOR_GREATER_WHIRLWIND)
+END
+
+IF TRIGGER
+	RequireBlock(Talents)
+	RequireBlock(IsMonk)
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackSmite)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(AbilityRES,"%MONK_TIGER_STRIKE%")
+END
+
+IF TRIGGER
+	RequireBlock(Talents)
+	RequireBlock(IsMonk)
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|BreachTarget)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+	!GlobalTimerNotExpired("dragonfist","LOCALS")
+THEN DO
+	Action(AbilityRES,"%MONK_DRAGON_FIST%")
+	SetGlobalTimer("dragonfist","LOCALS",6)
+END
+
+IF TRIGGER
+	RequireBlock(EnhancedEdition)
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackSmite)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(Ability,WARRIOR_SMITE)
+END
+
+IF TRIGGER
+	AreaType(OUTDOOR)
+	IgnoreBlock(EnhancedEdition)
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackSmite)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(Ability,WARRIOR_SMITE)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackPrecisionStrike)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(Ability,WARRIOR_CRITICAL_STRIKE)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+        RequireBlock(IsRanged)
+	RequireBlock(IsArcher)
+	RequireBlock(Refinements|Talents)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackPrecisionStrike)
+	CheckStatGT(scstarget,8,LEVEL)
+	See(scstarget)
+THEN DO
+	Action(AbilityRES,"%ARCHER_PRECISION%")
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsRanged)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackPrecisionStrike)
+	CheckStatGT(scstarget,8,LEVEL)
+	See(scstarget)
+THEN DO
+	Action(Ability,WARRIOR_CRITICAL_STRIKE)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsThief|IsAssassin)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TriggerBlock(Enemy|Disabled|MirrorImage|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackAssassination)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+	Range(NearestEnemyOf(Myself),5)
+	!StateCheck(Myself,STATE_INVISIBLE)
+THEN DO
+	Action(Ability,ROGUE_ASSASINATION)
+END
+
+IF TRIGGER
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	RequireBlock(IsThief|IsAssassin)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TriggerBlock(Enemy|Disabled|MirrorImage|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackAssassination)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+	Range(NearestEnemyOf(Myself),5)
+	!StateCheck(Myself,STATE_INVISIBLE)
+THEN DO
+	Action(AbilityRES,"%ROGUE_ASSASINATION%")
+	Action(AbilityRES,"%ROGUE_CRIPPLING_STRIKE%")
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	RequireBlock(Refinements)
+	RequireBlock(IsAssassin)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+	TriggerBlock(ILackPoison)
+THEN DO
+	Action(AbilityRES,"%ASSASSIN_NERVE_POISON%")
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackWhirlwind)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(Ability,WARRIOR_WHIRLWIND)
+END
+
+IF TRIGGER
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackPowerAttack)
+	CheckStatGT(scstarget,8,LEVEL)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(Ability,WARRIOR_POWER_ATTACK)
+END
+
+
+IF TRIGGER
+	RequireBlock(SmiteEvilOld)
+	RequireBlock(IsPaladin)
+	IgnoreBlock(IsBlackguard)
+	TriggerBlock(CorePlus)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|Evil)
+	Range(scstarget,10)
+THEN DO
+	Action(SpellRES,"%PALADIN_SMITE_EVIL%")
+END
+
+IF TRIGGER
+	RequireBlock(SmiteEvilNew)
+	RequireBlock(IsPaladin)
+	IgnoreBlock(IsBlackguard)
+	!CheckSpellState(Myself,PALADIN_SMITE_EVIL)
+	TriggerBlock(CorePlus)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|Evil)
+	Range(scstarget,5)
+	Combine()
+THEN DO
+	Action(AbilityRES,"%PALADIN_SMITE_EVIL%")
+	Action(AbilityRES,"%spl_smite_evil_cavalier%")
+	Action(AbilityRES,"%spl_smite_evil_undead_hunter%")
+END
+
+IF TRIGGER
+	RequireBlock(SmiteEvilNew)
+	RequireBlock(IsBlackguard)
+	!CheckSpellState(Myself,PALADIN_SMITE_EVIL)
+	TriggerBlock(CorePlus)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|Good)
+	Range(scstarget,5)
+THEN DO
+	Action(AbilityRES,"%spl_smite_good%")
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsBerserker)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(IAmNotRaging)
+THEN DO
+	Action(Ability,BERSERKER_RAGE)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsBarbarian)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(IAmNotRaging)
+THEN DO
+	Action(Ability,BARBARIAN_RAGE)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsKensai)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackKai)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	Action(Ability,KENSAI_KIA)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        HPPercentLT(Myself,75)
+        RequireBlock(IsDarkMoon)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|MR|MinorGlobe)
+	Range(scstarget,5)
+THEN DO
+	Action(SpellRES,"%DARK_MOON_VAMPIRIC_TOUCH%")
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        HPPercentLT(Myself,75)
+        RequireBlock(IsBlackguard)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|MR|MinorGlobe)
+	Range(scstarget,5)
+THEN DO
+	Action(Spell,BLACKGUARD_ABSORB_HEALTH)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsPaladin)
+        TargetBlock(EnemiesInOrderShort)
+        TriggerBlock(Enemy|Disabled)
+THEN DO
+        Combine()
+        Action(SpellMyself,PALADIN_PROTECTION_FROM_EVIL|200|100)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsDarkMoon)
+        TargetBlock(EnemiesInOrderShort)
+        TriggerBlock(Enemy|Disabled)
+        !StateCheck(Myself,STATE_MIRRORIMAGE)
+THEN DO
+        Combine()
+        Action(SpellRES,"%DARK_MOON_MIRROR_IMAGE%"|100|100)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsDarkMoon)
+        TargetBlock(EnemiesInOrderShort)
+        TriggerBlock(Enemy|Disabled)
+        Range(scstarget,5)
+THEN DO
+        Combine()
+        Action(SpellRES,"%DARK_MOON_BLUR%"|100|100)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsDarkMoon)
+	TargetBlock(PCFighters)
+	TriggerBlock(Enemy|Helpless|MR|MinorGlobe)
+	CheckStatGT(scstarget,0,SAVEVSSPELL)
+
+THEN DO
+	Action(SpellRES,"%DARK_MOON_BLINDNESS%"|150|50)
+END
+
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsDarkMoon)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,5)
+	See(scstarget)
+	!GlobalTimerNotExpired("DarkMoonTouch","LOCALS")
+THEN DO
+        SetGlobalTimer("DarkMoonTouch","LOCALS",12)
+	Action(SpellRESMyself,"%DARK_MOON_FROZEN_FIST%")
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsSunSoul)
+        !CheckStat(Myself,0,WIZARD_FIRE_SHIELD)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled)
+	Range(scstarget,5)
+THEN DO
+        Action(SpellMyself,SUN_SOUL_GREATER_SUN)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsSunSoul)
+        !GlobalTimerNotExpired("flamingfists","LOCALS")
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+       Action(SpellMyself,SUN_SOUL_FLAMING_FISTS)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsSunSoul)
+	TargetBlock(EnemiesInOrder)
+	TriggerBlock(Enemy|MR|ResistFire)
+	Range(scstarget,10)
+        TriggerBlock(DirectDamageSafe)
+	!StateCheck(scstarget,STATE_MIRRORIMAGE)
+THEN DO
+	Combine()
+	Action(SpellMyself,SUN_SOUL_SUN_SOULBEAM|150|50)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsBlackguard)
+	TargetBlock(EnemiesInOrder)
+	TriggerBlock(Enemy|MR)
+	Range(scstarget,10)
+THEN DO
+	Combine()
+	Action(SpellMyself,BLACKGUARD_AURA_OF_DESPAIR|100|50)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsSunSoul)
+	ConditionalTargetBlock(PCsPreferringWeak;HPPercentLT(scstarget,40))
+        Target([0.UNDEAD])
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(DirectDamageSafe)
+	TriggerBlock(MR|ResistFire|Enemy|SpellDeflect|MinorGlobe|MirrorImage|Helpless|L1safe)
+	Range(scstarget,30)
+	See(scstarget)
+THEN DO
+       Action(Spell,SUN_SOUL_SUN_SOULRAY)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsMonk)
+        IgnoreBlock(IsSunSoul)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackQuiveringPalm)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	DisplayStringHead(Myself,72936) // Hyo-o-cha!
+	Action(Ability,MONK_QUIVERING_PALM)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsMonk)
+        IgnoreBlock(IsSunSoul|IsDarkMoon)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|ILackQuiveringPalm)
+	Range(scstarget,5)
+	See(scstarget)
+THEN DO
+	DisplayStringHead(Myself,72937) // Kyai-ya!
+	Action(Ability,MONK_STUNNING_BLOW)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+	RequireBlock(IsBlackguard)
+	TriggerBlock(ILackPoison)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+THEN DO
+	Action(Ability,ASSASSIN_POISON)
+END
+
+IF TRIGGER
+        RequireBlock(RogueRebalancingPoison)
+        TriggerBlock(CorePlus)
+	RequireBlock(IsAssassin)
+	TriggerBlock(ILackPoison)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+THEN DO
+	Action(AbilityRES,"fl#tas02")
+END
+
+IF TRIGGER
+        IgnoreBlock(RogueRebalancingPoison)
+        TriggerBlock(CorePlus)
+	RequireBlock(IsAssassin)
+	TriggerBlock(ILackPoison)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+THEN DO
+	Action(Ability,ASSASSIN_POISON)
+END
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+	RequireBlock(IsArcher)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(ILackCalledShot)
+THEN DO
+	Action(Ability,ARCHER_CALL_SHOT)
+END
+
+

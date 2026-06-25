@@ -1,0 +1,12 @@
+/// Based on WK dragon, but:
+///
+/// - defensive sequencer instead of Unholy Blight
+/// - PMW instead of PW:silence, used when at 40% hp
+/// - righteous magic instead of Insect Plague, used when at 65% hp
+/// - we don't get the WK lethally-fast breath weapon
+
+
+VARIABLE(FastDragonBreath=DragonBreath)
+VARIABLE(AbazigalEnclave=True)
+
+INCLUDE FILE(%MOD_FOLDER%/dragon/ssl/draggree.ssl)

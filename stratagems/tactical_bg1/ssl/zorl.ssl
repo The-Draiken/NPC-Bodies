@@ -1,0 +1,25 @@
+IF
+	AttackedBy([GOODCUTOFF],DEFAULT)
+	Allegiance(Myself,NEUTRAL)
+THEN
+	RESPONSE #100
+		SetGlobal("ZorlDopple","GLOBAL",1)
+END
+
+IF TRIGGER
+        TriggerBlock(CoreMinus)
+	Global("ZorlDopple","GLOBAL",1)
+	Allegiance(Myself,NEUTRAL)
+THEN DO
+                Action(Literal)
+		ForceSpell(Myself,DOPPLEGANGER_CHANGE2)
+END
+
+IF TRIGGER
+        TriggerBlock(HardPlus)
+	Global("ZorlDopple","GLOBAL",1)
+	Allegiance(Myself,NEUTRAL)
+THEN DO
+                Action(Literal)
+		ForceSpellRES("dw#dopzo",Myself)
+END

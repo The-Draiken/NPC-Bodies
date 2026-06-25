@@ -1,0 +1,101 @@
+DEFINE_ACTION_FUNCTION realistic_wolves BEGIN
+
+	cre.edit[%tutu_scriptbg%wolf]
+	[
+		m.cre_strip_scripts{wtasight _tasight wdasight _dasight}
+		m_allegiance:=neutral
+	]
+	cre.edit[%tutu_var%dogwa %tutu_var%dogwi]
+	[
+		m.cre_strip_scripts{wtasight _tasight wdasight _dasight wilddog}
+		m.cre_insert_script{dw#wldog|loc=high}
+		m_allegiance:=neutral
+
+	]
+
+    COPY ~%MOD_FOLDER%/%component_loc%/resource/wolf.baf~ ~override/%tutu_var%wolf.bcs~
+		EVALUATE_BUFFER
+		COMPILE_BAF_TO_BCS
+
+    COPY_EXISTING ~%tutu_var%wolf.bcs~ ~override/dw#wldog.bcs~
+       REPLACE_TEXTUALLY 117 105
+
+<<<<<<<< .../stratagems-inline/wolftimer.baf
+
+IF
+  !GlobalTimerNotExpired("DMWWWolfControlTimer","GLOBAL")
+THEN
+    RESPONSE #400
+             SetGlobalTimer("DMWWWolfControlTimer","GLOBAL",300)
+             SetGlobal("DMWWWolvesHostile","GLOBAL",0)
+             Continue()
+    RESPONSE #100
+             SetGlobalTimer("DMWWWolfControlTimer","GLOBAL",300)
+             SetGlobal("DMWWWolvesHostile","GLOBAL",1)
+             Continue()
+END
+
+
+>>>>>>>>
+
+   EXTEND_TOP ~baldur.bcs~ ~.../stratagems-inline/wolftimer.baf~
+
+// protect the Melicamp wolf!
+	cre.edit[%tutu_var%wolfch]
+	[
+		m_script_race:="%tutu_scriptw%tasight"
+	]
+// summoned wolves don't get wolf script
+	cre.edit[wolfsu]
+	[
+		m.cre_strip_scripts{%tutu_var%wolf}
+	]
+// protect the random wolves
+    LAF random_wolves END
+
+
+END
+
+DEFINE_ACTION_FUNCTION random_wolves BEGIN
+
+	cre.copy[%tutu_scriptbg%wolf => dw#rnwlf %tutu_var%dogwa => dw#rndwa %tutu_var%dogwi => dw#rndwi]
+	[
+		m_script_race:=%tutu_scriptw%tasight
+	]
+
+    ACTION_IF enhanced_edition BEGIN
+		ACTION_FOR_EACH area_name IN 	Encounter_Plains1 Encounter_Plains2 Encounter_Canyon1 Encounter_Canyon2
+										Encounter_Cliff1 Encounter_Cliff2 Encounter_Grassland1 Encounter_Grassland2
+										Encounter_Forest1 Encounter_Forest2 Encounter_Road 
+		BEGIN
+			OUTER_SPRINT script EVAL "%%area_name%_BCS%"
+			COPY_EXISTING "%script%.bcs" override
+				REPLACE_TEXTUALLY "dogwi" "dw#rndwi"
+				REPLACE_TEXTUALLY "dogwa" "dw#rndwa"
+				REPLACE_TEXTUALLY "wolf" "dw#rnwlf"
+		END
+    END ELSE 
+    ACTION_IF is_tutu BEGIN  // Tutu version
+		ACTION_FOR_EACH scriptnum IN 5600 5601 5700 5701 5800 5801 5900 5901 6000 6001 6100 BEGIN
+			COPY_EXISTING "_ar%scriptnum%.bcs" override
+				REPLACE_TEXTUALLY "dogwi" "dw#rndwi"
+				REPLACE_TEXTUALLY "dogwa" "dw#rndwa"
+				REPLACE_TEXTUALLY "wolf" "dw#rnwlf"
+
+		END
+    END ELSE BEGIN
+		ACTION_FOR_EACH area IN Encounter_Plains1 Encounter_Plains2 Encounter_Canyon1 Encounter_Canyon2
+                             Encounter_Cliff1 Encounter_Cliff2 Encounter_Grassland1 Encounter_Grassland2
+                             Encounter_Forest1 Encounter_Forest2 Encounter_Road 
+		BEGIN
+			OUTER_SPRINT area EVALUATE_BUFFER ~%%area%%.are~
+			COPY_EXISTING "%area%" override
+				REPLACE_TEXTUALLY "dogwi" "dw#rndwi" (8)
+				REPLACE_TEXTUALLY "dogwa" "dw#rndwa" (8)
+				REPLACE_TEXTUALLY "bgwolf" "dw#rnwlf"   (8) 
+			BUT_ONLY
+		END
+    END
+END
+
+

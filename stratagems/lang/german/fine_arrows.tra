@@ -1,0 +1,43 @@
+
+@20305 = ~Erstklassiger Pfeil~
+@20306 = ~Wie schon sein Name andeutet ist der Flugpfeil für den Fernkampf vorgesehen. Diese Pfeile haben ein geringes Gewicht und werden oft zum Jagen eingesetzt. Sie bestehen meist aus Eschen- oder Birkenholz und sind 70 cm bis 1 m lang. Dieser Pfeil jedoch ist eine ungewöhnlich hohe Qualitätsarbeit.
+
+EIGENSCHAFTEN:
+
+ETW0-Bonus: -1
+Schaden: 1W6 +1 (Geschoss)
+Schusswaffe: Bogen
+
+Gewicht: 0~
+@20307 = ~Erstklassiger Bolzen~
+@20308 = ~Bolzen sind die Munition für Armbrüste, wobei die Größe der Waffe keine Rolle spielt. Dieser Bolzen jedoch ist eine ungewöhnlich hohe Qualitätsarbeit.
+
+EIGENSCHAFTEN:
+
+ETW0-Bonus: -1
+Schaden: 1W8 +1 (Geschoss)
+Schusswaffe: Armbrust
+
+Gewicht: 0~
+@20309 = ~Erstklassiger Wurfpfeil~
+@20310 = ~Ein Wurfpfeil ist eine kleine, leicht zu versteckende Fernkampfwaffe, die nicht mit einem Bogen oder einer anderen Waffe abgefeuert, sondern mit der Hand auf das Ziel geworfen wird. Dieser Wurfpfeil jedoch ist eine ungewöhnlich hohe Qualitätsarbeit.
+
+EIGENSCHAFTEN:
+
+ETW0-Bonus: -1
+Schaden: 1W3 +1 (Geschoss)
+Initiativefaktor: 1
+Fertigkeit: Wurfpfeil
+Typ: 1-händig
+
+Gewicht: 0~
+@20311 = ~Erstklassige Kugel~
+@20312 = ~Eine Kugel ist einfach ein abgerundeter, gut ausbalancierter Stein. Kugeln werden als Geschosse für Schleudern verwendet. Diese Kugel ist jedoch stahlummantelt, um ihre Genauigkeit und ihren Schaden zu verbessern.
+
+EIGENSCHAFTEN:
+
+ETW0-Bonus: -1
+Schaden: 1W4 +2 (Geschoss)
+Schusswaffe: Schleuder
+
+Gewicht: 0~

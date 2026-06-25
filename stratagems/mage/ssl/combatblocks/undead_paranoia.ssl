@@ -1,0 +1,158 @@
+
+
+
+
+////////////////////////////////////////////////////////////////////
+/// Use this block when you fear that Protected-from-undead foes
+/// are close
+////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        RequireBlock(IsLich|IsVampire)
+	!Detect(NearestEnemyOf(Myself))
+	Allegiance(Myself,ENEMY)
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+	Target([ENEMY.0.SWORD])
+	Target([ENEMY.0.DEMONIC])
+	!CombatCounter(0)
+THEN DO
+	Action(SequencerManual,3X_DISPEL_MAGIC,DISPEL_MAGIC,DISPEL_MAGIC,DISPEL_MAGIC)
+	Action(SequencerManual,2X_DISPEL_MAGIC_GREATER_MALISON,DISPEL_MAGIC,DISPEL_MAGIC,GREATER_MALISON)
+	Action(SpellArea,WIZARD_DISPEL_MAGIC)
+END	
+
+IF TRIGGER
+        RequireBlock(IsLich|IsVampire)
+		TriggerBlock(HLAMage)
+	!See(NearestEnemyOf(Myself))
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+	Global("ChainContingencyFired","LOCALS",1)
+THEN DO
+	Action(SpellL9RESMyself,WIZARD_SUMMON_PLANATAR_EVIL)
+	Action(SpellL9RESMyself,WIZARD_SUMMON_ULTROLOTH)
+END
+
+IF TRIGGER
+	IgnoreBlock(Demivrgvs)
+    RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+	!See([ENEMY.0.DEMONIC])
+	!See([ENEMY.0.0.TANARI])
+	!See([ENEMY.0.0.IMP])
+	!See([ENEMY.0.0.0.0.SUMMONED_DEMON])
+THEN DO
+	Action(SpellL9Myself,WIZARD_GATE)
+END
+
+IF TRIGGER
+	RequireBlock(Demivrgvs)
+    RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+THEN DO
+	Action(SpellL9RESReplaceMyself,"%WIZARD_GATE_SCS%",WIZARD_GATE)
+	Action(SpellMyself,WIZARD_SUMMON_DEATH_KNIGHT)
+
+END
+
+IF TRIGGER
+	IgnoreBlock(Demivrgvs)
+    RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+THEN DO
+	Action(SpellMyself,WIZARD_SUMMON_FIEND)
+	Action(SpellMyself,WIZARD_CACOFIEND)
+END
+
+IF TRIGGER
+	RequireBlock(Demivrgvs)
+    RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+THEN DO
+	Action(SpellRESReplaceMyself,"%WIZARD_SUMMON_FIEND_SCS%",WIZARD_SUMMON_FIEND)
+END
+
+IF TRIGGER
+        RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+	OR(6)
+	   BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+		Range(Playerscsplayer,20)
+	   END LOOP
+THEN DO
+	Action(SpellMyself,WIZARD_MORDENKAINENS_SWORD|200|50)
+	Action(SpellMyself,WIZARD_SUMMON_EFREET|200|50)
+END
+
+IF TRIGGER
+    RequireBlock(IsLich|IsVampire)
+	TriggerBlock(HLAMage)
+	!Detect(NearestEnemyOf(Myself))
+	Allegiance(Myself,ENEMY)
+        OR(6)
+		BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+			Range(Playerscsplayer,20)
+		END LOOP		
+	Target([ENEMY])
+	!CombatCounter(0)
+THEN DO
+	Action(SpellL9RES,WIZARD_DRAGONS_BREATH)
+	Action(SpellL9RES,WIZARD_COMET)
+	Action(SpellL9RES,THUNDERSTORM)
+END
+
+IF TRIGGER
+    RequireBlock(IsLich|IsVampire)
+	!Detect(NearestEnemyOf(Myself))
+	Allegiance(Myself,ENEMY)
+        OR(6)
+		BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+			Range(Playerscsplayer,20)
+		END LOOP		
+	Target([ENEMY])
+	!CombatCounter(0)
+THEN DO
+	Action(Spell,WIZARD_ABI_DALZIMS_HORRID_WILTING)
+	Action(Spell,WIZARD_CHAIN_LIGHTNING)
+END
+
+IF TRIGGER
+        RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+        OR(6)
+		BEGIN LOOP(scsplayer||1;2;3;4;5;6)
+			Range(Playerscsplayer,20)
+		END LOOP
+THEN DO
+	Action(SpellMyself,WIZARD_DISPEL_MAGIC|200|50)
+END
+
+
+IF
+        RequireBlock(IsLich|IsVampire)
+	!See(NearestEnemyOf(Myself))
+THEN
+	RESPONSE #100
+		NoAction()
+END

@@ -1,0 +1,108 @@
+INCLUDE FILE (%MOD_FOLDER%\lib\ssl\shared_definitions.ssl)
+
+////////////////////////////////////////////////////////////
+////	This is a rest-and-recover step for when
+////	enemies leave you alone...
+////////////////////////////////////////////////////////////
+
+INCLUDE FILE (%MOD_FOLDER%\lib\ssl\common_rest.ssl)
+
+///////////////////////////////////////////////////////////////////////////////
+
+IF
+	!Detect(NearestEnemyOf(Myself))
+	!Global("inafight","LOCALS",1)
+THEN
+	RESPONSE #100
+		NoAction()
+END
+
+///////////////////////////////////////////////////////////////////////////////
+///	Bluster
+///////////////////////////////////////////////////////////////////////////////
+
+IF
+	Detect([PC])
+	Global("Display","LOCALS",0)
+THEN
+	RESPONSE #100
+		SetGlobal("Display","LOCALS",1)
+		DisplayStringHead(Myself,72786) // Who calls Imix, Prince of Fire!
+END
+
+//////////////////////////////////////////////////////////////////////////////////
+///	Whirlwind
+//////////////////////////////////////////////////////////////////////////////////
+
+
+IF TRIGGER
+	!StateCheck(Myself,STATE_DISABLED)
+	!GlobalTimerNotExpired("whirlwind","LOCALS")
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(ILackGreaterWhirlwind)
+THEN DO
+	Action(ForceSpellMyself,WARRIOR_GREATER_WHIRLWIND)
+	SetGlobalTimer("whirlwind","LOCALS",24)
+END
+
+////////////////////////////////////////////////////////////////////////////////////
+///	Fireburst
+////////////////////////////////////////////////////////////////////////////////////
+
+IF
+	!StateCheck(Myself,STATE_DISABLED)
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	!GlobalTimerNotExpired("fireburst","LOCALS")
+THEN
+	RESPONSE #100
+		DisplayStringHead(Myself,72787) // Feel the wrath of Imix!
+		SetGlobalTimer("fireburst","LOCALS",18)
+		SetGlobalTimer("castspell","LOCALS",6)
+		ReallyForceSpell(Myself,RED_DRAGON_HIT)
+		ReallyForceSpellRES("dw#imsta",Myself)
+END
+
+////////////////////////////////////////////////////////////////////////////////////
+///	Firestorm
+////////////////////////////////////////////////////////////////////////////////////
+
+IF
+	!StateCheck(Myself,STATE_DISABLED)
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	!GlobalTimerNotExpired("firestorm","LOCALS")
+THEN
+	RESPONSE #100
+		SetGlobalTimer("firestorm","LOCALS",18)
+		SetGlobalTimer("castspell","LOCALS",6)
+		ReallyForceSpell(NearestEnemyOf(Myself),CLERIC_FIRE_STORM)
+		ReallyForceSpell(SecondNearestEnemyOf(Myself),CLERIC_FIRE_STORM)
+		ReallyForceSpell(ThirdNearestEnemyOf(Myself),CLERIC_FIRE_STORM)
+END
+	
+
+
+////////////////////////////////////////////////////////////////////////////////////
+////	Flame Strike
+////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	!StateCheck(Myself,STATE_DISABLED)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(Disabled|MR|ResistFire|Enemy|SIEvocation|SpellTurn)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Action(ForceSpellRES,"spimix01"|80|20)
+	DisplayStringHead(Myself,72787) // Feel the wrath of Imix!
+END
+
+////////////////////////////////////////////////////////////////////////////////////
+///	Combat
+////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN LOOP(MyWeaponStrength||5)
+BEGIN LOOP(MyWeaponDamageType||Crushing)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/dw#wtacor.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/move.ssl)
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/chase.ssl)
+END LOOP
+END LOOP

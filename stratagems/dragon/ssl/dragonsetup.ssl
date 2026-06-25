@@ -1,0 +1,128 @@
+///////////////////////////////////////////////////////////////////////////////////////
+///	Difficulty adjustments
+///////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+   TriggerBlock(Insane)
+THEN DO
+     Action(BreathAccelerator)
+END
+
+
+IF TRIGGER
+   TriggerBlock(CorePlus)
+   Global("innate_casting","LOCALS",0)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#innat",Myself)
+     SetGlobal("innate_casting","LOCALS",1)
+     Continue()
+END
+
+IF TRIGGER
+   TriggerBlock(EasyMinus)
+   Global("innate_casting","LOCALS",1)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#inrem",Myself)
+     SetGlobal("innate_casting","LOCALS",0)
+     Continue()
+END
+
+IF TRIGGER
+   TriggerBlock(HardPlus)
+   IgnoreBlock(IsIWD)
+   IgnoreBlock(NoHitPointBoost)
+   Global("staying_power","LOCALS",0)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#drahp",Myself)
+     SetGlobal("staying_power","LOCALS",1)
+     Continue()
+END
+
+IF TRIGGER
+   TriggerBlock(CoreMinus)
+   IgnoreBlock(IsIWD)
+   IgnoreBlock(NoHitPointBoost)
+   Global("staying_power","LOCALS",1)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#hprem",Myself)
+     SetGlobal("staying_power","LOCALS",0)
+     Continue()
+END
+
+/////////////////////////////////////////////////////////
+/////      Initial material
+////////////////////////////////////////////////////////
+
+INCLUDE FILE (%MOD_FOLDER%\dragon\ssl\rest.ssl)
+INCLUDE FILE (%MOD_FOLDER%\dragon\ssl\gohostile.ssl)
+
+
+////////////////////////////////////////////////////////////////////////
+// Initialise for combat
+////////////////////////////////////////////////////////////////////////
+
+IF
+	Global("inafight","LOCALS",0)
+	See(NearestEnemyOf(Myself))
+THEN
+	RESPONSE #100
+		SetGlobal("inafight","LOCALS",1)
+		Continue()
+END
+
+
+//////////////////////////////////////////////////////////////////////
+///CPU saver
+//////////////////////////////////////////////////////////////////////
+
+IF
+	!Detect(NearestEnemyOf(Myself))
+	!HPPercentLT(Myself,100)
+	!Global("inafight","LOCALS",1)
+THEN
+	RESPONSE #100
+		NoAction()
+END
+
+//////////////////////////////////////////////////////////////////////////////////
+////  Revert a Polymorph Self spell
+//////////////////////////////////////////////////////////////////////////////////
+
+IF
+       !GlobalTimerNotExpired("castspell","LOCALS")
+       HasItem("squirp",Myself)
+THEN
+    RESPONSE #100
+        SetGlobalTimer("castspell","LOCALS",6)
+        ForceSpellRES("dwplydr",Myself)
+END
+
+//////////////////////////////////////////////////////////////////////////////////
+////  Look for illusion-detecting rogues
+//////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/lib/ssl/thief_detect_illusion.ssl)
+
+//////////////////////////////////////////////////////////////////////
+///Locate party
+//////////////////////////////////////////////////////////////////////
+
+IF
+        !Detect(NearestEnemyOf(Myself))
+        !Detect(Player1)
+        !Detect(Player2)
+        !Detect(Player3)
+        !Detect(Player4)
+        !Detect(Player5)
+        !Detect(Player6)
+        Global("inafight","LOCALS",1)
+THEN
+    RESPONSE #100
+             MoveToObject(Player1)
+END
+
+

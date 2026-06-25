@@ -1,0 +1,224 @@
+//////////////////////////////////////////////////////////////////////////////////////
+///	Marilith combat script
+//////////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/fiend_definitions.ssl)
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/initial.ssl)  // rest-and-recover, mill in confusion, etc.
+
+//////////////////////////////////////////////////////////////////////////////////////
+///	Begin stoneskinned 
+//////////////////////////////////////////////////////////////////////////////////////
+
+IF
+	See(NearestEnemyOf(Myself))
+	IgnoreBlock(IsIWD)
+	!GlobalTimerNotExpired("initialbuff","LOCALS")
+	!AreaCheck("ar3004") // dead magic
+THEN
+	RESPONSE #100
+		SetGlobalTimer("initialbuff","LOCALS",1000)
+		ReallyForceSpell(Myself,WIZARD_STONE_SKIN)
+		Continue()
+END
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	RequireBlock(IsIWD)
+	TriggerBlock(CorePlus)
+	!GlobalTimerNotExpired("initialbuff","LOCALS")
+THEN DO
+		Action(Literal)
+		SetGlobalTimer("initialbuff","LOCALS",1000)
+		ReallyForceSpell(Myself,WIZARD_STONE_SKIN)
+		Continue()
+END
+
+//////////////////////////////////////////////////////////////////////////////////////
+///	Yxunomei has Oil of Speed
+//////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER                                                                            
+       RequireBlock(IsIWD)
+       TriggerBlock(CorePlus)
+       Range(NearestEnemyOf(Myself),8)
+THEN DO
+       Action(Potion,"potn14",@101014)
+END
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+///	Renew defences - Stoneskin every 3 rounds, PMW every 5
+///////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        IgnoreBlock(IsIWD)
+        TriggerBlock(CorePlus)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(ILackWeaponProtection)
+THEN DO
+	Action(SpellMyself,MARILITH_PROTECTION_FROM_MAGIC_WEAPONS)
+END
+
+IF TRIGGER
+        RequireBlock(IsIWD)
+        TriggerBlock(Insane)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(ILackWeaponProtection)
+THEN DO
+	Action(SpellMyself,MARILITH_PROTECTION_FROM_MAGIC_WEAPONS)
+END
+
+IF TRIGGER
+        IgnoreBlock(IsIWD)
+        TriggerBlock(CorePlus)
+	See(NearestEnemyOf(Myself))
+	GlobalTimerNotExpired("initialbuff","LOCALS")
+	TriggerBlock(StoneskinFailing)
+THEN DO
+	Action(SpellMyself,INNATE_FIEND_STONE_SKIN)
+END
+
+IF TRIGGER
+        RequireBlock(IsIWD)
+        RequireBlock(HardPlus)
+	See(NearestEnemyOf(Myself))
+	GlobalTimerNotExpired("initialbuff","LOCALS")
+	TriggerBlock(StoneskinFailing)
+THEN DO
+	Action(SpellMyself,INNATE_FIEND_STONE_SKIN)
+END
+
+IF TRIGGER
+        IgnoreBlock(IsIWD)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(ILackBladeBarrier|CorePlus)
+THEN DO
+	Action(SpellMyself,INNATE_FIEND_BLADE_BARRIER|200|200)
+END
+
+IF TRIGGER
+        RequireBlock(IsIWD)
+	See(NearestEnemyOf(Myself))
+	TriggerBlock(ILackBladeBarrier|Insane)
+THEN DO
+	Action(SpellMyself,INNATE_FIEND_BLADE_BARRIER|200|200)
+END
+
+/////////////////////////////////////////////////////////////////////////////////////////
+///	Kill Baatezu
+/////////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN LOOP(scsdemon||LAWFUL_EVIL)
+	INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/bloodwar.ssl)
+END LOOP
+
+/////////////////////////////////////////////////////////////////////////////////////////
+///	Cloudkill (1/5 rounds)
+/////////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        TriggerBlock(EasyPlus)
+	Target(NearestEnemyOf(Myself))
+	!AreaCheck("ar3019") // not the Final Seal battle
+THEN DO
+	Action(Spell,MARILITH_CLOUDKILL|150|50)
+END
+
+//////////////////////////////////////////////////////////////////////////////////////
+///	Consider moving to a more interesting location in the battle
+//////////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/jump.ssl)
+
+//////////////////////////////////////////////////////////////////////////////////////
+///	Consider a Dispel Magic
+//////////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/dispel.ssl)
+
+//////////////////////////////////////////////////////////////////////////////////////
+///	True Sight
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+IF TRIGGER
+	TargetBlock(EnemiesInOrder)
+	TriggerBlock(TruesightAlreadyCast|IllusionTarget|Enemy|SIDivination|CorePlus)
+THEN DO
+	Action(SpellMyself,INNATE_FIEND_TRUE_SIGHT|100|100)
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////
+///	Animate Dead (done by ApplySpell in keeping with Y'tossi's script)
+///	... except that means it's at L1, so we'll do it normally
+//////////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        TriggerBlock(EasyPlus)
+	Target(NearestEnemyOfType([PC]))
+THEN DO
+         Action(Spell,MARILITH_ANIMATE_DEAD|100|100)
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////
+///	Telekinesis - get rid of nearby warrior types
+//////////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        IgnoreBlock(IsIWD)
+        TriggerBlock(CorePlus)
+	TargetBlock(PCsInOrder)
+	TriggerBlock(Enemy|Disabled)
+	OR(2)
+		Class(scstarget,FIGHTER_ALL)
+		Class(scstarget,MONK)
+	CheckStatGT(scstarget,4,SAVEVSSPELL)
+THEN DO
+	Combine()
+	Action(SpellNoDecRES,"dw#batel"|100|100)
+END
+
+IF TRIGGER
+        RequireBlock(IsIWD)
+        TriggerBlock(HardPlus)
+	TargetBlock(PCsInOrder)
+	TriggerBlock(Enemy|Disabled)
+	OR(2)
+		Class(scstarget,FIGHTER_ALL)
+		Class(scstarget,MONK)
+	CheckStatGT(scstarget,4,SAVEVSSPELL)
+THEN DO
+	Combine()
+	Action(SpellNoDecRES,"dw#batel"|100|100)
+END
+
+//////////////////////////////////////////////////////////////////////////////
+///	Combat
+//////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+////	At least *consider* chewing on stunned victims
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	Target(NearestEnemyOfType([PC]))
+	StateCheck(scstarget,STATE_STUNNED)
+	TriggerBlock(Enemy|Plus4Safe|SlashingSafe)
+THEN DO
+	Action(Attack|100|100)
+END
+
+//////////////////////////////////////////////////////////////////////////////
+////	Core combat block
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+BEGIN LOOP(MyWeaponStrength||4)
+BEGIN LOOP(MyWeaponDamageType||Slashing)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/dw#wtacor.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/move.ssl)
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/chase.ssl)
+END LOOP
+END LOOP

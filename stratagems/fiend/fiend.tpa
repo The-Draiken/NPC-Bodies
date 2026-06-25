@@ -1,0 +1,985 @@
+LAF include STR_VAR file=fiend_shared.tph END
+
+DEFINE_ACTION_FUNCTION fiend STR_VAR version="" BEGIN
+     
+ 
+     LAF define_difficulty STR_VAR type=fiend RET difficulty_variable END
+
+	 ACTION_IF is_bg2 && enhanced_edition BEGIN
+		LAF fiend_remove_regeneration END
+	 END
+
+     ACTION_IF is_iwd BEGIN
+        LAF fiend_resources_iwd END
+        LAF fiend_iwd END
+     END ELSE BEGIN
+        
+        LAF check_label STR_VAR label=fin_ascension_main RET ascension_2_0=value END // if Ascension 2.0 is installed, no need to make resources
+
+        LAF fiend_resources END
+        LAF fiend_corrections END
+        LAF fiend_scripts END
+        LAF fiend_core END
+     END
+END
+
+////////////////////////////////////////////////////////////////
+/////   Needed resources
+////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION fiend_resources BEGIN
+
+
+    ////////////////
+    /// shared
+    ////////////////
+
+    LAF shared_fiend_resources END
+
+    ////////////////
+    /// general
+    ////////////////
+
+    // demon fear shouldn't be cumulative
+
+    MAKE_PATCH
+       opcode=>206
+       at_end=>1
+       target=>2
+       duration=>5
+       resource=>"%DEMON_FEAR%"
+    END
+    LAF edit_spell STR_VAR spell=DEMON_FEAR editstring="add_effect=>patch_data" END
+
+    ///////////////
+    /// Nabassu
+    ///////////////
+
+    /*
+      We're a bit inspired by Ascension 2.0 - we keep the Nabassu paralysation aura but not anything else.
+    */
+    
+
+    ACTION_IF !ascension_2_0 BEGIN
+        // make the resources
+        LAF make_aura STR_VAR spell=nabpara effect=nabpara payload=nabparab END
+        
+        // this copied from Ascension 2.0
+
+// projectile for the payload
+
+COPY_EXISTING inareasm.pro "override/finnabas.pro"
+         WRITE_SHORT 0x200 64 // not affecting allies
+ADD_PROJECTILE "override/finnabas.pro"
+OUTER_SET projectile=finnabas
+
+// make an effect to display the 'paralyzation aura' string
+
+COPY_EXISTING cdheld.eff "override/finnastr.eff"
+WRITE_LONG 0x1c RESOLVE_STR_REF (@1027)
+
+// now build our payload spell from Hold Person
+
+ACTION_IF demivrgvs BEGIN
+   ACTION_IF enhanced_edition BEGIN
+      COPY "%MOD_FOLDER%/fiend/resource/SPWI306_EE.spl" "override/nabparab.spl"
+   END ELSE BEGIN
+      COPY "%MOD_FOLDER%/fiend/resource/SPWI306_VANILLA.spl" "override/nabparab.spl"
+   END
+END ELSE BEGIN
+   COPY_EXISTING "%WIZARD_HOLD_PERSON%.spl" "override/nabparab.spl"
+END
+
+COPY_EXISTING "nabparab.spl" "override/nabparab.spl" // not just override because we refer to DEST_RES, since it's a direct copy-paste of Ascension v2.0 code
+         WRITE_LONG NAME1 "-1"
+         LPF ALTER_SPELL_HEADER INT_VAR projectile END
+         PATCH_IF enhanced_edition BEGIN // this is just cosmetic, it avoids unneeded saving throws
+            LPF ADD_SPELL_EFFECT INT_VAR insert_point=0 opcode=318 target=2 parameter2=1 duration=1 STR_VAR resource="%DEST_RES%" END // undead are immune
+            LPF CLONE_EFFECT INT_VAR match_opcode=318 parameter2=9 END // elementals are immune
+            LPF CLONE_EFFECT INT_VAR match_opcode=318 parameter1=121 parameter2=104 END // demons are immune
+         END
+         LPF ALTER_EFFECT STR_VAR match_resource=cdheld resource=finnastr END
+         PATCH_FOR_EACH match_opcode IN 177 175 BEGIN
+            PATCH_FOR_EACH parameter1 IN 2 5 BEGIN // animal, gianthumanoid
+                LPF CLONE_EFFECT INT_VAR match_opcode match_parameter1=1 match_parameter2=3 parameter1 END
+            END
+         END
+         LPF ADD_SPELL_EFFECT INT_VAR opcode=206 target=2 parameter1="-1" duration=60 resist_dispel=1 STR_VAR resource="%DEST_RES%" END
+         LPF ADD_SPELL_EFFECT INT_VAR opcode=206 target=2 parameter1="-1" duration=6 resist_dispel=0 STR_VAR resource="%DEST_RES%" END  // this second one is so that creatures with MR check only 1/rd
+// BUT_ONLY
+
+    // at least pro tem, make some rudimentary allowance for old-style Ascension
+
+    ACTION_IF FILE_EXISTS_IN_GAME finnabas.bcs BEGIN
+
+    LAF DELETE_SCRIPT_BLOCK STR_VAR script=finnabas match="ParalyzeAura" END
+
+<<<<<<<<.../stratagems-inline/finnabas_top.baf
+IF
+  !Global("aura","LOCALS",1)
+  DifficultyGT(EASY)
+THEN
+    RESPONSE #100
+             SetGlobal("aura","LOCALS",1)
+             ApplySpellRES("nabpara",Myself)
+             Continue()
+END
+>>>>>>>>
+
+    LAF extend INT_VAR inline=1 STR_VAR script=finnabas top=finnabas_top END
+
+
+    END
+
+
+    END
+
+    ///////////////
+    /// Marilith
+    ///////////////
+
+    // relabel Marilith weapon as a scimitar (helps atweaks compatibility)
+    
+    LAF edit_item STR_VAR item=marili editstring=~proficiency=>PROFICIENCYSCIMITARWAKISASHININJATO~ END
+
+    // Version of Animate Dead from vanilla game (insulates from "BG1 summons" in D0Tweak)
+    // deprecated for now
+    // LAF install STR_VAR file=dw#marun.spl location=resource END
+
+    // Marilith protections and others
+    
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=30 STR_VAR arguments="WIZARD_PROTECTION_FROM_MAGIC_WEAPONS=>MARILITH_PROTECTION_FROM_MAGIC_WEAPONS WIZARD_ANIMATE_DEAD=>MARILITH_ANIMATE_DEAD WIZARD_CLOUDKILL=>MARILITH_CLOUDKILL" END
+
+    ///////////////
+    /// balors
+    ///////////////
+
+    // Baalor telekinesis
+
+    MAKE_PATCH
+       say_name=>100
+       patch_effect_inline=>~savebonus=>"-10"~
+    END
+    LAF install_spell STR_VAR spell="telekinesis => dw#batel" locbase="caster_shared/resource" edits=patch_data END
+    MAKE_PATCH
+       patch_effect_inline=>~match=>"opcode=235" parameter2=>4~
+    END
+    LAF clone_spell STR_VAR spell="dw#batel=>dw#bate2" edits=patch_data END
+
+    // Balor sword: revert vAsc edits
+    
+    ACTION_IF !ascension_2_0 && FILE_EXISTS_IN_GAME finabaz.cre BEGIN
+
+       LAF edit_item STR_VAR item=balor editstring="delete_effect_global=>1" END
+
+    END
+
+    // Balor sword: extra SCS edits
+    
+	itm.edit[balor]
+	[
+		m.ab.alter{s_range=3}
+		m_proficiency:=PROFICIENCYLONGSWORD
+		m_enchantment=5
+		m.ab_fx.alter{s_save_vs_poison=1 s_savebonus="-4"}
+	]
+
+
+    // Baalor explosion, borrowed from Ascension
+    
+    ACTION_IF !ascension_2_0 BEGIN
+     COPY "%MOD_FOLDER%/%component_loc%/resource/baldead.spl" override
+        PATCH_IF enhanced_edition BEGIN
+            LPF DELETE_EFFECT INT_VAR match_save_vs_spell=0 END // get rid of the no-save effect
+            LPF ALTER_EFFECT INT_VAR save_for_half=1 parameter1=50 END // put save-for-half on the remaining effect, and double its damage
+        END
+    END
+
+    // Baalor whip, 1d4 crushing+3d6 fire, FLAIL proficiency, rather crude/minimal version of atweaks
+
+    MAKE_PATCH
+        patch_ability_inline=>~ability_range=>3 ability_dicesize=>4 to_hit=>5 damage_bonus=>0~
+        enchantment=>5
+        droppable=>0
+        add_effect_inline=>~match=>"ability_type=1" opcode=>12 parameter2=>524288 dicenum=>3 dicesize=>6~
+    END
+    LAF clone_item STR_VAR item=~blun32=>dw#balwp~ edits=patch_data END
+
+    // Balor aura
+    
+    ACTION_IF !ascension_2_0 BEGIN
+    
+    // borrowed from Ascension 2.0
+
+COPY_EXISTING "sppr730.spl" "override/finbalor.spl"
+    WRITE_LONG NAME1 "-1"
+    WRITE_BYTE 0x27 0       // zero sectype
+    LPF DELETE_SPELL_HEADER INT_VAR min_level=2 END  // remove all but the first header
+    PATCH_FOR_EACH match_opcode IN 30 84 142 174 0 120 328 318 233 BEGIN // get rid of all Aura of FD effects except the cosmetics and cast-on-condition (or eff file in EE)
+       LPF DELETE_EFFECT INT_VAR match_opcode END
+    END
+    LPF ALTER_EFFECT INT_VAR resist_dispel=0 END
+    LPF ALTER_EFFECT INT_VAR match_timing=0 duration=0 timing=1 END         // make permanent and nonmagical
+	// this handles oBG2-style aura
+	LPF ALTER_EFFECT INT_VAR silent=1 match_opcode=232 STR_VAR resource=balaura END  // patch in new payload
+	// this handles 2.6-style aura
+	LPF ALTER_EFFECT INT_VAR silent=1 match_opcode=177 STR_VAR resource=balaura END  // patch in new payload
+	
+// BUT_ONLY
+
+ACTION_IF FILE_EXISTS_IN_GAME "sppr730d.eff" BEGIN
+	COPY_EXISTING "sppr730d.eff" "override/balaura.eff"
+		REPLACE_TEXTUALLY "SPPR730D" "BALAURA" (8)
+END
+
+COPY_EXISTING "sppr730d.spl" "override/balaura.spl"
+    LPF ALTER_EFFECT INT_VAR power=0 dicenumber=4 dicesize=6 END
+// BUT_ONLY
+
+    END
+
+    // demon lord's Flame Strike spell (see uddemon.dlg)
+    
+    MAKE_PATCH
+       say_name=>101
+       clone_effect_inline=>~match=>"opcode=12" parameter2b=>64~
+       patch_effect_inline=>"resist_dispel=>0"
+       patch_effect_inline'=>"match=>~resource=%CLERIC_FLAME_STRIKE%~ resource=>dw#abyfs"
+    END
+    LAF clone_spell STR_VAR spell="%CLERIC_FLAME_STRIKE%=>dw#abyfs" edits=patch_data END
+
+
+
+    ///////////////
+    /// Yochlols
+    ///////////////
+
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=30 STR_VAR arguments="CLERIC_FLAME_STRIKE=>INNATE_YOCHLOL_FLAME_STRIKE" END
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=18 STR_VAR arguments="WIZARD_SPIDER_SPAWN=>INNATE_YOCHLOL_SPIDER_SPAWN" END
+
+    ///////////////
+    /// Succubus
+    ///////////////
+    
+    // upgraded Ethereal
+    
+    MAKE_PATCH
+       add_effect_inline=>"opcode=>146 target=>1 resource=>%WIZARD_SPELL_IMMUNITY_DIVINATION% at_end=>1"
+    END
+    LAF edit_spell STR_VAR spell=SUCCUBUS_ETHEREAL edits=patch_data END
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=18 overwrite=1 STR_VAR arguments=SUCCUBUS_ETHEREAL END
+
+    ///////////////
+    /// Bone fiend
+    ///////////////
+
+    // upgraded poison
+
+    MAKE_PATCH
+       magical=>1
+       patch_effect_inline=>~match=>"opcode=44 or opcode=15" parameter1=>"-4"~
+    END
+    LAF edit_item STR_VAR item=bonefd edits=patch_data END
+
+    ///////////////
+    /// Chromatic demon
+    ///////////////
+
+    LAF clone_spell STR_VAR spell="%DRAGON_WING_BUFFET%=>dw#airbu" editstring=~say_name=>3202~ END
+    LAF clone_spell STR_VAR spell="%TRAP_SLIME%=>dw#chrsl" editstring=~say_name=>3208~ END
+    LAF install STR_VAR file=dw#chrco.spl location=resource END
+    
+    //////////////////
+    /// Solar
+    //////////////////
+
+
+        LAF install STR_VAR files=~finsol01.itm finsol02.itm dw#solra.cre dw#solra.itm dw#solra.baf dw#soldi.spl~ location=resource END
+
+        MAKE_PATCH
+           say_both_names=>3210
+           script_override=>dw#solra
+           dv=>dw#solra
+           add_items=>~dw#solra(ring)~
+        END
+        LAF edit_creature STR_VAR creature=dw#solra edits=patch_data END
+
+        LAF edit_spell STR_VAR spell=dw#soldi editstring=~say_name=>3211~ END
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=30 STR_VAR arguments="CLERIC_HEAL=>INNATE_SOLAR_HEAL" END
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=30 STR_VAR arguments="WIZARD_DEATH_SPELL=>INNATE_SOLAR_DEATH_SPELL" END
+    LAF spl_make_innate_repeating_spell STR_VAR arguments="WIZARD_VOCALIZE=>INNATE_SOLAR_VOCALIZE" END
+    
+    ///////////////////
+    ///  Rilmani
+    ///////////////////
+
+      // mass charm, Aurumach lay hands
+  LAF spl_make_innate_repeating_spell INT_VAR cooldown=1000 STR_VAR arguments="CLERIC_RESTORATION=>INNATE_RILMANI_LAY_HANDS" END
+  LAF spl_make_innate_repeating_spell STR_VAR arguments="WIZARD_DIRE_CHARM=>INNATE_FIEND_MASS_CHARM" END
+
+  CLEAR_IDS_MAP
+
+  MAKE_PATCH
+     ability_target=>4
+     projectile=>159
+  END
+  LAF edit_spell STR_VAR spell=INNATE_FIEND_MASS_CHARM editstring="say_name=>3213 patch_ability=>patch_data" END
+
+  MAKE_PATCH
+     delete_effect=>"opcode=93"
+     delete_effect'=>"resource=dvwinded"
+     add_effect_inline=>"target=>2 timing=>1 opcode=>146 resource=>%CLERIC_REGENERATE% parameter1=>0 parameter2=>1"
+     say_name=>3212
+  END
+  LAF edit_spell STR_VAR spell=INNATE_RILMANI_LAY_HANDS edits=patch_data END
+
+  // Rilmani time stop
+
+  MAKE_PATCH
+     delete_effect=>"resource=dw#time"
+     patch_effect_inline=>"duration=>~if duration=36 then 12 else 6~"
+  END
+  LAF clone_spell STR_VAR spell="%WIZARD_TIME_STOP%=>dw#rilts" edits=patch_data END
+
+    ///////////////////
+    ///  Demogorgon
+    ///////////////////
+
+    // fixes a typo in the new version of Ascension
+    
+    MAKE_PATCH
+       match=>"resource=dlab01"
+       resource=>dglab01
+    END
+    LAF edit_spell STR_VAR spell=DEMOGORGON_GATE editstring="patch_effect=>patch_data" END
+
+END
+
+////////////////////////////////////////////////////////////////
+/////   Pre-install corrections
+////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION fiend_corrections BEGIN
+
+
+   ///// Bridge District warriors no longer need pro/evil
+ 
+          LAF edit_creature STR_VAR creature="demfig01 demfig02" editstring=~strip_script=>demfig~ END
+
+   /// liches shouldn't be immune to summoned demons any more
+
+          LAF edit_item STR_VAR item=lich editstring=~delete_opcodes=>100~ END
+
+   /// The abishai in Sendai's enclave doesn't make sense, it's supposed to be a CE grouping.
+   /// We'll replace it with a nabassu
+
+          LAF swap_text STR_VAR files=ar6105.are swaps=~demabi01=>tanari01~ END
+
+END
+
+////////////////////////////////////////////////////////////////
+/////   Compile scripts
+////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION fiend_scripts BEGIN
+
+   ACTION_IF enhanced_edition BEGIN
+      OUTER_SPRINT ice_golem_animation GOLEM_ICE
+   END ELSE BEGIN
+	ACTION_IF IDS_OF_SYMBOL (animate IC_ICE_GOLEM)>=0 BEGIN // Infinity Animations changes it, so we check
+      OUTER_SPRINT ice_golem_animation IC_ICE_GOLEM
+	END ELSE BEGIN
+	  OUTER_SPRINT ice_golem_animation ICE_GOLEM 
+	END
+   END
+
+   LAF ssl_to_bcs STR_VAR script=~dembal01 demglab demglasu tanari
+                                  marilith demsuc   demmau01 uddeath
+                                  demalu01 dw#bonef dempit dw#dlord
+                                  dempitsu cornugon erinyes  gorchr 
+                                  demogor2 demnabsu dw#llbnf dw#llcor dw#llbal
+                                  dw#solar gorgua01 gorgua02 demyoch~
+                          location=ssl
+                          variables="ImprovedFiends=True"
+   END
+   ACTION_FOR_EACH script IN dw#hlbal dw#hlcor dw#hlbnf dw#hlpit dw#hlgla dw#hlnab plangood devagood BEGIN
+         ACTION_IF FILE_EXISTS_IN_GAME "%script%.bcs" BEGIN
+              LAF ssl_to_bcs STR_VAR script location="ssl/summon" variables="ImprovedFiends=True" END
+         END
+   END
+   
+   // if Friendly Fiends is installed, we need to redo its script changes, as we'll have overwritten them
+
+   LAF check_label STR_VAR label=dw#friendly_fiends RET value END
+   ACTION_IF value BEGIN
+      LAF include STR_VAR file=friendly_fiends_core.tpa END
+      LAF friendly_fiends_scripts END
+   END
+
+END
+
+////////////////////////////////////////////////////////////////
+/////   Core
+////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION fiend_core BEGIN
+
+     // overall creature patch at end
+
+     //////////////
+     // Baalors
+     //////////////
+     
+     // general
+
+     LAF clone_script STR_VAR script=~dembal01=>demosum2 dembal01=>melbalor dembal01=>telbal01 dembal01=>dembal02~ END
+     
+     // specific
+
+     LAF clone_extend STR_VAR arguments=~dembal01=>dw#subal~ location=script END
+     LAF clone_extend STR_VAR arguments=~dembal01=>tahazz~ location=script END
+     LAF edit_creature STR_VAR creature=sudemon2 editstring=~script_override=>dw#subal~ END  /// Suldanesselar Baalor (eats elves)
+     LAF edit_creature STR_VAR creature=~jondem02 jondem04~ editstring=~strip_script=>demptj script_override=>dembal01~ END
+
+     //////////////
+     // Glabrezu
+     //////////////
+
+     // general
+     
+     LAF clone_script STR_VAR script=~demglab=>demglab2 demglab2=>glabrez demglab2=>melglab~ END
+
+     //specific
+
+	 cre.edit[teltan1 teltan2|allow_missing:i=1]
+	 [
+		spellcaster=1
+		LPM glabrezu
+	 ]
+     LAF clone_extend STR_VAR arguments=~demglab2=>teltan1~ location=script END
+     LAF clone_script STR_VAR script=~teltan1=>teltan2~ END
+     LAF swap_text STR_VAR files=~teltan1.bcs teltan2.bcs~ swaps=~ForceSpell(Myself,WIZARD_FIRE_SHIELD=>ApplySpell(Myself,WIZARD_FIRE_SHIELD MANTLE=>PROTECTION_FROM_MAGIC_WEAPONS Range(NearestEnemyOf(Myself),10)=>False()~ END
+     LAF swap_text STR_VAR files=~teltan2.bcs~ swaps=~FIRE_SHIELD_RED=>FIRE_SHIELD_BLUE FIRE_ELEMENTAL=>ICE_SALAMANDER~ END
+     LAF edit_creature STR_VAR creature=~jondem01 jondem03 jondem05~ editstring=~script_override=>demglab2~ END
+     LAF edit_creature STR_VAR creature=~teltan1 teltan2~ editstring=~insert_script_high=>gensht01~ END
+     LAF edit_creature STR_VAR creature=demgla01 editstring=~script_override=>demglab~ END // reverse BP overwrite
+
+     //////////////
+     // Nabassu
+     //////////////
+
+     LAF clone_script STR_VAR script=~tanari=>tanari2 tanari=>sumtan01~ END
+
+     //////////////
+     //  Mariliths
+     /////////////
+
+     // general
+
+
+     LAF clone_script STR_VAR script=~marilith=>melmari~ END
+
+     // specific
+
+     LAF clone_extend STR_VAR arguments=~marilith=>ytossi~ location=script END
+
+     ////////////
+     //	Yochlols
+     ///////////
+
+     LAF edit_creature STR_VAR creature="gortan3 yochlo01" editstring="swap_script=>~yochlol=>demyoch~" END
+
+     ////////////
+     //	Succubus
+     ///////////
+
+     // specific
+     
+     LAF clone_extend STR_VAR arguments=~demsuc=>nalmiss~ location=script END
+
+     ////////////
+     // Maurezhi
+     ////////////
+
+     LAF clone_script STR_VAR script=~demmau01=>obsdem04~ END
+
+     ///////////
+     //	Quasits
+     ///////////
+
+     ///////////
+     //	Cambions
+     ///////////
+
+	cre.edit[pwarden demosum4][LPM cambion]
+ 
+     ////////////////
+     //   Bone fiends
+     ////////////////
+
+     // install script at the same time - hence, bone fiends are omitted from filter
+	 cre.edit[dbonef01 gorbat5]
+	 [
+		LPM bone_fiend
+		m_script_override:="dw#bonef"
+	 ]
+	 
+	 cre.edit[dw#vibon|allow_missing:i=1]
+	 [
+		LPM bone_fiend
+		m_script_override:="dw#bonef"
+		m_gender:=EXTRA7
+	 ]
+ 
+     ////////////////
+     //	Demon Knights
+     ////////////////
+
+     LAF clone_creature STR_VAR creature=~uddeath=>melsum02~ END
+
+     //////////////
+     //	Alu-fiends
+     /////////////
+
+     /////////////
+     //	Pit fiends
+     /////////////
+
+     // specific
+     
+     LAF clone_extend STR_VAR arguments=~dempit=>telpit1 dempit=>karash~ location=script END
+
+     /////////////
+     //	Cornugon
+     /////////////
+     
+      ////////////
+      /// Erinyes
+      ////////////
+
+      ////////
+      // Imps
+      ////////
+
+     //////////////////
+     /// Planetar/Deva
+     //////////////////
+	    
+     COPY_EXISTING "plangood.bcs" "override/planevil.bcs"
+	 COPY_EXISTING "plangood.bcs" "override/planet.bcs"
+     COPY_EXISTING "devagood.bcs" "override/devaevil.bcs"
+		 
+	 //////////////////
+     /// Deva
+     //////////////////
+
+     //////////////////
+     /// Solar
+     //////////////////
+     
+     ACTION_IF !ascension BEGIN
+        LAF install STR_VAR file="finsol04.baf" location=resource END
+        LAF extend INT_VAR ssl=1 STR_VAR script=finsol04 bottom=dw#solar location=ssl END
+     END
+
+     /////////////////////
+     //	Overall creature patch
+     ////////////////////
+     
+     COPY_EXISTING_REGEXP GLOB ".*\.cre" override
+	    PATCH_TRY
+          SPRINT fiend_type ""
+          SET is_fiend=0
+          FOR (offset=0x248;offset<=0x268;offset+=8) BEGIN
+             READ_ASCII offset script
+             PATCH_MATCH "%script%" WITH
+             dembal01 tahazz demosum2 melbalor telbal01 dembal02 dw#llbal
+             BEGIN
+                SPRINT fiend_type balor
+                is_fiend +=1
+             END
+	     demglab demglab2 glabrez melglab demglasu
+             BEGIN
+                  SPRINT fiend_type glabrezu
+                  is_fiend +=1
+             END
+             tanari tanari2 sumtan01 demnabsu
+             BEGIN
+                  SPRINT fiend_type nabassu
+                  is_fiend +=1
+             END
+             marilith melmari ytossi
+             BEGIN
+                  SPRINT fiend_type marilith
+                  is_fiend +=1
+             END
+             yochlol demyoch
+             BEGIN
+                  SPRINT fiend_type yochlol
+                  is_fiend +=1
+             END
+             demsuc nalmiss
+             BEGIN
+                  SPRINT fiend_type succubus
+                  is_fiend +=1
+             END
+             demmau01 obsdem04
+             BEGIN
+                  SPRINT fiend_type maurezhi
+                  is_fiend +=1
+             END
+             quasit
+             BEGIN
+                  SPRINT fiend_type quasit
+                  is_fiend +=1
+             END
+             uddeath
+             BEGIN
+                  SPRINT fiend_type demon_knight
+                  is_fiend +=1
+             END
+             demalu01
+             BEGIN
+                  SPRINT fiend_type alu_fiend
+                  is_fiend +=1
+             END
+             dempit telpit1 karash dempitsu
+             BEGIN
+                  SPRINT fiend_type pit_fiend
+                  is_fiend +=1
+             END
+             cornugon dw#llcor
+             BEGIN
+                  SPRINT fiend_type cornugon
+                  is_fiend +=1
+             END
+             erinyes
+             BEGIN
+                  SPRINT fiend_type erinyes
+                  is_fiend +=1
+             END
+             dw#solar finsol04
+             BEGIN
+                  SPRINT fiend_type solar
+                  is_fiend +=1
+             END
+			 plangood planevil planet
+			 BEGIN
+				  READ_BYTE 0x27b align
+				  PATCH_IF align=19 || align=35 ||align=51 BEGIN
+					   SPRINT fiend_type planetar_evil
+				  END ELSE BEGIN			  
+						SPRINT fiend_type planetar
+				  END
+				  is_fiend +=1
+			 END
+			 devagood devaevil
+			 BEGIN
+					SPRINT fiend_type deva
+                    is_fiend +=1			 
+			 END
+             gorgua01
+             BEGIN
+                  SPRINT fiend_type aurumach
+                  is_fiend +=1
+             END
+             gorgua02
+             BEGIN
+                  SPRINT fiend_type ferrumach
+                  is_fiend +=1
+             END
+	     DEFAULT
+	     END	
+          END
+          PATCH_IF is_fiend>=1 BEGIN
+			PATCH_IF !VARIABLE_IS_SET $fiend_changes("%fiend_type%") BEGIN
+				SPRINT $fiend_changes("%fiend_type%") "%SOURCE_RES%"
+			END ELSE BEGIN
+				SPRINT temp $fiend_changes("%fiend_type%")
+				SPRINT $fiend_changes("%fiend_type%") "%temp% %SOURCE_RES%"
+			END
+          END
+          PATCH_IF is_fiend>1 BEGIN
+             LPF warning STR_VAR warning="Creature %SOURCE_RES% seems to have multiple fiend scripts" END
+          END
+		WITH DEFAULT
+			LPF regexp_warning STR_VAR parent=fiend_core END
+		END
+     BUT_ONLY
+
+	ACTION_PHP_EACH fiend_changes AS fiend_type=>fiend_resrefs BEGIN
+		PRINT "%fiend_resrefs% appear to be type %fiend_type%; making creature changes"
+		cre.edit[%fiend_resrefs%] [LPM "%fiend_type%"]	
+	END
+
+
+     /////////////////////
+     //	Lesser Demon Lord
+     ////////////////////
+
+
+	cre.edit[uddemon]
+	[
+		LPM balor
+		m.cre_add_spells{WAIL_OF_THE_BANSHEE POWER_WORD_KILL(3) dw#abyfs(3) WIZARD_TRUE_SIGHT(3)}
+		m_level_all=25
+		m_hp=250
+		m.cre_insert_script{dw#dlord|loc="after demlord"}
+		m_xp_value=52000 // higher than Tahazzar
+	]
+    
+     COPY_EXISTING
+          uddemon.dlg override
+          udardul.dlg override
+          udphae01.dlg override
+           DECOMPILE_AND_PATCH BEGIN
+             REPLACE_TEXTUALLY ~Kill(Player1)~ ~Enemy()~
+             REPLACE_TEXTUALLY ~ReallyForceSpell(Player1,CLERIC_FLAME_STRIKE)~ ~ReallyForceSpellRES("dw#abyfs",Player1)~
+             REPLACE_TEXTUALLY ~ReallyForceSpell(Myself,CLERIC_FLAME_STRIKE)~ ~ReallyForceSpellRES("dw#abyfs",Myself)~
+           END
+     BUT_ONLY
+	 
+
+	LAF script_alter_block
+		STR_VAR script=demlord
+				match1=~Global("DemonHatesAll","GLOBAL",0)~
+				match2=~Detect(\[PC\])~
+				swap_out1=~AttackReevaluate(LastSeenBy(Myself),15)~
+				swap_in1=~SetGlobal("dw_demon_in_combat","LOCALS",1)~
+				swap_out2=~Global("DemonHatesAll","GLOBAL",0)~
+				swap_in2=~Global("DemonHatesAll","GLOBAL",0)Global("dw_demon_in_combat","LOCALS",0)~
+				swap_out3=~Allegiance(Myself,ENEMY)~
+				swap_in3=~Global("dw_sfo_temporary","GLOBAL",0)~
+	END
+
+	LAF script_alter_block
+		STR_VAR script=demlord
+				match=~Global("DemonWalks","GLOBAL",[0-9]+)~
+				patch=~REPLACE_TEXTUALLY %\([^t]\)Global("DemonWalks","GLOBAL",\([0-9]+\))% %\1Global("DemonWalks","GLOBAL",\2)Global("dw_demon_in_combat","LOCALS",0)%~
+	END
+
+	LAF script_delete_block
+		STR_VAR script=demlord
+				match1="[^!]Allegiance(Myself,ENEMY)"
+	END
+
+	LAF script_delete_block
+		STR_VAR script=demlord
+				match1="[^!]See(NearestEnemyOf(Myself))"
+	END
+
+	LAF script_alter_block
+		STR_VAR script=demlord
+				match1=~Global("dw_sfo_temporary","GLOBAL",0)~
+				swap_out=~Global("dw_sfo_temporary","GLOBAL",0)~
+				swap_in=~Allegiance(Myself,ENEMY)~
+	END
+
+
+
+     ///////////////////
+     // Chromatic Demon
+     ///////////////////
+
+     MAKE_PATCH
+        fiend_general=>tanarri
+        level_all=>28
+        resist_slashing=>100
+        resist_piercing=>100
+        resist_crushing=>100
+        resist_missile=>100
+        add_effect_inline=>~opcode=>31 parameter1=>100~
+     END
+     LAF edit_creature STR_VAR creature=gorchr edits=patch_data END
+
+     /////////////
+     //	Demogorgon
+     /////////////
+     
+     MAKE_PATCH
+        fiend_general=>tanarri
+        level_all=>30
+     END
+     LAF edit_creature STR_VAR creature=demogor2 edits=patch_data END
+
+
+
+END
+
+////////////////////////////////////////////////////////////////
+/// Needed resources (IWD version)
+////////////////////////////////////////////////////////////////
+
+
+DEFINE_ACTION_FUNCTION fiend_resources_iwd BEGIN
+
+
+    ////////////////
+    /// shared
+    ////////////////
+
+    LAF shared_fiend_resources END
+
+    ////////////////
+    /// general
+    ////////////////
+
+    LAF install STR_VAR file=~dw#sumfi.itm dw#fitel.spl~ location=resource END
+
+    // demon fear shouldn't be cumulative
+
+    MAKE_PATCH
+       opcode=>206
+       at_end=>1
+       target=>2
+       duration=>5
+       resource=>"%DEMON_FEAR%"
+    END
+    LAF edit_spell STR_VAR spell=DEMON_FEAR editstring="add_effect=>patch_data" END
+
+    ///////////////
+    /// Marilith
+    ///////////////
+
+    // Marilith protections and others
+    
+    LAF spl_make_innate_repeating_spell INT_VAR cooldown=30 STR_VAR arguments="WIZARD_PROTECTION_FROM_MAGIC_WEAPONS=>MARILITH_PROTECTION_FROM_MAGIC_WEAPONS WIZARD_ANIMATE_DEAD=>MARILITH_ANIMATE_DEAD WIZARD_CLOUDKILL=>MARILITH_CLOUDKILL" END
+
+END
+
+
+////////////////////////////////////////////////////////////////
+/// Core content (IWD version)
+////////////////////////////////////////////////////////////////
+
+DEFINE_ACTION_FUNCTION fiend_iwd BEGIN
+
+   // pit fiend (Belhifet)
+
+
+	cre.edit[belhif]
+	[
+		LPM pit_fiend
+		m.cre_remove_spells{all}
+		m.cre_add_spells{INNATE_FIEND_TELEPORT INNATE_FIEND_DISPEL_MAGIC INNATE_FIEND_IMPROVED_INVISIBILITY INNATE_FIEND_FIREBALL CLERIC_SYMBOL_PAIN WIZARD_METEOR_SWARM CLERIC_UNHOLY_WORD}
+		m.cre_strip_scripts{eebelwa}
+	]
+
+   MAKE_PATCH
+   1=>"[1275.639]"
+   2=>"[386.573]"
+   3=>"[956.509]"
+   4=>"[572.1035]"
+   5=>"[263.842]"
+   6=>"[917.1098]"
+   END
+   ACTION_PHP_EACH patch_data AS key=>loc BEGIN
+      OUTER_SPRINT "belhifet_loc_%key%" "%loc%"
+   END
+
+   LAF ssl_to_baf STR_VAR script="dempit=>eebelhi1" variables="jump=bel_conveyance&ImprovedFiends=True" location=ssl END
+   LAF fiend_script_iwd STR_VAR script=eebelhi1 END
+   LAF extend STR_VAR script=eebelhi1 top=belhifet_top location=resource END
+   LAF swap_text STR_VAR file="eepoqcng.bcs" swaps="~ReallyForceSpell(\[PC\],WIZARD_DISPEL_MAGIC)~=>null" END
+   
+   // cornugons
+   
+   MAKE_PATCH
+      cornugon=>null
+      strip_script=>dwmessge
+      insert_script_low=>cornugon
+   END
+   cre.edit[corcat]
+   [
+		LPM cornugon
+		m.cre_strip_scripts{dwmessge}
+		m.cre_insert_script{cornugon|loc=low}
+   ]
+
+	cre.edit[fincor01 fincor02]
+	[
+		LPM cornugon
+	]
+
+  MAKE_PATCH
+      match=>~actor_resource=fincor01 or actor_resource=fincor02~
+      swap_scripts=>"dwmessge=>null"
+      script_default=>cornugon
+   END
+   LAF edit_area STR_VAR area=ar1105 edits=patch_data END
+   LAF ssl_to_baf STR_VAR script=cornugon variables="ImprovedFiends=True" location=ssl END
+   LAF fiend_script_iwd STR_VAR script=cornugon END
+
+   // marilith (Yxunomei)
+   
+   cre.edit[tanarri]
+   [
+		LPM marilith
+		m.cre_remove_spells{all}
+		m.cre_add_spells{INNATE_FIEND_TELEPORT INNATE_FIEND_DISPEL_MAGIC INNATE_FIEND_TRUE_SIGHT INNATE_FIEND_BLADE_BARRIER INNATE_FIEND_STONE_SKIN MARILITH_PROTECTION_FROM_MAGIC_WEAPONS MARILITH_ANIMATE_DEAD MARILITH_CLOUDKILL}
+	
+   ]
+
+   LAF ssl_to_baf STR_VAR script="marilith=>d5yxun" variables="ImprovedFiends=True" location=ssl END
+   LAF fiend_script_iwd STR_VAR script=d5yxun END
+   LAF extend STR_VAR script=d5yxun top=yxun_top location=resource END
+
+   // glabrezu
+   
+   cre.edit[glbcat]
+   [
+		LPM glabrezu
+		m.cre_strip_scripts{dwmessge}
+		m.cre_insert_script{demglab|loc=low}
+   ]
+	cre.edit[vexing2 vexing3 vexing4] [LPM glabrezu]
+
+   LAF ssl_to_baf STR_VAR script=demglab  variables="ImprovedFiends=True" location=ssl END
+   LAF fiend_script_iwd STR_VAR script=demglab END
+   LAF ssl_to_baf STR_VAR script="demglab=>bavex1" variables="ImprovedFiends=True" location=ssl END
+   LAF fiend_script_iwd STR_VAR script=bavex1 END
+   LAF ssl_to_baf STR_VAR script="demglab=>bavex2" variables="ImprovedFiends=True" location=ssl END
+   LAF fiend_script_iwd STR_VAR script=bavex2 END
+   LAF ssl_to_baf STR_VAR script="dw#hlgla=>bavex3" variables="ImprovedFiends=True" location="ssl/summon" END
+   LAF fiend_script_iwd STR_VAR script=bavex3 END
+   ACTION_FOR_EACH number IN 1 2 3 BEGIN
+      LAF extend STR_VAR script="bavex%number%" top="vexing%number%_top" location=resource END
+   END
+   LAF extend STR_VAR script=effolpty top=effolpty_fiend location=resource END
+
+
+
+
+
+
+
+END
+
+DEFINE_ACTION_FUNCTION fiend_script_iwd
+	STR_VAR script=""
+BEGIN
+  COPY "%workspace%/ssl_out/%script%.baf" "override/%script%.bcs"
+	REPLACE_TEXTUALLY EXACT_MATCH ~!AreaCheck("ar3004")~ ~~
+	REPLACE_TEXTUALLY EXACT_MATCH ~!AreaCheck("ar2202")~ ~~
+	COMPILE_BAF_TO_BCS
+END
+
+DEFINE_ACTION_FUNCTION fiend_remove_regeneration BEGIN
+
+	ACTION_FOR_EACH creature IN
+		DEMOGOR2
+		DEVAGOOD
+		DEVAEVIL
+		FINSOL01
+		FINSOL04
+		PLANET01
+		PLANGOOD
+		PLANEVIL
+		PLANWISH
+		BEGIN
+			COPY_EXISTING "%creature%.cre" override
+				LPF DELETE_EFFECT INT_VAR match_opcode=98 END
+		END
+
+
+END

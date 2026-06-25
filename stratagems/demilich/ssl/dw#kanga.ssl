@@ -1,0 +1,38 @@
+
+IF	
+	!Global("DMWWKangaxxWalks","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("DMWWKangaxxWalks","GLOBAL",1)
+		MakeGlobal()
+END
+
+
+////////////////////////////////////////////////////////////////////////////
+////	Kill innocent people
+////////////////////////////////////////////////////////////////////////////
+
+IF
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	!See([PC])
+	See([NEUTRAL])
+THEN
+	RESPONSE #100
+		SetGlobalTimer("castspell","LOCALS",6)
+		ForceSpell(LastSeenBy(Myself),DEMILICH_TRAP_SOUL)
+	RESPONSE #100
+		SetGlobalTimer("castspell","LOCALS",6)
+		SpellNoDec(LastSeenBy(Myself),WIZARD_FLAME_ARROW)
+	RESPONSE #100
+		SetGlobalTimer("castspell","LOCALS",6)
+		SpellNoDec(LastSeenBy(Myself),WIZARD_SKULL_TRAP)
+END
+
+IF
+	AreaType(OUTDOOR)
+	!See([PC])
+THEN
+	RESPONSE #100
+		RandomWalkContinuous()
+END
+

@@ -1,0 +1,241 @@
+//////// Definitions //////////////////////////////////////////
+
+BEGIN LOOP(CheckStatLT\(Myself,60,SPELLFAILUREMAGE\)|| )
+INCLUDE FILE (%MOD_FOLDER%\lib\ssl\shared_definitions.ssl)
+END LOOP
+
+
+///////////// Initialise /////////////////////////////////////////////////////
+
+BEGIN LOOP(scscloudmelee||!See([PC]))
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/initial.ssl)
+END LOOP
+
+IF
+	Global("prep","LOCALS",0)
+	See(NearestEnemyOf(Myself))
+THEN
+	RESPONSE #100
+		SetGlobal("prep","LOCALS",1)
+		SetGlobalTimer("redefend","LOCALS",3)
+		Continue()
+END
+	
+
+
+
+//////////////// HLAs and powers ///////////////////////////////////////////////////////
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+		IgnoreBlock(Talents)
+        RequireBlock(EnhancedEdition)
+		TargetBlock(PCsPreferringWeak)
+		TriggerBlock(Enemy)
+THEN DO
+        Combine()
+        Action(SpellArea,BLACKGUARD_SUMMON_FALLEN_DEVA|300|100)
+END
+
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	RequireBlock(Talents)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(CorePlus)
+	Allegiance(Myself,ENEMY)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellAreaRES,"%BLACKGUARD_SUMMON_BALOR%"|300|100)
+        Action(SpellAreaRES,"%BLACKGUARD_SUMMON_PIT_FIEND%"|300|100)
+END
+
+IF TRIGGER
+	RequireBlock(Talents)
+	TargetBlock(Fiends)
+	TriggerBlock(CorePlus)
+	Allegiance(Myself,ENEMY)
+	!Allegiance(scstarget,ENEMY)
+	Alignment(scstarget,CHAOTIC_EVIL)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellRES,"%BLACKGUARD_ABYSSAL_PACT%")
+END
+
+IF TRIGGER
+	RequireBlock(Talents)
+	TargetBlock(Fiends)
+	TriggerBlock(CorePlus)
+	Allegiance(Myself,ENEMY)
+	!Allegiance(scstarget,ENEMY)
+	Alignment(scstarget,LAWFUL_EVIL)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellRES,"%BLACKGUARD_INFERNAL_CONTRACT%")
+END
+
+IF TRIGGER
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TargetBlock(PCsInOrderShort)
+	Range(scstarget,10)
+	!CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	TriggerBlock(SpellTurn|MR|Enemy|SINecromancy|ResistMagicDamage)
+	!HPPercentLT(scstarget,10)
+	!HasItem("harm",Myself)
+THEN DO
+	Action(AbilityRES,"%BLACKGUARD_HARM%"|200|100)
+END
+
+
+IF TRIGGER
+    RequireBlock(IsBlackguard)
+	RequireBlock(Talents)
+	RequireBlock(IsHighLevel)
+	TriggerBlock(CorePlus|HardPlusOrMarker)
+	Allegiance(Myself,ENEMY)
+	TargetBlock(Celestials)
+	TargetBlock(PCsPreferringWeak)
+	!Allegiance(scstarget,ENEMY)
+	!HasItem("harm",Myself)
+THEN DO
+        Action(SpellRES,"%BLACKGUARD_PROFANE_FIRE%"|300|100)
+END
+
+IF TRIGGER
+	!StateCheck(Myself,State_INVISIBLE)
+	TriggerBlock(TruesightSafe)
+	See(NearestEnemyOf(Myself))
+	!StateCheck(Myself,STATE_BLUR)
+THEN DO
+	Action(SpellMyself,PSIONIC_BLUR|100|50)
+END
+
+
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(IsBlackguard)
+	TargetBlock(EnemiesInOrder)
+	TriggerBlock(Enemy|MR)
+	Range(scstarget,10)
+THEN DO
+	Combine()
+	Action(SpellMyself,BLACKGUARD_AURA_OF_DESPAIR|100|50)
+END
+	
+IF TRIGGER
+        TriggerBlock(CorePlus)
+        RequireBlock(EnhancedEdition)
+        HPPercentLT(Myself,75)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Disabled|MR|MinorGlobe)
+	Range(scstarget,5)
+THEN DO
+	Action(Spell,BLACKGUARD_ABSORB_HEALTH)
+END
+
+
+
+IF TRIGGER
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+THEN DO
+	Action(SpellMyself,WARRIOR_HARDINESS|100|100)
+	Action(SpellMyself,WARRIOR_GREATER_WHIRLWIND|100|100)
+	Action(SpellMyself,WARRIOR_CRITICAL_STRIKE|100|100)
+END
+
+
+
+/////////////// Psionics ////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	TargetBlock(PCsInOrder)
+	HPPercentLT(Myself,60)
+	Range(scstarget,10)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_LIFE_DRAIN|100|50)
+END
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringStrong;CheckStatGT(scstarget,5,SAVEVSSPELL))
+	TargetBlock(PCsPreferringStrong)
+	ConditionalTargetBlock(EnemiesInOrder;CheckStatGT(scstarget,7,Level)) // don't maze weak creatures
+	TriggerBlock(Enemy|Helpless|PsiMaze|EasyPlus)
+	CheckStatGT(scstarget,1,SAVEVSSPELL)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_MAZE|100|50)
+END
+
+IF TRIGGER
+	TargetBlock(PCsInOrder)
+	TriggerBlock(Enemy|Disabled)
+	OR(2)
+		Class(scstarget,FIGHTER_ALL)
+		Class(scstarget,MONK)
+	CheckStatGT(scstarget,4,SAVEVSSPELL)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_PROJECT_FORCE|100|100)
+END
+
+///////////////////////////////////////////////////////////////////////////////	
+////	Detonation and Ballistic attack
+///////////////////////////////////////////////////////////////////////////////
+
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsInOrder;HPPercentLT(scstarget,25))
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Helpless|Stoneskin|EasyPlus)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_BALLISTIC)
+END
+
+
+////////////// Jump ///////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/psionic/ssl/gith/githjump.ssl)
+
+
+DEFAULT TRIGGER()
+
+///////////// Potions //////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        RequireBlock(EnhancedEdition)
+	TargetBlock(EnemiesInOrder)
+	TriggerBlock(Enemy|MR)
+	Range(scstarget,10)
+THEN DO
+	Combine()
+	Action(SpellMyself,BLACKGUARD_AURA_OF_DESPAIR|100|50)
+END
+
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/potionuse.ssl)
+
+IF TRIGGER
+        RequireBlock(EnhancedEdition)
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),5)
+	TriggerBlock(ILackPoison)
+THEN DO
+	Action(SpellMyself,ASSASSIN_POISON)
+END
+
+///////////// Melee //////////////////////////////////////////////////////////////
+
+BEGIN LOOP(MyWeaponStrength||4)
+BEGIN LOOP(MyWeaponDamageType||Slashing)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/chase.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/dw#wtacor.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/move.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/chase.ssl)
+END LOOP
+END LOOP
+

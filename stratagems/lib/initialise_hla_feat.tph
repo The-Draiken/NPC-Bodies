@@ -1,0 +1,86 @@
+DEFINE_ACTION_FUNCTION initialise_hla_feat
+   STR_VAR extant_list=""
+BEGIN
+
+   // if we're bg2 then...
+   
+	ACTION_IF is_bg2 BEGIN
+		// read extant HLAs not in spell.ids onto the list
+		
+		 MAKE_PATCH 
+			USE_ANY_ITEM=>spcl915
+			EXTRA_LEVEL_6=>spcl928
+			EXTRA_LEVEL_7=>spcl929
+			EXTRA_LEVEL_8=>spcl930
+		 END
+		 ACTION_PHP_EACH patch_data AS ids=>resref BEGIN
+			ACTION_TO_UPPER ids
+			ACTION_TO_UPPER resref
+			OUTER_SPRINT "%ids%" "%resref%"
+		END
+		
+		// read in extras
+		
+		ACTION_IF "%extant_list%" STRING_EQUAL_CASE "" BEGIN
+		   ACTION_IF enhanced_edition BEGIN
+			  OUTER_SPRINT extant_list vanilla_hlas
+		   END ELSE BEGIN
+			  OUTER_SPRINT extant_list vanilla_hlas_no_ee
+		   END
+		END
+
+		LAF 2da_read STR_VAR file="%extant_list%.2da" location=lib case=mixed type=table_header RET_ARRAY rows array_in=array END
+		ACTION_CLEAR_ARRAY array_out
+		ACTION_PHP_EACH rows AS num=>discard BEGIN
+			OUTER_SPRINT id $array_in("%num%" ids)
+			OUTER_SPRINT $array_out("%id%" resref) "%%id%%"
+			OUTER_SPRINT $array_out("%id%" type) $array_in("%num%" type)
+		END
+		LAF 2da_write STR_VAR file="dw_feat_data.2da" path="%data_loc_shared%" array=array_out END
+
+  END ELSE BEGIN
+  // otherwise just create blank data
+  
+<<<<<<<< .../stratagems-inline/dw_feat_data.2da
+2DA V1.0
+*
+                                      resref                                type
+>>>>>>>>
+		COPY ".../stratagems-inline/dw_feat_data.2da" "%data_loc_shared%/dw_feat_data.2da"
+  
+  END
+
+END
+
+
+DEFINE_ACTION_MACRO read_hla_feat BEGIN
+	LOCAL_SPRINT hla ""
+	LOCAL_SPRINT resref ""
+	LOCAL_SET spelltype=0
+	LOCAL_SET level=0
+	LAF 2da_read STR_VAR file=dw_feat_data.2da path="%data_loc_shared%" RET_ARRAY hla_rows=rows hla_array=array END
+	ACTION_PHP_EACH hla_rows AS hla=>discard BEGIN
+		OUTER_SPRINT "%hla%" $hla_array("%hla%" "RESREF")
+		OUTER_SPRINT hla_resref $hla_array("%hla%" "RESREF")
+		OUTER_SPRINT $hla_type("%hla%") $hla_array("%hla%" "TYPE")
+		OUTER_SET spelltype=0
+		OUTER_SPRINT resref EVAL "%%hla%%"
+		COPY_EXISTING - "%%hla%%.spl" nowhere
+			READ_SHORT 0x1c spelltype
+			READ_LONG 0x34 level
+		IF_EXISTS
+		OUTER_SET $hla_spelltype("%hla%")=spelltype
+		OUTER_SET "RESREF_%hla_resref%_LEVEL"=level
+		ACTION_IF spelltype=1 BEGIN
+			OUTER_SPRINT "RESREF_%hla_resref%_TYPE" wizard
+		END ELSE
+		ACTION_IF spelltype=2 BEGIN 
+			OUTER_SPRINT "RESREF_%hla_resref%_TYPE" priest			
+		END ELSE BEGIN
+			OUTER_SPRINT "RESREF_%hla_resref%_TYPE" innate			
+		END
+	END
+
+
+
+END

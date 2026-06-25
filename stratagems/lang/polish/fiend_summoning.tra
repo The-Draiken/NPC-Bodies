@@ -1,0 +1,49 @@
+
+@32100 = ~Brama
+(Sprowadzanie/Przywoływanie)
+
+Poziom: 9
+Zasięg: 0
+Czas działania: 33 rundy
+Czas rzucania: 9
+Obszar działania: specjalny
+Rzut obronny: brak
+
+Za pomocą tego zaklęcia czarujący przyzywa pozaplanarne stworzenie, Biesa z Czeluści lub balora, które atakuje jego wrogów oraz, jeśli nie okaże się on ostrożny, również jego samego. Aby ukryć się przed wzrokiem diabła, czarujący musi rzucić zaklęcie Ochrona przed złem na siebie i na członków swojej drużyny. Jeśli bowiem nie zabezpieczy się skutecznie w ten sposób, bies rozerwie go na strzępy, a następnie uczyni to samo z jego towarzyszami.~
+
+@32101 = ~Brama
+(Sprowadzanie/Przywoływanie)
+
+Poziom: 7
+Sfera: Przywoływanie
+Zasięg: 0
+Czas działania: 33 rundy
+Czas rzucania: 5
+Obszar działania: specjalny
+Rzut obronny: brak
+
+Za pomocą tego zaklęcia czarujący przyzywa pozaplanarne stworzenie, Biesa z Czeluści lub balora, które atakuje jego wrogów oraz, jeśli nie okaże się on ostrożny, również jego samego. Aby ukryć się przed wzrokiem diabła, czarujący musi rzucić zaklęcie Ochrona przed złem na siebie i na członków swojej drużyny. Jeśli bowiem nie zabezpieczy się skutecznie w ten sposób, bies rozerwie go na strzępy, a następnie uczyni to samo z jego towarzyszami.~
+
+@32102 = ~Przyzwanie biesa
+(Sprowadzanie/Przywoływanie)
+
+Poziom: 8
+Zasięg: 0
+Czas działania: 15 rund
+Czas rzucania: 9
+Obszar działania: specjalny
+Rzut obronny: brak
+
+Zaklęcie przywołuje oszalałego biesa, który atakuje każdego, kto znajduje się w obszarze działania czaru, z wyjątkiem osób chronionych zaklęciem Ochrona przed złem. Tylko zdesperowani lub mający skłonności samobójcze czarodzieje używają Przyzwania biesa.~
+
+@32103 = ~Wielobies
+(Sprowadzanie/Przywoływanie)
+
+Poziom: 7
+Zasięg: 0
+Czas działania: 15 rund
+Czas rzucania: 9
+Obszar działania: specjalny
+Rzut obronny: brak
+
+Zaklęcie to przywołuje potężnego biesa, który zaczyna siać wokół zniszczenie, atakując i zabijając wszystko w zasięgu wzroku. Każda osoba chroniona przed złem nie będzie obrana za cel przez biesa. To bardzo niebezpieczne zaklęcie, które najlepiej zostawić na czarną godzinę.~

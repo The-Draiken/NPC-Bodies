@@ -1,0 +1,7 @@
+DEFINE_ACTION_FUNCTION killsword BEGIN
+
+	COPY "%MOD_FOLDER%/lib/resource/killsw01.itm" "override/dw#kilsw.itm"
+		WRITE_ASCII 0x3a "isw1h01"
+		WRITE_LONG 0xace 20 // we control this file!
+
+END

@@ -1,0 +1,85 @@
+INCLUDE FILE (%MOD_FOLDER%\lib\ssl\shared_definitions.ssl)
+
+
+
+IF
+	Die()
+THEN
+	RESPONSE #100
+		CreateVisualEffectObject("ICRMPARI",Myself)
+		DestroySelf()
+END
+
+IF
+	!GlobalTimerNotExpired("runonce","LOCALS")
+	See(NearestEnemyOf(Myself))
+	Range(NearestEnemyOf(Myself),7)
+THEN
+	RESPONSE #100
+		SetGlobalTimer("runonce","LOCALS",18)
+		RunAwayFromNoLeaveArea(NearestEnemyOf(Myself),30)
+END
+
+
+IF
+	!GlobalTimerNotExpired("castspell","LOCALS")
+	Global("SeekerAttack","LOCALS",0)
+	See(NearestEnemyOf(Myself))
+THEN
+	RESPONSE #80
+		SetGlobal("SeekerAttack","LOCALS",1)
+	RESPONSE #80
+		SetGlobal("SeekerAttack","LOCALS",2)
+	RESPONSE #100
+		SetGlobal("SeekerAttack","LOCALS",3)
+	RESPONSE #100
+		SetGlobal("SeekerAttack","LOCALS",4)
+END
+
+
+IF TRIGGER
+	Global("SeekerAttack","LOCALS",1)
+	ConditionalTargetBlock(PCsPreferringWeak;HPPercentLT(scstarget,40))
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(DirectDamageSafe)
+	TriggerBlock(MR|ResistFire|Enemy|ArrowSafe|SpellTurn|Stoneskin|MinorGlobe|MirrorImage|Helpless|SIConjuration)
+THEN DO
+	Action(ForceSpell,WIZARD_FLAME_ARROW|150|50)
+END
+
+IF TRIGGER
+	Global("SeekerAttack","LOCALS",4)
+	ConditionalTargetBlock(PCsPreferringWeak;HPPercentLT(scstarget,40))
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(DirectDamageSafe)
+	TriggerBlock(MR|ResistFire|Enemy|ArrowSafe|SpellTurn|Stoneskin|MinorGlobe|MirrorImage|Helpless|SIConjuration)
+THEN DO
+	Action(ForceSpell,WIZARD_AGANNAZAR_SCORCHER|150|50)
+END
+
+
+
+
+IF TRIGGER
+	Global("SeekerAttack","LOCALS",2)
+	ConditionalTargetBlock(PCSpellcasters;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(PCSpellcasters)
+	TargetBlock(PCsInOrderShort)
+	TriggerBlock(DirectDamageSafe)
+	TriggerBlock(MR100|SIConjuration|Stoneskin|MirrorImage|MinorGlobe|ArrowSafe|SpellTurn|Enemy)
+THEN DO
+	Action(ForceSpell,WIZARD_MELF_ACID_ARROW|100|50)
+END
+
+
+
+IF TRIGGER
+	Global("SeekerAttack","LOCALS",3)
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC)&HPPercentLT(scstarget,40))
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(DirectDamageSafe)
+	TriggerBlock(MR100|SIEvocation|MinorGlobe|SpellTurn|Enemy|MagicMissile|L1safe)
+THEN DO
+	Action(ForceSpellMarker,WIZARD_MAGIC_MISSILE,ITEM_MM_SEEN)
+END

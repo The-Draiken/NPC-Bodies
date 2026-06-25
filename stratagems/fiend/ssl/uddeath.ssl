@@ -1,0 +1,126 @@
+//////////////////////////////////////////////////////////////////////////////////////
+///	Demon Knight combat script
+//////////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/fiend_definitions.ssl)
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/initial.ssl)  // rest-and-recover, mill in confusion, etc.
+
+//////////////////////////////////////////////////////////////////////////////////////
+////	Dispel Magic
+//////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN LOOP(INNATE_FIEND||WIZARD)
+
+	INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/dispel.ssl)
+
+END LOOP
+
+/////////////////////////////
+///   Symbol: Fear
+//////////////////////////////
+
+IF TRIGGER
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(Panic|MR100|SIConjuration|Enemy|Helpless|AoEHelpless)
+THEN DO
+	Combine()
+	Action(Spell,WIZARD_NPC_SYMBOL_FEAR|100|200)
+END
+
+///////////////////////////////
+////	Symbol: Death
+///////////////////////////////
+
+IF TRIGGER
+	TargetBlock(EnemiesInOrder)
+	IgnoreBlock(IsDurlagKnight)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(Slay|MR|SIConjuration|AoE)
+THEN DO
+	Combine()
+	Action(Spell,WIZARD_NPC_SYMBOL_DEATH|100|200)
+END
+
+//////////////////////////////////////////////////////////////////////////////////////
+///	Consider moving to a more interesting location in the battle
+//////////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/jump.ssl)
+
+
+////////////////////////////////////////////
+///	Fireball
+////////////////////////////////////////////
+
+IF TRIGGER
+	TargetBlock(DistantEnemies)
+	TriggerBlock(MR100|ResistFire|SIEvocation|MinorGlobe|Enemy|AoEFireball)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+        Combine()
+	Action(Spell,DEATHKNIGHT_FIREBALL|100|100)
+END
+
+/////////////////////////////////////////////////////////////////////////
+///// Power Word: Kill
+////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	IgnoreBlock(IsDurlagKnight)
+	TargetBlock(PCsInOrderShort)
+	TriggerBlock(Enemy)
+	OR(3)
+		HPPercentLT(scstarget,50)
+		Class(scstarget,MAGE)
+		Class(scstarget,MAGE_THIEF)
+	TriggerBlock(MR100|SpellDeflect|Slay|SIConjuration|Enemy|SRPowerWord)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Combine()
+	Action(Spell,WIZARD_POWER_WORD_KILL|100|100)
+END
+
+
+////////////////////////////////////////
+////	Power Word: Blind
+///////////////////////////////////////
+
+IF TRIGGER
+	TargetBlock(PCsPreferringStrong)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(SpellDeflect|MR|Enemy|SIConjuration|SRPowerWord)
+THEN DO
+	Combine()
+	Action(Spell,WIZARD_POWER_WORD_BLIND|100|100)
+END
+
+////////////////////////////////////////////////////////////////////////
+////  Power Word: Stun
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(PCsInOrderShort)
+	TriggerBlock(MR100|SpellTurn|Stun|Enemy|Helpless|SIConjuration|SRPowerWord)
+	OR(3)
+		HPPercentLT(scstarget,60)
+		Class(scstarget,MAGE)
+		Class(scstarget,MAGE_THIEF)
+THEN DO
+	Action(Spell,WIZARD_POWER_WORD_STUN|100|100)
+END
+
+//////////////////////////////////////////////////////////////////////////////
+////	Core combat block
+///////////////////////////////////////////////////////////////////////////////
+
+BEGIN LOOP(MyWeaponStrength||Unknown)
+BEGIN LOOP(MyWeaponDamageType||Slashing)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/dw#wtacor.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/move.ssl)
+INCLUDE FILE(%MOD_FOLDER%/fiend/ssl/chase.ssl)
+END LOOP
+END LOOP

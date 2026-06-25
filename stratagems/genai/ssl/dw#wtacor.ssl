@@ -1,0 +1,295 @@
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+/////	Now the core combat block      ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+////	Am I a moron? If so, don't waste time on this "find a target" crap. 
+////	Just kill the nearest opponent
+///////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	RequireBlock(IsMoron)
+	Target(NearestEnemyOf(Myself))
+	TriggerBlock(Enemy)
+	Range(scstarget,10)
+THEN DO
+	Action(MoronAttack)
+END
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////	If I'm not a moron and I'm attacking something I can't hit, STOP!
+////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        RequireBlock(EnhancedEdition)
+	IgnoreBlock(IsMoron)
+        Target(LastTargetedBy(Myself))
+        Global("validtarget","LOCALS",1)
+        OR(2)
+            !WeaponEffectiveVs(scstarget,MAINHAND)
+            !WeaponCanDamage(scstarget,MAINHAND)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+
+IF TRIGGER
+	IgnoreBlock(IsBG1)
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(EnhancedEdition)
+	Target(LastTargetedBy(Myself))
+	CheckStat(Myself,0,WEAPON_ENCHANTMENT)
+	Global("validtarget","LOCALS",1)
+	OR(2)
+           CheckSpellState(scstarget,PROTECTION_FROM_NORMAL_WEAPONS)
+           HasItem("immune1",scstarget)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsBG1)
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(EnhancedEdition)
+	Target(LastTargetedBy(Myself))
+	CheckStatLT(Myself,2,WEAPON_ENCHANTMENT)
+	Global("validtarget","LOCALS",1)
+	HasItem("immune2",scstarget)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsBG1)
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(EnhancedEdition)
+	Target(LastTargetedBy(Myself))
+	CheckStatLT(Myself,3,WEAPON_ENCHANTMENT)
+	Global("validtarget","LOCALS",1)
+	OR(2)
+	   CheckStatGT(scstarget,0,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+	   HasItem("immune3",scstarget)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsBG1)
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(EnhancedEdition)
+	Target(LastTargetedBy(Myself))
+	CheckStat(Myself,3,WEAPON_ENCHANTMENT)
+	Global("validtarget","LOCALS",1)
+	OR(2)
+           CheckStatGT(scstarget,1,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+           HasItem("immune4",scstarget)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsBG1)
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(EnhancedEdition)
+	Target(LastTargetedBy(Myself))
+	CheckStat(Myself,4,WEAPON_ENCHANTMENT)
+	Global("validtarget","LOCALS",1)
+	CheckStatGT(scstarget,2,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsBG1)
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(EnhancedEdition)
+	Target(LastTargetedBy(Myself))
+	!CheckStat(Myself,0,WEAPON_ENCHANTMENT)
+	Global("validtarget","LOCALS",1)
+	CheckStat(scstarget,4,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+THEN DO
+	SetGlobal("validtarget","LOCALS",0)
+	ClearActions(Myself)
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+////	Backstab if you're an invisible thief; 
+////	don't attack stoneskinned or mirror imaged targets.
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	RequireBlock(IsThief|IsAssassin|IsStalker)
+	StateCheck(Myself,STATE_INVISIBLE)
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|BackstabSafe|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	OR(2)
+		Range(scstarget,4)
+		Global("backstabplan","LOCALS",1)
+THEN DO
+	Action(Attack2)
+END
+
+/////////////////////////////////////////////////////////////////////////////
+////	Kill spellcasters if you're a Wizard Slayer
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	RequireBlock(IsWizardSlayer)
+	TargetBlock(PCSpellcasters)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,10)
+THEN DO
+	Action(Attack)
+END
+
+/////////////////////////////////////////////////////////////////////////////
+////	Kill evil creatures if you're a paladin
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	RequireBlock(IsPaladin)
+	IgnoreBlock(IsBlackguard)
+	TargetBlock(PCsPreferringStrong)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|Evil|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,5)
+THEN DO
+	Action(Attack)
+END
+
+IF TRIGGER
+	RequireBlock(IsBlackguard)
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|Good|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,5)
+THEN DO
+	Action(Attack)
+END
+
+
+
+///////////////////////////////////////////////////////////////////////
+////	We start by looking at the very near opponents. Go for the 
+////	most vulnerable of them. In the first instance, try for PCs with no stoneskins
+////	and no mirror images
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(Enemy|Helpless|MirrorImage|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	!CheckStatGT(scstarget,0,STONESKINS)
+	!HPPercentGT(scstarget,20)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(Enemy|Helpless|MirrorImage|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	!CheckStatGT(scstarget,0,STONESKINS)
+	!HPPercentGT(scstarget,50)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	TargetBlock(PCsPreferringWeak)
+	TriggerBlock(Enemy|Helpless|MirrorImage|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	!CheckStatGT(scstarget,0,STONESKINS)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+///////////////////////////////////////////////////////////////////////
+////	Don't attack the helpless (that is: the stunned etc); don't attack
+////	people protected from your weapon.
+////
+////    If an invisible (or Assassinate-using) thief, still don't attack mirrored/stoneskinned foes
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	IgnoreBlock(IsThief|IsAssassin|IsStalker)
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	RequireBlock(IsThief|IsAssassin|IsStalker)
+	!StateCheck(Myself,STATE_INVISIBLE)
+	!CheckStat(Myself,4,SCRIPTINGSTATE4)
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	RequireBlock(IsThief|IsAssassin|IsStalker)
+	OR(2)
+            StateCheck(Myself,STATE_INVISIBLE)
+	    CheckStat(Myself,4,SCRIPTINGSTATE4)
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|Helpless|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe|MirrorImage)
+	!CheckStatGT(scstarget,0,STONESKINS)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+///////////////////////////////////////////////////////////////////////
+////	... but if there's a nearby target who *is* helpless (and no-one else), scac'em.
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	IgnoreBlock(IsMoron)
+	TargetBlock(CloseEnemies)
+	TriggerBlock(Enemy|PlusMyWeaponStrengthSafe|MyWeaponDamageTypeSafe)
+	Range(scstarget,4)
+THEN DO
+	Action(Attack)
+END
+
+///////////////////////////////////////////////////////////////////////
+////	No targets? I'm probably being a bit fastidious about damage resistance
+///////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+   IgnoreBlock(IsMoron)
+   TriggerBlock(CannotEquipRanged)
+   ActionListEmpty()
+   Allegiance(Myself,ENEMY)
+   !GlobalTimerNotExpired("targetcompromise","LOCALS")
+THEN DO
+             Action(Literal)
+             SetGlobalTimer("targetcompromise","LOCALS",24)
+END

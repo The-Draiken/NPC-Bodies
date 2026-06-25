@@ -1,0 +1,241 @@
+DEFINE_ACTION_FUNCTION spellhold_cost
+    STR_VAR version="0" // this is the cost in thousands of gp
+BEGIN
+    // work out variables
+	OUTER_SET asking_price_thousands=version
+    OUTER_SET asking_price=version *1000
+    OUTER_SET asking_price_minus_one = asking_price - 1
+    OUTER_SET actual_price_thousands=(version *3) / 4
+    OUTER_SET actual_price=actual_price_thousands* 1000
+    OUTER_SET actual_price_minus_one = actual_price - 1
+    OUTER_SET threshold_price=asking_price / 4
+    OUTER_SET threshold_price_minus_one=threshold_price - 1
+    OUTER_SPRINT asking_price_string ~%version%,000~
+    OUTER_SPRINT actual_price_string ~%actual_price_thousands%,000~
+    OUTER_SET malficus_high_price_thousands=(version * 9) / 10
+    OUTER_SET malficus_high_price=malficus_high_price_thousands * 1000
+    OUTER_SET malficus_high_price_minus_one=malficus_high_price - 1
+    OUTER_SET malficus_near_full_price_thousands=(version * 95) / 100
+    OUTER_SET malficus_near_full_price=malficus_near_full_price_thousands * 1000
+    OUTER_SET malficus_near_full_price_minus_one=malficus_near_full_price - 1
+    OUTER_SET malficus_half_price_thousands=version / 2
+    OUTER_SET malficus_half_price=malficus_half_price_thousands * 1000
+    OUTER_SET malficus_half_price_minus_one=malficus_half_price - 1
+    OUTER_SET malficus_low_price_thousands=(version * 15) / 100
+    OUTER_SET malficus_low_price=malficus_low_price_thousands * 1000
+    OUTER_SET malficus_low_price_minus_one=malficus_low_price - 1
+    OUTER_SET malficus_small_discount_thousands=version - malficus_high_price_thousands
+    OUTER_SET malficus_large_discount_thousands=malficus_high_price_thousands - malficus_half_price_thousands
+    OUTER_SET malficus_max_discount_thousands=version - malficus_low_price_thousands
+    OUTER_SPRINT malficus_high_price_string ~%malficus_high_price_thousands%,000~
+    OUTER_SPRINT malficus_near_full_price_string ~%malficus_near_full_price_thousands%,000~
+    OUTER_SPRINT malficus_half_price_string ~%malficus_half_price_thousands%,000~
+    OUTER_SPRINT malficus_low_price_string ~%malficus_low_price_thousands%,000~
+    OUTER_SPRINT malficus_small_discount_string ~%malficus_small_discount_thousands%,000~
+    OUTER_SPRINT malficus_large_discount_string ~%malficus_large_discount_thousands%,000~
+    OUTER_SPRINT malficus_max_discount_string ~%malficus_max_discount_thousands%,000~
+
+	// do the changes to scripting that actually implement the change
+	// I don't know any mod that actually responds to this number
+	
+	ACTION_DEFINE_ASSOCIATIVE_ARRAY spellhold_text_swap BEGIN
+		"PartyGoldLT(20000)" => "PartyGoldLT(%asking_price%)"
+        "PartyGoldLT(50000)" => "PartyGoldLT(%asking_price%)"
+		"PartyGoldLT(15000)" => "PartyGoldLT(%actual_price%)"
+		"PartyGoldLT(5000)" => "PartyGoldLT(%threshold_price%)"
+		"PartyGoldGT(49999)" => "PartyGoldGT(%asking_price_minus_one%)"
+		"PartyGoldGT(19999)" => "PartyGoldGT(%asking_price_minus_one%)"
+		"PartyGoldGT(14999)" => "PartyGoldGT(%actual_price_minus_one%)"
+		"PartyGoldGT(4999)" => "PartyGoldGT(%threshold_price_minus_one%)"
+		"TakePartyGold(20000)" => "TakePartyGold(%asking_price%)"
+		"TakePartyGold(15000)" => "TakePartyGold(%actual_price%)"
+		"DestroyGold(15000)" => "DestroyGold(%actual_price%)"
+	END
+	ACTION_FOR_EACH file IN "bodhi.dlg" "gaelan.dlg" "ar0800.bcs" "baldur.bcs" BEGIN
+		COPY_EXISTING "%file%" override
+			DECOMPILE_AND_PATCH BEGIN
+				PHP_EACH spellhold_text_swap AS old=>new BEGIN
+					REPLACE_TEXTUALLY "%old%" "%new%"
+				END
+			END
+		BUT_ONLY
+	END
+
+	// Alternatives: Aster's route uses the same 15,000 gp competing-offer price as Bodhi.
+	ACTION_IF FILE_EXISTS_IN_GAME "b!aster.dlg" BEGIN
+		COPY_EXISTING "b!aster.dlg" override
+			DECOMPILE_AND_PATCH BEGIN
+				PHP_EACH spellhold_text_swap AS old=>new BEGIN
+					REPLACE_TEXTUALLY "%old%" "%new%"
+				END
+			END
+		BUT_ONLY
+	END
+
+	// Alternatives: scale Malficus's 100k/95k/90k/50k/15k ladder to the selected SCS cost.
+	ACTION_DEFINE_ASSOCIATIVE_ARRAY alternatives_malficus_text_swap BEGIN
+		~PartyGoldGT(100000)~ => ~PartyGoldGT(%asking_price_minus_one%)~
+		~PartyGoldGT(95000)~ => ~PartyGoldGT(%malficus_near_full_price_minus_one%)~
+		~PartyGoldGT(90000)~ => ~PartyGoldGT(%malficus_high_price_minus_one%)~
+		~PartyGoldGT(50000)~ => ~PartyGoldGT(%malficus_half_price_minus_one%)~
+		~PartyGoldGT(15000)~ => ~PartyGoldGT(%malficus_low_price_minus_one%)~
+		~TakePartyGold(100000)~ => ~TakePartyGold(%asking_price%)~
+		~TakePartyGold(95000)~ => ~TakePartyGold(%malficus_near_full_price%)~
+		~TakePartyGold(90000)~ => ~TakePartyGold(%malficus_high_price%)~
+		~TakePartyGold(50000)~ => ~TakePartyGold(%malficus_half_price%)~
+		~TakePartyGold(15000)~ => ~TakePartyGold(%malficus_low_price%)~
+		~DestroyGold(100000)~ => ~DestroyGold(%asking_price%)~
+		~DestroyGold(95000)~ => ~DestroyGold(%malficus_near_full_price%)~
+		~DestroyGold(90000)~ => ~DestroyGold(%malficus_high_price%)~
+		~DestroyGold(50000)~ => ~DestroyGold(%malficus_half_price%)~
+		~DestroyGold(15000)~ => ~DestroyGold(%malficus_low_price%)~
+		~Global("B!TouristFirstClass","GLOBAL",50)~ => ~Global("B!TouristFirstClass","GLOBAL",%malficus_half_price_thousands%)~
+		~SetGlobal("B!TouristFirstClass","GLOBAL",50)~ => ~SetGlobal("B!TouristFirstClass","GLOBAL",%malficus_half_price_thousands%)~
+		~Global("B!TouristFirstClass","GLOBAL",15)~ => ~Global("B!TouristFirstClass","GLOBAL",%malficus_low_price_thousands%)~
+		~SetGlobal("B!TouristFirstClass","GLOBAL",15)~ => ~SetGlobal("B!TouristFirstClass","GLOBAL",%malficus_low_price_thousands%)~
+	END
+	ACTION_IF FILE_EXISTS_IN_GAME "b!mal.dlg" BEGIN
+		COPY_EXISTING "b!mal.dlg" override
+			DECOMPILE_AND_PATCH BEGIN
+				PHP_EACH alternatives_malficus_text_swap AS old=>new BEGIN
+					REPLACE_TEXTUALLY "%old%" "%new%"
+				END
+			END
+		BUT_ONLY
+	END
+
+	// set strings
+
+
+	LAF 2da_read INT_VAR inline=1 STR_VAR file=cost_strings.2da RET_ARRAY cost_string_array=array END
+	OUTER_SET actual_price_tra=$cost_string_array("%version%" ACTUAL_PRICE_TEXT)
+	OUTER_SPRINT actual_price_text (AT actual_price_tra)
+	OUTER_SET asking_price_tra=$cost_string_array("%version%" ASKING_PRICE_TEXT)
+	OUTER_SPRINT asking_price_text (AT asking_price_tra)
+	OUTER_SPRINT actual_price_text_old @1601
+	OUTER_SPRINT asking_price_text_old @1602
+	
+	// these are the dialog files that mention the price
+	
+	ACTION_FOR_EACH dialog IN 
+			bodhi 	// original game
+			gaelan 
+			b!aster // Alternatives
+			bo#xan  // Xan mod
+			o#xanj 
+			bo#tiax  // Tiax mod (appears in crossmod I think)
+		BEGIN
+		COPY_EXISTING - "%dialog%.dlg" nowhere
+			LPF strref_apply STR_VAR function=swap_strref_spellhold END
+		IF_EXISTS
+	END
+
+	ACTION_FOR_EACH dialog IN 
+			b!mal // Alternatives
+		BEGIN
+		COPY_EXISTING - "%dialog%.dlg" nowhere
+			LPF strref_apply STR_VAR function=swap_strref_alternatives_malficus END
+		IF_EXISTS
+	END
+	
+	// these journal strings also mention it
+	
+	OUTER_PATCH "" BEGIN
+		PATCH_FOR_EACH arguments IN
+		34187
+		BEGIN
+			LPF swap_strref_spellhold STR_VAR arguments END
+		END
+		PATCH_IF enhanced_edition BEGIN
+			PATCH_FOR_EACH arguments IN
+			74374
+			96385
+			BEGIN
+				LPF swap_strref_spellhold STR_VAR arguments END
+			END
+		END
+	END
+END
+
+DEFINE_PATCH_FUNCTION swap_strref_spellhold
+	STR_VAR arguments=0
+	RET value
+BEGIN
+	// return the unaltered strref
+	value=arguments
+	// make the swap
+	PATCH_IF arguments>=0 BEGIN
+		GET_STRREF arguments string
+		GET_STRREF_S arguments sound
+		INNER_PATCH_SAVE string "%string%" BEGIN
+			
+			REPLACE_TEXTUALLY "^20\(.?.?\)000" "%asking_price_thousands%\1000"
+			REPLACE_TEXTUALLY "\([^1]\)20\(.?.?\)000" "\1%asking_price_thousands%\2000"
+			REPLACE_TEXTUALLY "15\(.?.?\)000" "%actual_price_thousands%\1000"
+			REPLACE_TEXTUALLY "%asking_price_text_old%" "%asking_price_text%"
+			REPLACE_TEXTUALLY "%actual_price_text_old%" "%actual_price_text%"	
+		END
+		INNER_ACTION BEGIN
+			ACTION_IF "%sound%" STR_EQ "" BEGIN
+				STRING_SET_EVALUATE arguments "%string%"
+			END ELSE BEGIN
+				STRING_SET_EVALUATE arguments "%string%" [%sound%]			
+			END
+		END
+	END
+END
+
+DEFINE_PATCH_FUNCTION swap_strref_alternatives_malficus
+	STR_VAR arguments=0
+	RET value
+BEGIN
+	// return the unaltered strref
+	value=arguments
+	// make the swap
+	PATCH_IF arguments>=0 BEGIN
+		GET_STRREF arguments string
+		GET_STRREF_S arguments sound
+		INNER_PATCH_SAVE string "%string%" BEGIN
+			REPLACE_TEXTUALLY "100\(.?.?\)000" "SCS_ALT_MAL_FULL_PRICE"
+			REPLACE_TEXTUALLY "95\(.?.?\)000" "SCS_ALT_MAL_NEAR_FULL_PRICE"
+			REPLACE_TEXTUALLY "90\(.?.?\)000" "SCS_ALT_MAL_HIGH_PRICE"
+			REPLACE_TEXTUALLY "85\(.?.?\)000" "SCS_ALT_MAL_MAX_DISCOUNT"
+			REPLACE_TEXTUALLY "50\(.?.?\)000" "SCS_ALT_MAL_HALF_PRICE"
+			REPLACE_TEXTUALLY "40\(.?.?\)000" "SCS_ALT_MAL_LARGE_DISCOUNT"
+			REPLACE_TEXTUALLY "15\(.?.?\)000" "SCS_ALT_MAL_LOW_PRICE"
+			REPLACE_TEXTUALLY "10\(.?.?\)000" "SCS_ALT_MAL_SMALL_DISCOUNT"
+			REPLACE_TEXTUALLY "A hundred thousand" "SCS_ALT_MAL_FULL_PRICE"
+			REPLACE_TEXTUALLY "a hundred thousand" "SCS_ALT_MAL_FULL_PRICE"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_FULL_PRICE" "%asking_price_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_NEAR_FULL_PRICE" "%malficus_near_full_price_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_HIGH_PRICE" "%malficus_high_price_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_MAX_DISCOUNT" "%malficus_max_discount_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_HALF_PRICE" "%malficus_half_price_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_LARGE_DISCOUNT" "%malficus_large_discount_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_LOW_PRICE" "%malficus_low_price_string%"
+			REPLACE_TEXTUALLY "SCS_ALT_MAL_SMALL_DISCOUNT" "%malficus_small_discount_string%"
+		END
+		INNER_ACTION BEGIN
+			ACTION_IF "%sound%" STR_EQ "" BEGIN
+				STRING_SET_EVALUATE arguments "%string%"
+			END ELSE BEGIN
+				STRING_SET_EVALUATE arguments "%string%" [%sound%]
+			END
+		END
+	END
+END
+
+
+<<<<<<<<.../stratagems-inline/cost_strings.2da
+2DA v1.0
+*
+			ACTUAL_PRICE_TEXT		ASKING_PRICE_TEXT
+40			1603					1604
+60			1605					1606
+80			1606					1607
+100			1608					1609
+120			1610					1611
+>>>>>>>>
+
+
+

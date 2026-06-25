@@ -1,0 +1,143 @@
+//////////////////////////////////////////////////////////////////////////////////
+////	Label casters
+//////////////////////////////////////////////////////////////////////////////////
+
+        IF
+          RequireBlock(EnhancedEdition)
+          Global("caster_label_ini","LOCALS",0)
+          !StateCheck(Myself,STATE_INVISIBLE)
+        THEN
+            RESPONSE #100
+                     SetGlobal("caster_label_ini","LOCALS",1)
+                     ApplySpellRES("dw#calab",Myself)
+                     Continue()
+        END
+
+//////////////////////////////////////////////////////////////////////////////////
+////  Look for illusion-detecting rogues
+//////////////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE(%MOD_FOLDER%/lib/ssl/thief_detect_illusion.ssl)
+
+//////////////////////////////////////////////////////////////////////////////////
+////  Protect against invisibility edge cases
+//////////////////////////////////////////////////////////////////////////////////
+
+
+        IF
+          RequireBlock(EnhancedEdition)
+          Global("invis_anim","LOCALS",0)
+          StateCheck(Myself,STATE_INVISIBLE)
+        THEN
+            RESPONSE #100
+                     SetGlobal("invis_anim","LOCALS",1)
+                     ApplySpellRES("dw#hdani",Myself)
+                     Continue()
+        END
+
+        IF
+          RequireBlock(EnhancedEdition)
+          Global("invis_anim","LOCALS",1)
+          !StateCheck(Myself,STATE_INVISIBLE)
+        THEN
+            RESPONSE #100
+                     SetGlobal("invis_anim","LOCALS",0)
+                     ApplySpellRES("dw#blhda",Myself)
+                     Continue()
+        END
+
+///////////////////////////////////////////////////////////////////////////////////////
+///	Difficulty adjustments
+///////////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+   TriggerBlock(CorePlus)
+   Global("innate_casting","LOCALS",0)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#innat",Myself)
+     SetGlobal("innate_casting","LOCALS",1)
+     Continue()
+END
+
+IF TRIGGER
+   TriggerBlock(EasyMinus)
+   Global("innate_casting","LOCALS",1)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#inrem",Myself)
+     SetGlobal("innate_casting","LOCALS",0)
+     Continue()
+END
+
+IF TRIGGER
+   TriggerBlock(HardPlus)
+   Global("staying_power","LOCALS",0)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#gnihp",Myself)
+     SetGlobal("staying_power","LOCALS",1)
+     Continue()
+END
+
+IF TRIGGER
+   TriggerBlock(CoreMinus)
+   Global("staying_power","LOCALS",1)
+THEN DO
+     Action(Literal)
+     ApplySpellRES("dw#hprem",Myself)
+     SetGlobal("staying_power","LOCALS",0)
+     Continue()
+END
+
+///////////////////////////////////////////////////////////////////////////////////////
+///	Gaseous Form
+///////////////////////////////////////////////////////////////////////////////////////
+
+IF
+        IgnoreBlock(NoCloud)
+        HPPercentLT(Myself,30)
+	!Allegiance(Myself,GOODCUTOFF)
+	GlobalLT("GasForm","LOCALS",3)
+	!HasItem("dvgasfrm",Myself)
+	!StateCheck(Myself,STATE_DEAD)
+THEN
+	RESPONSE #100
+		IncrementGlobal("GasForm","LOCALS",1)
+		ReallyForceSpellRES("dvgasfrm",Myself)
+END
+
+IF
+        IgnoreBlock(NoCloud)
+  HasItem("dvgasfrm",Myself)
+  Range(NearestEnemyOf(Myself),30)
+THEN
+    RESPONSE #100
+        RandomWalkContinuous()
+END
+
+IF
+  IgnoreBlock(NoCloud)
+  HasItem("dvgasfrm",Myself)
+  !Range(NearestEnemyOf(Myself),30)
+THEN
+    RESPONSE #100
+        NoAction()
+END
+
+///////////////////////////////////////////////////////////////////////////////////////
+///	Leave clouds
+///////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN LOOP(scscloudmelee||!See([PC]))
+BEGIN LOOP(scscloudresponse||RunAwayFromNoLeaveArea(LastHeardBy(Myself),30))
+INCLUDE FILE(%MOD_FOLDER%\genai\ssl\fleecloud.ssl)
+END LOOP
+END LOOP
+
+BEGIN LOOP(scscloudmelee||See([PC])!Range([PC],8))
+BEGIN LOOP(scscloudresponse||MoveToObject([PC]))
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/fleecloud.ssl)
+INCLUDE FILE(%MOD_FOLDER%/genai/ssl/cloud_stop.ssl)
+END LOOP
+END LOOP

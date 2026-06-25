@@ -1,0 +1,58 @@
+
+// definitely summon if alone
+
+IF TRIGGER
+        IgnoreBlock(IsBG1Only)
+       RequireBlock(Demivrgvs|IsIWDDivine)
+	  TargetBlock(PCsPreferringWeak)
+          !NumCreatureGT([ENEMY],1)
+THEN DO
+        SetGlobalTimer("summon","LOCALS",18)
+  	Action(SpellL7AreaIgnoreDNT,CLERIC_STALKER)
+END
+
+IF TRIGGER
+        IgnoreBlock(IsBG1Only)
+       IgnoreBlock(Demivrgvs)
+	  TargetBlock(PCsPreferringWeak)
+          !NumCreatureGT([ENEMY],1)
+THEN DO
+        SetGlobalTimer("summon","LOCALS",18)
+  	Action(SpellL7AreaIgnoreDNT,CLERIC_CONJURE_EARTH_ELEMENTAL)
+END
+
+IF TRIGGER
+        IgnoreBlock(IsBG1Only)
+       RequireBlock(Demivrgvs)
+	  TargetBlock(PCsPreferringWeak)
+          !NumCreatureGT([ENEMY],1)
+THEN DO
+        SetGlobalTimer("summon","LOCALS",18)
+  	Action(SpellL7AreaIgnoreDNT,CLERIC_SUMMON_DEATH_KNIGHT)
+END
+
+IF TRIGGER
+          RequireBlock(Demivrgvs)
+	  TargetBlock(PCsPreferringWeak)
+          !NumCreatureGT([ENEMY],1)
+THEN DO
+        SetGlobalTimer("summon","LOCALS",18)
+  	Action(SpellAreaIgnoreDNT,CLERIC_CONJURE_EARTH_ELEMENTAL)
+  	Action(SpellAreaIgnoreDNT,CLERIC_CONJURE_AIR_ELEMENTAL)
+  	Action(SpellAreaIgnoreDNT,CLERIC_ANIMATE_SKELETON_WARRIOR)
+END
+
+
+
+IF TRIGGER
+	  TargetBlock(PCsPreferringWeak)
+          !NumCreatureGT([ENEMY],1)
+THEN DO
+        SetGlobalTimer("summon","LOCALS",18)
+	Action(SpellAreaIgnoreDNT,CLERIC_CONJURE_ANIMALS)
+ 	Action(SpellAreaIgnoreDNT,CLERIC_CONJURE_FIRE_ELEMENTAL)
+ 	Action(SpellAreaIgnoreDNT,CLERIC_AERIAL_SERVANT)
+ 	Action(SpellAreaIgnoreDNT,CLERIC_CALL_WOODLAND_BEINGS)
+ 	Action(SpellAreaIgnoreDNT,CLERIC_ANIMAL_SUMMONING_2)
+ 	Action(SpellAreaIgnoreDNT,CLERIC_ANIMAL_SUMMONING_1)
+END

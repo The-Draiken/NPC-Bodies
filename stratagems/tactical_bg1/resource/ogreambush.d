@@ -1,0 +1,8 @@
+BEGIN ~%tutu_scripto%GRELEAD~
+IF ~NumTimesTalkedTo(0)~ THEN BEGIN 0
+SAY @21502
+IF ~~ THEN DO
+	~Enemy()~
+JOURNAL @21503
+EXIT END
+

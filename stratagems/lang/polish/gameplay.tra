@@ -1,0 +1,109 @@
+
+@10 = ~LANGUAGE_CAN_SUBSTITUTE~
+@601 = ~Tryb rzucania czarów przed walką włączony; nie pić mikstur leczniczych~
+@602 = ~Tryb rzucania czarów przed walką wyłączony~
+@603 = ~Tryb rzucania czarów przed walką włączony; picie mikstur leczniczych~
+@604 = ~Tryb rzucania czarów przed walką włączony; picie mikstur dodatkowego leczenia~
+@605 = ~Łatwy w użyciu skrypt SCS SI:~
+@606 = ~SI posiada 5 funkcji:
+
+1) Postać będzie walczyć, atakując w pierwszej kolejności przeciwników, którzy nie są ograniczeni zdolnością poruszania się ani pozbawieni obrony, nie walczą podczas próby Odpędzenia nieumarłych i nie marnują Miniaturowych meteorów Melfa, Ostrz energii lub Niewidzialności. Możesz zmieniać tryb walki postaci na walkę wręcz (D) lub na bronie dystansowe (F) przy użyciu skrótów klawiszowych. Jeśli chcesz, aby twoja postać nie wchodziła w tryb walki wręcz, możesz go wyłączyć, wciskając (K). Postacie z wyłączonym trybem walki wręcz będą walczyć, jeśli wrogowie znajdują się w zasięgu broni, ale nie będą aktywnie wchodzić i dostawać się w jej zasięg.
+
+2) Postać, która nie walczy, rzuci kilka długotrwałych czarów. Istnieją 4 ustawienia, które możesz przełączać, używając (S). Przy ustawieniu 1, postać nie używa czarów. Przy ustawieniu 2 i wyższym, postać będzie rzucać wszystkie z wymienionych zaklęć, oczywiście musi mieć je zapamiętane (i nie mogą być już aktywne): Kamienna skóra, Żelazna skóra, Zbroja, Miniaturowe meteory Melfa, Dobre jagody.
+
+3) Przy ustawieniu 2 i wyższym, postać zużyje Dobre jagody, jeśli jest ranna i nie walczy. Przy ustawieniu 3 i wyższym, postać zużyje również mikstury leczenia. Przy ustawieniu 4, postać zużyje mikstury dodatkowego leczenia.
+
+4) Przy ustawieniu 2 i wyższym, postać automatycznie uaktywni raz dziennie następujące przedmioty: Płaszcz gwiazd, Buty gorgony, Pas wytrzymałości.
+
+5) Przy ustawieniu 2 i wyższym, postać automatycznie rzuci na drużynę zaklęcia leczące niskiego poziomu, jeśli je ma. Rzucanie czarów jest znacznie przyspieszone, nie można ich rzucać podczas walki; postacie rzucą tylko czary leczące poziomu 2 lub wyższego, poniżej najwyższego poziomu czarów.
+
+6) Postać rzuci kilka czarów na całą drużynę przy użyciu skrótów klawiszowych. Rzucanie czarów jest znacznie przyspieszone, nie można ich rzucać podczas walki, lecz na postacie, które są już pozbawione magicznej ochrony. Jego główna funkcja przeznaczona jest dla późniejszego etapu rozgrywki, gdy możemy pozwolić sobie na zapamiętanie takiej ilości czarów, by zapewnić magiczną ochronę całej drużynie. Skróty klawiszowe to: C dla Chaotycznych rozkazów; V dla Symbol: śmierć; B dla Ochrona przed ogniem, Ochrona przed błyskawicami i Ochrona przed magiczną energią; Z dla paladyna Ochrona przed złem.~
+@607 = ~Tryb unikania zwarcia włączony~
+@608 = ~Tryb unikania zwarcia wyłączony~
+@609 = ~Postać będzie preferowała używanie brani do walki w zwarciu, takich jak miecze lub wekiery. Możesz włączyć ten tryb dla wybranej postaci, wciskając klawisz D, jeżeli postać jest ustawiona do atakowania przeciwników.~
+@610 = ~Postać będzie preferowała używanie broni dystansowych, takich jak łuki lub proce. Możesz włączyć ten tryb dla wybranej postaci, wciskając klawisz F, jeżeli postać jest ustawiona do atakowania przeciwników.~
+@611 = ~Jeśli włączone, postać będzie atakować przeciwników w zasięgu wzroku. Jeśli wyłączone, postać będzie atakować tylko wtedy kiedy przeciwnik zaatakuje wręcz. Możesz włączać lub wyłączać ten tryb dla wybranej postaci, wciskając klawisz K.~
+
+@700 = ~Nie używaj leczenia~
+@701 = ~Użyj zaklęć leczniczych~
+@702 = ~Użyj mikstur leczenia~
+@703 = ~Użyj mikstur dodatkowego leczenia~
+@704 = ~Indywidualne zaklęcia defensywne~
+@705 = ~Grupowe zaklęcia defensywne~
+@706 = ~Użyj Miniaturowych meteorów Melfa~
+@707 = ~Używaj przedmiotów~
+
+@710 = ~Postać nie będzie automatycznie rzucać zaklęć leczących ani używać mikstur leczących.~
+@711 = ~Poza walką postać będzie rzucać zaklęcia leczące na rannych członków drużyny (nie są to zaklęcia najwyższego poziomu) i jeśli będzie ranna, spożyje Dobre jagody.~
+@712 = ~Poza walką postać będzie rzucać zaklęcia leczące na rannych członków drużyny (nie są to zaklęcia najwyższego poziomu) i jeśli będzie ranna, spożyje Dobre jagody lub wypije mikstury leczenia.~
+@713 = ~Poza walką postać będzie rzucać zaklęcia leczące na rannych członków drużyny (nie są to zaklęcia najwyższego poziomu) i jeśli będzie ranna, spożyje Dobre jagody lub wypije mikstury leczenia i mikstury dodatkowego leczenia.~
+@714 = ~Poza walką postać będzie rzucać na siebie długotrwałe zaklęcia ochronne, jeśli ma je zapamiętane. Wykorzystywane zaklęcia to: Kamienna skóra, Żelazna skóra i Zbroja.~
+@715 = ~Poza walką postać będzie rzucać na członków drużyny długotrwałe zaklęcia ochronne, jeśli ma je zapamiętane. Wykorzystywane zaklęcia to: Chaotyczne rozkazy, Osłona przed śmiercią, Ochrona przed ogniem, Ochrona przed błyskawicami, Ochrona przed magiczną energią i zdolność paladyna Ochrona przed złem. Ta opcja automatycznie wyłączy się po rzuceniu zaklęć. Możesz także aktywować te zaklęcia, wciskając klawisze: C – Chaotyczne rozkazy, V – Osłona przed śmiercią, B – Ochrona przed ogniem/błyskawicami i Ochrona przed magiczną energią, Z – Ochrona przed złem.~
+@716 = ~Poza walką postać będzie rzucać zaklęcie Miniaturowe meteory Melfa, jeśli ma je zapamiętane i nie używa w tej chwili meteorów.~
+@717 = ~Poza walką postać będzie używać (niektórych) magicznych przedmiotów, które dają długotrwałe efekty lub te tworzące magiczną amunicję.~
+@724 = ~Poza walką postać będzie rzucać na siebie długotrwałe zaklęcia ochronne, jeśli ma je zapamiętane. Wykorzystywane zaklęcia to: Kamienna skóra, Żelazna skóra, Zbroja i Zasłonięcie umysłu.~
+@734 = ~Poza walką postać będzie rzucać na siebie długotrwałe zaklęcia ochronne, jeśli ma je zapamiętane. Wykorzystywane zaklęcia to: Kamienna skóra, Żelazna skóra, Zbroja, Zasłonięcie umysłu i Nietykalna świętość umysłu.~
+
+@750 = ~ŁATWY W UŻYCIU SKRYPT SCS~
+@751 = ~Ten skrypt udostępnia kilka prostych ustawień bitewnych: postać będzie atakować w zwarciu lub z dystansu, skupiając się w pierwszej kolejności na agresywnych przeciwnikach, a nie na tych bezbronnych. Postać nie będzie walczyć, jeśli korzysta z odpędzania nieumarłych. Nie będzie marnować Miniaturowych meteorów Melfa, Ostrza energii czy Niewidzialności. Poza walką postać będzie korzystać z niskopoziomowych zasobów leczących w razie potrzeby; będzie używać przedmiotów z długo trwającymi efektami raz na dzień; może zostać pokierowana do rzucania na drużynę długo trwających zaklęć defensywnych za pomocą klawiszy: C – Chaotyczne rozkazy, V – Osłona przed śmiercią, B – Ochrona przed ogniem i Ochrona przed magiczną energią, Z – Ochrona przed złem paladyna (te zaklęcia nie zostaną rzucona na postacie, które są już pod wpływem ochrony). Możesz dostosować akcje wykonywane przez postać poprzez zmianę ustawień w powyższym menu.~
+
+@1301 = ~Twoje groźby są niedorzeczne i całkowicie bezsensowne. Czy zapłaciłeś 15000 tylko po to, by wziąć nogi za pas? Bardzo w to wątpie.~
+@1302 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "30000" and "40000"]~
+@1303 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "45000" and "60000"]~
+@1304 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "60000" and "80000"]~
+@1305 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "75000" and "100000"]~
+@1306 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "90000" and "120000"]~
+@1307 = ~[Set this string to NOT_TRANSLATED if you are using a non-substitutable language and this mod has not been translated into your language]~
+@1311 = ~Ach, więc piętnaście tysięcy sztuk złota dałeś Złodziejom Cienia, ponieważ uznałeś, że nie godzi się ryzykować. Bardzo interesujące.~
+@1312 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "30000" and "40000"]~
+@1313 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "45000" and "60000"]~
+@1314 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "60000" and "80000"]~
+@1315 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "75000" and "100000"]~
+@1316 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "90000" and "120000"]~
+@1317 = ~[Set this string to NOT_TRANSLATED if you are using a non-substitutable language and this mod has not been translated into your language]~
+@1321 = ~Oczywiście, zapłaciłem im piętnaście tysięcy sztuk złota, tylko po to, aby mieć zaszczyt wykonywania ich brudnej roboty! Cóż za przenikliwość!~
+@1322 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "30000" and "40000"]~
+@1323 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "45000" and "60000"]~
+@1324 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "60000" and "80000"]~
+@1325 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "75000" and "100000"]~
+@1326 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "90000" and "120000"]~
+@1327 = ~[Set this string to NOT_TRANSLATED if you are using a non-substitutable language and this mod has not been translated into your language]~
+@1331 = ~Och, myślałem, że wiedziałeś. Widzisz, przebyliśmy długą drogę by dostać się do Czarowięzów. <CHARNAME> przyjął kilka niebezpiecznych zadań by zdobyć złoto potrzebne do zabezpieczenia naszego przejścia. Piętnaście tysięcy sztuk złota, powinienem dodać - to sumka, którą nie łatwo się odrzuca, prawda?~
+@1332 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "30000" and "40000"]~
+@1333 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "45000" and "60000"]~
+@1334 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "60000" and "80000"]~
+@1335 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "75000" and "100000"]~
+@1336 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "90000" and "120000"]~
+@1337 = ~[Set this string to NOT_TRANSLATED if you are using a non-substitutable language and this mod has not been translated into your language]~
+@1341 = ~... er, piętnaście tysięcy?~
+@1342 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "30000" and "40000"]~
+@1343 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "45000" and "60000"]~
+@1344 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "60000" and "80000"]~
+@1345 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "75000" and "100000"]~
+@1346 = ~[For non-substitutable languages: replace "15000" and "20000" in above string with "90000" and "120000"]~
+@1347 = ~[Set this string to NOT_TRANSLATED if you are using a non-substitutable language and this mod has not been translated into your language]~
+@1601 = ~Piętnaście tysięcy~
+@1602 = ~Dwadzieścia tysięcy~
+    
+@4200 = ~Ten gruby dziennik wypełniają różnorodne wpisy, które z początku są pisane czytelnym językiem elfów... opowiadają o grozie, jakiej doświadczył właściciel, gdy został uwięziony w labiryncie, o frustracji z powodu tego, że nawet wrócenie się po swoich śladach przez portal, przez który właśnie przebyliście, nie zaprowadzi z powrotem w miejsce, z którego się przybyło. Osoba, która spisywała swoje przeżycia, z pewnością czuła się winna za to, że opuściła swoich martwych towarzyszy. Z czasem pismo robi się coraz mniej czytelne... w końcu zostają tylko bazgroły szaleńca, paranoidalne brednie o demonach i powtarzające się opisy dotyczące jakiegoś „Yakmana”.
+
+PARAMTERTY:
+
+Waga: 0~
+@20501 = ~Ta postać jest obecnie na zerowym poziomie. Awansuj ją i przydziel dla niej punkty biegłości i umiejętności. (Dopóki tego nie zrobisz, punkty życia i ekwipunek może być nieco dziwny; nie przejmuj się tym. Gdy ją awansujesz, może zdobywać wyższe poziomy, w zależności od twojego doświadczenia).~
+@22201 = ~Hej tam, <CHARNAME>! Twój przybrany ojciec Gorion powiedział mi, że musisz natychmiast opuścić Candlekeep. Twe życie jest zagrożone i nie ma czasu do stracenia.~
+@22202 = ~Ale przed tym, pewnie dobrym pomysłem byłoby, gdybyś poszwendał<PRO_HESHE> się po Candlekeep i bez pośpiechu poszukał<PRO_HESHE> zgubione własności oraz pobiegał<PRO_HESHE> sobie na posyłki. Wszystko to dla nieprawdopodobnie opłacalnej nagrody pieniężnej i zadziwiającej ilości doświadczenia.~
+@22203 = ~Brzmi nieźle, wchodzę w to.~
+@22204 = ~A czy nie mogę już teraz otrzymać tych pieniędzy i doświadczenia? Im dłużej tu czekam, tym większa jest szansa na to, że ci pierwszopoziomowi skrytobójcy wykończą mnie w Candlekeep.~
+@22205 = ~Powodzenia <CHARNAME>, i uważaj na te szczury. Zobaczymy się, gdy wrócisz do Candlekeep.~
+@22206 = ~Dlaczego by nie. Ile tak naprawdę nauczysz się o rzucaniu czarów i władaniu mieczem przynosząc bełty do kuszy?~
+@22207 = ~Proszę, oto pieniądze, kilka mikstur i trochę losowych rupieci, które może uda ci się komuś sprzedać. Idź i zrób zakupy, a potem zabiorę cię do Goriona.~
+@22208 = ~Gotowy do drogi, <CHARNAME>?~ ~Gotowa do drogi, <CHARNAME>?~
+@22209 = ~Tak, zabierz mnie do Goriona.~
+@22210 = ~Nie, jeszcze nie skończyłem zakupów.~ ~Nie, jeszcze nie skończyłam zakupów.~
+@22211 = ~W zasadzie to myślę, że wykonam te wszystkie zadania i podwoję swoje doświadczenie.~
+@22212 = ~Tędy proszę.~
+@22213 = ~Bardzo dobrze, <CHARNAME>, ale pośpiesz się trochę, nie mam na to całego dnia.~
+@22214 = ~W każdym razie nie zdajesz sobie sprawy, jakie czyha tu na ciebie niebezpieczeństwo. Ci łowcy nagród mogą zadać ci wiele obrażeń jednym uderzeniem!~
+@22215 = ~Doskonale cię rozumiem, <CHARNAME>. Wspanialsi herosi od ciebie ulegali pokusie otrzymania dwóch klejnotów rysie oko.~
+@22300 = ~~

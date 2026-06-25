@@ -360,6 +360,9 @@ END
 
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END //raise dead which is cast by temples
 OUTER_TEXT_SPRINT raisedead ~%spell_res%~
+LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
+	STR_VAR spell_res = EVAL ~%raisedead%~ sr_source = ~spell_rev/sppr5##/sppr504.spl~
+END
 COPY_EXISTING ~%raisedead%.spl~ ~override~
 		READ_STRREF 0x50 ~raise~
 		SAY 0x50 @4
@@ -374,26 +377,40 @@ COPY_EXISTING ~%spell_res%.spl~ ~override~
 	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
 	
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_MASS_RAISE_DEAD~  RET spell_res END
+LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
+	STR_VAR spell_res = EVAL ~%spell_res%~ sr_source = ~spell_rev/sppr7##/sppr729.spl~
+END
 COPY_EXISTING ~%spell_res%.spl~ ~override~
 	READ_STRREF 0x50 ~raise~
 	SAY 0x50 @4
 	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 6 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
 
+LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
+	STR_VAR spell_res = ~SPJA01~ sr_source = ~spell_rev/sppr5##/spja01.spl~
+END
 COPY_EXISTING ~SPJA01.spl~ ~override~ 
 	READ_STRREF 0x50 ~raise~
 	SAY 0x50 @4
 	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
 
+LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
+	INT_VAR preserve_scs = 0
+	STR_VAR spell_res = ~spwish10~ sr_source = ~spell_rev/spwi9##/spwish10.spl~
+END
 COPY_EXISTING ~spwish10.spl~ ~override~ 
-	READ_STRREF 0x50 ~raise~
-	SAY 0x50 @4
-	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 			
+	READ_STRREF 0x50 ~res~
+	SAY 0x50 @5
+	LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %aliveprot% END
+	LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %deadprot% END
 		
 COPY ~npc-bodies/spl/EJNPRES.spl~ ~override~
 	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (@3) END
 
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
 OUTER_TEXT_SPRINT resurrection ~%spell_res%~
+LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
+	STR_VAR spell_res = EVAL ~%resurrection%~ sr_source = ~spell_rev/sppr7##/sppr712.spl~
+END
 COPY_EXISTING ~%resurrection%.spl~ ~override~
 	READ_STRREF 0x50 ~res~
 	SAY 0x50 @5
@@ -483,7 +500,7 @@ ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERI
 		BUT_ONLY
 	END
 END	
-ACTION_FOR_EACH res_spell IN  ~SPPRJA01~ ~spwish10~ BEGIN
+ACTION_FOR_EACH res_spell IN  ~SPJA01~ ~spwish10~ BEGIN
 	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
 		COPY_EXISTING ~%res_spell%.SPL~ ~override~
 			READ_STRREF 0x50 ~desc~
@@ -1007,10 +1024,18 @@ ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERI
 		BUT_ONLY
 	END
 END	
-ACTION_FOR_EACH res_spell IN  ~SPPRJA01~ ~spwish10~ BEGIN
+ACTION_FOR_EACH res_spell IN  ~SPJA01~ BEGIN
 	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
 		COPY_EXISTING ~%res_spell%.SPL~ ~override~
 			READ_STRREF 0x50 ~raise~
+			SAY 0x50 @10
+		BUT_ONLY
+	END
+END	
+ACTION_FOR_EACH res_spell IN  ~spwish10~ BEGIN
+	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
+		COPY_EXISTING ~%res_spell%.SPL~ ~override~
+			READ_STRREF 0x50 ~res~
 			SAY 0x50 @11
 		BUT_ONLY
 	END
@@ -1459,12 +1484,14 @@ END~
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
 				
-		COPY_EXISTING ~spwish10.spl~ ~override~ 
-				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
-				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
-				
 		LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
 			COPY_EXISTING ~%spell_res%.spl~ ~override~
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %revaliveprot% END
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revdeadprot% END
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter2 = EVAL %aliveprot% parameter1 = 0 parameter2 = EVAL %revaliveprot% END
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter2 = EVAL %deadprot% parameter1 = 0 parameter2 = EVAL %revdeadprot% END
+
+		COPY_EXISTING ~spwish10.spl~ ~override~
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %revaliveprot% END
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revdeadprot% END
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter2 = EVAL %aliveprot% parameter1 = 0 parameter2 = EVAL %revaliveprot% END
@@ -1713,4 +1740,127 @@ END */
 			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 script
 			INNER_ACTION BEGIN */
 //Need to have a way to set another timer, do all dead npcs in party-- spell summons invisible creature that sest a global for each NPC for revivify and another for the normal timing, when the timer ends for these spells instead of doing the normal effect these restart the timer set to 10 days. 		
-	
+
+// =============================================================================
+// Component 600: Temple Resurrection of Fallen Companions
+// =============================================================================
+// Allows players to bring body items to temple priests for resurrection.
+// Non-decayed bodies (EJB%ind%a): Raise Dead (5000 gp)
+// Decayed bodies (EJB%ind%b): Resurrection (10,000 gp)
+//
+// QQQQ placeholder approach (v25100 compatible):
+// 1. Empty heredocs create empty D files at parse time
+// 2. OUTER_SPRINT builds content with QQQQ instead of ~ (avoids ~ delimiter conflict)
+// 3. APPEND_OUTER writes the content to the file
+// 4. REPLACE_TEXTUALLY replaces QQQQ with ~ using %126%
+// 5. COMPILE the final D file
+//
+// Requires: Component 100 (main body system) + Component 400 or 500 (for NPCbods.2da)
+// =============================================================================
+
+BEGIN @600 // Temple Resurrection of Fallen Companions
+DESIGNATED 600
+LABEL ~NPC_BODIES_TEMPLE_RESURRECTION~
+REQUIRE_COMPONENT ~npc-bodies.tp2~ "100" "Requires main component to be installed"
+
+ACTION_IF !(MOD_IS_INSTALLED "npc-bodies.tp2" 400) && !(MOD_IS_INSTALLED "npc-bodies.tp2" 500) BEGIN
+	FAIL @620
+END
+
+ACTION_FOR_EACH priest_dlg IN ~ellendel~ ~pochra~ ~nalin~ ~poghman4~ ~tremai~ ~galile~ ~keldda~ ~agnasi~ ~doghma~ ~ecolt~ ~ameral~ ~hgnya01~ ~dempri~ BEGIN
+	ACTION_IF FILE_EXISTS_IN_GAME ~%priest_dlg%.dlg~ BEGIN
+
+		// ==========================================================================
+		// Read NPCbods.2da and build D files entirely in patch context
+		// Uses QQQQ placeholders for ~, then replaces QQQQ with ~ via %% delimiters
+		// ==========================================================================
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			COUNT_2DA_COLS cols
+			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+			SET ej_npc_count = r2en_bods
+
+			// APPEND header
+			INNER_ACTION BEGIN
+				OUTER_SPRINT ej_line ~APPEND QQQQ%priest_dlg%QQQQ
+~
+				APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_line%~
+			END
+
+			// State blocks + reply blocks for each NPC
+			FOR (row = 1; row < r2en_bods; ++row) BEGIN
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
+				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 2 cre
+				INNER_PATCH cre BEGIN
+					REPLACE_TEXTUALLY ~\\.CRE~ ~~
+				END
+
+				// Raise state
+				INNER_ACTION BEGIN
+					OUTER_SPRINT ej_block ~IF QQQQ THEN BEGIN ejtemple_raise_%ind%
+  SAY @602
+  IF QQQQPartyGoldGT(4999)QQQQ THEN REPLY @601 DO QQQQ
+    TakePartyItem("EJB%ind%a")
+    DestroyItem("EJB%ind%a")
+    TakePartyGold(5000)
+    SetGlobal("EJdead%ind%","GLOBAL",0)
+    CreateCreatureObject("%cre%",Myself,0,0,0)
+  QQQQ GOTO ejtemple_done_%priest_dlg%
+  IF QQQQ THEN REPLY @607 GOTO ejtemple_no_gold_%priest_dlg%
+END~
+					APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_block%~
+				END
+
+				// Resurrect state
+				INNER_ACTION BEGIN
+					OUTER_SPRINT ej_block ~IF QQQQ THEN BEGIN ejtemple_resurrect_%ind%
+  SAY @605
+  IF QQQQPartyGoldGT(9999)QQQQ THEN REPLY @601 DO QQQQ
+    TakePartyItem("EJB%ind%b")
+    DestroyItem("EJB%ind%b")
+    TakePartyGold(10000)
+    SetGlobal("EJdead%ind%","GLOBAL",0)
+    CreateCreatureObject("%cre%",Myself,0,0,0)
+  QQQQ GOTO ejtemple_done_%priest_dlg%
+  IF QQQQ THEN REPLY @607 GOTO ejtemple_no_gold_%priest_dlg%
+END~
+					APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_block%~
+				END
+
+				// Reply blocks
+				INNER_ACTION BEGIN
+					OUTER_SPRINT ej_block ~EXTEND_BOTTOM QQQQ%priest_dlg%QQQQ QQQQ0QQQQ
+  IF QQQQPartyHasItem("EJB%ind%a")QQQQ THEN REPLY @601 GOTO ejtemple_raise_%ind%
+  IF QQQQPartyHasItem("EJB%ind%b")QQQQ THEN REPLY @601 GOTO ejtemple_resurrect_%ind%
+END~
+					APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~ ~%ej_block%~
+				END
+			END
+
+			// Done and No-Gold states + END
+			INNER_ACTION BEGIN
+				OUTER_SPRINT ej_block ~IF QQQQ THEN BEGIN ejtemple_done_%priest_dlg%
+  SAY @608
+  IF QQQQ THEN EXIT
+END
+IF QQQQ THEN BEGIN ejtemple_no_gold_%priest_dlg%
+  SAY @610
+  IF QQQQ THEN EXIT
+END
+END~
+				APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_block%~
+			END
+
+		// Replace QQQQ with ~ using %% delimiters in REPLACE_TEXTUALLY
+		COPY_EXISTING ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~
+			REPLACE_TEXTUALLY ~QQQQ~ %%~%%
+		BUT_ONLY
+		COPY_EXISTING ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~ ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~
+			REPLACE_TEXTUALLY ~QQQQ~ %%~%%
+		BUT_ONLY
+
+		COMPILE ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~
+		COMPILE ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~
+
+	END
+END
+

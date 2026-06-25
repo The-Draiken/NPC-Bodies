@@ -1,0 +1,131 @@
+
+////////////////////////////////////////////////////////////////////////
+////  Power Word: Stun
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringWeak;!CheckStatGT(scstarget,50,RESISTMAGIC))
+	TargetBlock(PCsInOrderShort)
+	TargetBlock(Celestials)
+	TriggerBlock(MR100|SpellTurn|Stun|Enemy|Helpless|SIConjuration|SRPowerWord)
+	OR(3)
+		HPPercentLT(scstarget,60)
+		Class(scstarget,MAGE)
+		Class(scstarget,MAGE_THIEF)
+THEN DO
+	Action(SpellRESBoolean,CLERIC_POWER_WORD_STUN|150|50)
+END
+
+//////////////////////////////
+///   Symbol: Stun
+//////////////////////////////
+
+IF TRIGGER
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(AoEHelpless|Stun|MR100|SIConjuration|Enemy|Helpless)
+THEN DO
+	Action(SpellL7Area,CLERIC_SYMBOL_STUN|100|100)
+END
+
+///////////////////////////////
+////	Symbol: Death
+///////////////////////////////
+
+IF TRIGGER
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(AoE|Slay|MR|SIConjuration)
+	OR(2)
+		HPPercentLT(scstarget,75)
+		!CheckStatGT(scstarget,12,Level)
+	OR(3)
+		HPPercentLT(scstarget,50)
+		Class(scstarget,MAGE)
+		Class(scstarget,MAGE_THIEF)
+	TriggerBlock(DirectDamageSafe)
+THEN DO
+	Action(SpellL7Area,CLERIC_SYMBOL_DEATH|150|150)
+END
+
+////////////////////////////////////////////////////////////////////////
+////  Symbol: Weakness (SR)
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        IgnoreBlock(IsBG1Only)
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	RequireBlock(Demivrgvs)
+	TriggerBlock(MR100|Panic|Helpless|SIConjuration)
+THEN DO
+	Action(Spell,WIZARD_SYMBOL_WEAKNESS|100|200)
+END
+
+//////////////////////////////
+///   Symbol: Pain (IWD)
+//////////////////////////////
+
+IF TRIGGER
+        RequireBlock(IsIWDDivine)
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(AoEHelpless|MR100|SIConjuration|Enemy|Helpless)
+THEN DO
+	Action(SpellL7Area,CLERIC_SYMBOL_PAIN|100|200)
+END
+
+//////////////////////////////
+///   Symbol: Hopelessness (IWD)
+//////////////////////////////
+
+IF TRIGGER
+        RequireBlock(IsIWDDivine)
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(AoEHelpless|MR100|SIConjuration|Enemy|Helpless)
+THEN DO
+	Action(SpellL7Area,CLERIC_SYMBOL_HOPELESSNESS|100|200)
+END
+
+////////////////////////////////////////////////////////////////////////
+////  Symbol: Fear
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+    IgnoreBlock(IsBG1Only)
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(MR100|Panic|Helpless|SIConjuration|AoEHelpless)
+THEN DO
+	Action(SpellL7Area,CLERIC_SYMBOL_FEAR|100|200)
+END
+
+IF TRIGGER
+	RequireBlock(God:bane_xvim)
+	IgnoreBlock(IsBG1Only)
+	TargetBlock(EnemiesInOrder)
+	!Gender(scstarget,SUMMONED)
+	TriggerBlock(MR100|Panic|Helpless|SIConjuration|AoEHelpless)
+THEN DO
+	Action(SpellAreaRES,"%INNATE_WIZARD_SYMBOL_FEAR%"|100|200)
+END
+
+
+
+
+///////////////////////////////
+////	Sphere of Chaos (SR)
+///////////////////////////////
+
+IF TRIGGER
+          RequireBlock(Demivrgvs)
+  	  TargetBlock(EnemiesInOrder)
+	  TriggerBlock(MR100)
+THEN DO
+          Combine()
+	  Action(SpellArea,CLERIC_CONFUSION|100|100)
+END
+
+
+

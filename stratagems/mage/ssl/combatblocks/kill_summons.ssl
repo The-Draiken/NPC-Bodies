@@ -1,0 +1,22 @@
+
+
+
+///////////////////////////////////////////////////////////////////////////
+////	KILL SUMMONS
+///////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	Global("FIN_TIME_STOP_RUNNING","GLOBAL",0)
+	IgnoreBlock(IsBG1Only)
+	TargetBlock(Summons)
+	OR(2)
+		Gender(scstarget,SUMMONED)
+		Gender(scstarget,20)
+	!CheckStatGT(scstarget,8,LEVEL)
+	TriggerBlock(Enemy|Helpless)
+	/*slowspell*/
+THEN DO
+	Combine()
+	Action(SpellArea,WIZARD_DEATH_SPELL|150|50)
+END
+

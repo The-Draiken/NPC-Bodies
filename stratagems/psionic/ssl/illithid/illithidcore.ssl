@@ -1,0 +1,140 @@
+///////////////////////////////////////////////////////////////////////////////
+///     Blow up skeletons (close range)
+////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+   TriggerBlock(HardPlus)
+   TargetBlock(EnemiesInOrderShort)
+   Range(scstarget,5)
+   TriggerBlock(Enemy)
+   HaveSpell(PSIONIC_DETONATE)
+   OR(2)
+        Class(scstarget,SKELETON)
+        Class(scstarget,SKELETON_WARRIOR)
+THEN DO
+       Combine()
+       Action(ForceSpellRES,"dw#detun")
+END
+
+///////////////////////////////////////////////////////////////////////
+/// Consider moving somewhere more interesting
+////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE (%MOD_FOLDER%\psionic\ssl\illithid\jump.ssl)
+
+/////////////////////////////////////////////////////////////////////////
+///	Be invisible
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	!StateCheck(Myself,STATE_IMPROVEDINVISIBILITY)
+	TriggerBlock(CorePlus)
+	TriggerBlock(TruesightSafe)
+	OR(2)
+	     Detect(NearestEnemyOf(Myself))
+	     Global("DMWWIllithidsAreVisible","GLOBAL",0)
+THEN DO
+	Action(SpellMyself,PSIONIC_SUPERIOR_INVISIBILITY|100|50)
+END
+
+/////////////////////////////////////////////////////////////////////////
+///	Heal myself (Ulitharids only)
+/////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+        RequireBlock(IsUlitharid)
+	HPPercentLT(Myself,65)
+THEN DO
+	Action(SpellMyself,ULITHARID_CURE_SERIOUS_WOUNDS|100|50)
+END
+
+/////////////////////////////////////////////////////////////////////////
+///	Psionic Blast
+/////////////////////////////////////////////////////////////////////////
+
+INCLUDE FILE (%MOD_FOLDER%\psionic\ssl\illithid\psiblast.ssl)
+
+//////////////////////////////////////////////////////////////////////////
+////	Domination
+//////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringStrong;CheckStatGT(scstarget,6,SAVEVSSPELL))
+	TargetBlock(PCsPreferringStrong)
+	ConditionalTargetBlock(EnemiesInOrder;CheckStatGT(scstarget,7,Level)) // don't dominate weak creatures
+	TriggerBlock(Enemy|Helpless|PsiDom)
+	CheckStatGT(scstarget,3,SAVEVSSPELL)
+THEN DO
+	Combine()
+	Action(SpellMarker,MIND_FLAYER_DOMINATION,ITEM_PSIONIC_SEEN|100|50)
+END
+/////////////////////////////////////////////////////////////////////////
+///  If you have a Spell Strike wand, use it here
+/////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	TargetBlock(PCsInOrder)
+	TriggerBlock(SpellTurn|Enemy|Helpless|PriorityBreach|EasyPlus)
+THEN DO
+	Action(Wand,"wand18"|100|50)
+END
+
+//////////////////////////////////////////////////////////////////////////////
+////	Maze
+//////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsPreferringStrong;CheckStatGT(scstarget,5,SAVEVSSPELL))
+	TargetBlock(PCsPreferringStrong)
+	ConditionalTargetBlock(EnemiesInOrder;CheckStatGT(scstarget,7,Level)) // don't maze weak creatures
+	TriggerBlock(Enemy|Helpless|PsiMaze|EasyPlus)
+	CheckStatGT(scstarget,1,SAVEVSSPELL)
+	OR(2)
+		InPartySlot(scstarget,1) // isn't Player 1
+		Global("DMWWMazePlayer","GLOBAL",0)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_MAZE|100|50)
+END
+
+///////////////////////////////////////////////////////////////////////////////
+///     Blow up skeletons (ranged)
+////////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+   !Global("DMWWNoSkeletonDetonate","GLOBAL",1)
+   TargetBlock(EnemiesInOrderShort)
+   TriggerBlock(Enemy|HardPlus)
+   HaveSpell(PSIONIC_DETONATE)
+   OR(2)
+        Class(scstarget,SKELETON)
+        Class(scstarget,SKELETON_WARRIOR)
+THEN DO
+       Combine()
+       Action(ForceSpellRES,"dw#detun")
+END
+
+///////////////////////////////////////////////////////////////////////////////	
+////	Detonation and Ballistic attack
+///////////////////////////////////////////////////////////////////////////////
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsInOrder;HPPercentLT(scstarget,25))
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Helpless|EasyPlus)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_DETONATE|100|100)
+END
+
+IF TRIGGER
+	ConditionalTargetBlock(PCsInOrder;HPPercentLT(scstarget,25))
+	TargetBlock(PCsPreferringWeak)
+	TargetBlock(EnemiesInOrderShort)
+	TriggerBlock(Enemy|Helpless|Stoneskin|EasyPlus)
+THEN DO
+	Combine()
+	Action(Spell,PSIONIC_BALLISTIC)
+END
+

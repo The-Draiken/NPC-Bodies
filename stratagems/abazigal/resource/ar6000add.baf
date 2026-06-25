@@ -1,0 +1,44 @@
+IF
+	PartyHasItem("BazPlo05")
+	Global("DMWWAbazBlacks","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("DMWWAbazBlacks","GLOBAL",1)
+		TriggerActivation("Tran6001Info",TRUE)
+		TriggerActivation("Tran6001",FALSE)
+		CreateCreature("dw#abbl1",[586.1043],12)
+		CreateCreature("dw#abbl2",[820.837],15)
+		CreateCreature("dwcutctr",[700.900],0)
+END
+
+IF
+	Dead("dw#abbl1")
+	Dead("dw#abbl2")
+	Global("DMWWAbazRedGreen","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("DMWWAbazRedGreen","GLOBAL",1)
+		StartCutSceneMode()
+		StartCutScene("dw#abct1")
+END
+
+IF
+	Dead("dw#abgre")
+	!GlobalGT("DMWWAbazRedGreen","GLOBAL",3)
+THEN
+	RESPONSE #100
+		SetGlobal("DMWWAbazRedGreen","GLOBAL",4)
+		StartCutSceneMode()
+		StartCutScene("dw#abct2")
+END
+
+IF
+	Dead("dw#abred")
+	Global("DMWWReopenAbLair","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("DMWWReopenAbLair","GLOBAL",1)
+		TriggerActivation("Tran6001Info",FALSE)
+		TriggerActivation("Tran6001",TRUE)
+		ActionOverride("dwcutctr",DestroySelf())
+END
