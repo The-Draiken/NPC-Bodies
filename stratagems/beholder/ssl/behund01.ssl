@@ -1,4 +1,0 @@
-BEGIN LOOP(IsUndead||True)
-INCLUDE FILE(%MOD_FOLDER%\beholder\ssl\behold01.ssl)
-END LOOP
-

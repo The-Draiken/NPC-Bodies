@@ -1,8 +1,0 @@
-
-IF
-	HPPercentLT(Myself,5)
-THEN
-	RESPONSE #100
-		EscapeArea()
-END
-

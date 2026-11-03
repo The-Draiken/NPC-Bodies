@@ -1,5 +1,0 @@
-IF
- ActionListEmpty() !NearSavedLocation(Myself,"#savedloc",60)
-THEN
- RESPONSE #100 MoveToSavedLocation("#savedloc","LOCALS")
-END

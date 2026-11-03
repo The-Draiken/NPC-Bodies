@@ -1,2 +1,0 @@
-VARIABLE(IsFllyissetat=True)
-INCLUDE FILE(%MOD_FOLDER%/dragon/ssl/draggree.ssl)

@@ -1,5 +1,0 @@
-IF
- See(NearestEnemyOf(Myself)) Range(LastSeenBy(Myself),5)
-THEN
- RESPONSE #100 RunAwayFromNoLeaveArea(LastSeenBy(Myself),45) FaceObject(LastSeenBy(Myself)) Continue()
-END

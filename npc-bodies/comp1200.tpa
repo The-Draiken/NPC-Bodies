@@ -1,0 +1,51 @@
+// =============================================================================
+// Component 1200: NPC Bodies Death Cam. Included from npc-bodies.tp2.
+//
+// Like cdtweaks' Death Cam: when the main character dies, the game does not
+// end at once -- the camera moves to the body and the game ends a few
+// seconds later. It works the same way: the "Player1 can die" flag is set on
+// every area, so the engine no longer ends the game by itself, and the
+// global script ends it with GameOver(-1).
+//
+// The difference: cdtweaks checks STATE_REALLY_DEAD, which includes being
+// turned to stone, so a petrified main character ended the game and
+// Component 900's statue could never be cured or shattered. This version
+// only counts real death (STATE_DEAD, which every kill sets, including the
+// statue shattering) and frozen death. A statue is left alone.
+//
+// Note: a saved game keeps its own copy of every area already visited, so
+// those areas keep their old flags in an existing save (for them, the engine
+// still ends the game at once, as before).
+// =============================================================================
+
+<<<<<<<< npc-inline/ej1200_empty.baf
+>>>>>>>>
+
+COPY_EXISTING_REGEXP GLOB ~^.+\.are$~ ~override~
+	WRITE_LONG 0x14 (THIS | BIT4) // "Player1 can die"
+BUT_ONLY
+
+COPY ~npc-inline/ej1200_empty.baf~ ~weidu_external/npc-bodies/ejdcam.baf~
+APPEND_OUTER ~weidu_external/npc-bodies/ejdcam.baf~ ~~~~~
+IF
+	GlobalTimerExpired("EJDCAM","GLOBAL")
+THEN
+	RESPONSE #100
+		GameOver(-1)
+END
+IF
+	OR(2)
+		StateCheck(Player1,STATE_DEAD)
+		StateCheck(Player1,STATE_FROZEN_DEATH)
+	!GlobalTimerNotExpired("EJDCAM","GLOBAL")
+THEN
+	RESPONSE #100
+		SetGlobalTimer("EJDCAM","GLOBAL",6)
+		MoveViewObject(Player1,INSTANT)
+		CreateCreatureObjectOffset("cutspy",Player1,[1.1])
+END~~~~~
+ACTION_FOR_EACH ej12_baldur IN ~baldur~ ~bdbaldur~ ~baldur25~ BEGIN
+	ACTION_IF (FILE_EXISTS_IN_GAME ~%ej12_baldur%.bcs~) BEGIN
+		EXTEND_TOP ~%ej12_baldur%.bcs~ ~weidu_external/npc-bodies/ejdcam.baf~
+	END
+END

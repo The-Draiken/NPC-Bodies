@@ -1,0 +1,130 @@
+// =============================================================================
+// Component 600: Temple Resurrection of Fallen Companions
+// =============================================================================
+// Allows players to bring body items to temple priests for resurrection.
+// Non-decayed bodies (EJB%ind%a): Raise Dead (5000 gp)
+// Decayed bodies (EJB%ind%b): Resurrection (10,000 gp)
+//
+// Requires: Component 100 (main body system) + Component 400 or 500 (for NPCbods.2da)
+// =============================================================================
+
+BEGIN @600 // Temple Resurrection of Fallen Companions
+DESIGNATED 600
+LABEL ~NPC_BODIES_TEMPLE_RESURRECTION~
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 100 ~Requires main component to be installed~
+
+ACTION_IF !(MOD_IS_INSTALLED ~npc-bodies.tp2~ 400) && !(MOD_IS_INSTALLED ~npc-bodies.tp2~ 500) BEGIN
+	FAIL @620
+END
+
+ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~ BEGIN
+	// For each NPC, create a D file with temple priest dialogue states
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_COLS cols
+		READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+		FOR (row = 1; row < r2en_bods; ++row) BEGIN
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 1 dv
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 3 name
+			READ_2DA_ENTRY_FORMER ~r2en_bods~ row 4 script
+			INNER_ACTION BEGIN
+				// Skip NPCs with no script
+				ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN DONE END
+				ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN DONE END
+				ACTION_IF !(FILE_EXISTS_IN_GAME ~%script%.bcs~) BEGIN DONE END
+				
+				// Build the D file content for this NPC using QQQQ placeholders
+				OUTER_SPRINT ejtemple_content ~QQQQIF
+	QQQQ PartyHasItem("EJB%ind%a")
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",1)
+QQQQ
+END
+QQQQIF
+	QQQQ PartyHasItem("EJB%ind%b")
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",2)
+QQQQ
+END
+QQQQIF
+	QQQQ Global("EJTEMPLE%ind%","GLOBAL",1)
+	QQQQ PartyGoldGT(4999)
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ TakePartyGold(5000)
+	QQQQ TakePartyItem("EJB%ind%a")
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",3)
+QQQQ
+END
+QQQQIF
+	QQQQ Global("EJTEMPLE%ind%","GLOBAL",1)
+	QQQQ !PartyGoldGT(4999)
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",0)
+QQQQ
+END
+QQQQIF
+	QQQQ Global("EJTEMPLE%ind%","GLOBAL",2)
+	QQQQ PartyGoldGT(9999)
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ TakePartyGold(10000)
+	QQQQ TakePartyItem("EJB%ind%b")
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",4)
+QQQQ
+END
+QQQQIF
+	QQQQ Global("EJTEMPLE%ind%","GLOBAL",2)
+	QQQQ !PartyGoldGT(9999)
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",0)
+QQQQ
+END
+QQQQIF
+	QQQQ Global("EJTEMPLE%ind%","GLOBAL",3)
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",0)
+	QQQQ CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+	QQQQ ActionOverride("EJdro%ind%",DestroySelf())
+QQQQ
+END
+QQQQIF
+	QQQQ Global("EJTEMPLE%ind%","GLOBAL",4)
+QQQQ THEN
+	QQQQ RESPONSE #100
+	QQQQ SetGlobal("EJTEMPLE%ind%","GLOBAL",0)
+	QQQQ CreateCreatureObject("EJdro%ind%","%dv%",0,0,0)
+	QQQQ ActionOverride("EJdro%ind%",DestroySelf())
+QQQQ
+END~
+				
+				// Write the file
+				OUTER_SPRINT ejtemple_d_path ~weidu_external/npc-bodies/ejtemple%ind%.d~
+				COPY ~npc-bodies/blank.txt~ ~%ejtemple_d_path~
+					APPEND_OUTER ~%ejtemple_d_path~ ~%ejtemple_content%~
+					REPLACE_TEXTUALLY ~QQQQ~ ~%126%~
+			END
+		END
+
+	// Now extend each priest DLG with the new dialogue states
+	ACTION_FOR_EACH priest_dlg IN ~ellendel~ ~pochra~ ~nalin~ ~poghman4~ ~tremai~ ~galile~ ~keldda~ ~agnasi~ ~doghma~ ~ecolt~ ~ameral~ ~hgnya01~ ~dempri~ BEGIN
+		ACTION_IF FILE_EXISTS_IN_GAME ~%priest_dlg%.dlg~ BEGIN
+			COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+				COUNT_2DA_COLS cols
+				READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
+				FOR (row = 1; row < r2en_bods; ++row) BEGIN
+					READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
+					INNER_ACTION BEGIN
+						ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/ejtemple%ind%.d~ BEGIN
+							EXTEND_BOTTOM ~%priest_dlg%~ ~weidu_external/npc-bodies/ejtemple%ind%.d~
+						END
+					END
+				END
+		END
+	END
+END

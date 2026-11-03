@@ -1,1 +1,0 @@
-These are "dumb" summoning scripts for summoned versions of the alternative summons - bone fiends, balors, cornugons. They're not currently needed.

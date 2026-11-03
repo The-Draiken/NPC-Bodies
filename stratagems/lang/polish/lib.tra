@@ -1,9 +1,0 @@
-@50018 = ~Dostrajanie ustawień poziomu trudności gry~
-@50019 = ~Nie zmieniaj ustawień poziomu trudności dla tego elementu gry.~
-@50030 = ~Które ustawienia poziomu trudności chcesz zmienić?~
-@50031 = ~Nie chcę wprowadzać w tej chwili żadnych zmian.~
-@50032 = ~Możesz dokonać dalszych zmian w dowolnym momencie, jak również możesz użyć suwaka (z menu opcji) do zmiany globalnych ustawień poziomu trudności tych składników, dla których ustawienia nie zostały wybrane indywidualnie.~
-@50033 = ~Usuń umiejętność ustawiania poziomu trudności ze zdolności specjalnych.~
-@50034 = ~Przywróć umiejętność ustawiania poziomu trudności jako zdolność specjalną.~
-@50035 = ~Możliwość ustawiania poziomu trudności została usunięta. Dostęp do tego menu wciąż jest dostępny przez konsolę, wpisz: C:CreateCreature("dw#diffi").~
-@50036 = ~Możliwość ustawiania poziomu trudności została przywrócona.~

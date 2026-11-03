@@ -1,0 +1,135 @@
+// =============================================================================
+// Component 1000: Greater Restoration cures Raise Dead CON penalties.
+// Included from npc-bodies.tp2; each subcomponent sets ejg_count first
+// (stacks removed per casting: 1, 2, 3, or 5 = all).
+//
+// Greater Restoration marks its target with a short spell state (EJ_GRES).
+// The same script managers that add the Raise Dead -1 CON stacks (Component
+// 200 for companions, Component 700 for player-created characters) see the
+// mark and remove up to ejg_count stacks, newest first, freeing their slots.
+// =============================================================================
+
+<<<<<<<< npc-inline/ejgres_empty.baf
+>>>>>>>>
+
+LAF ADD_IDS_ENTRY INT_VAR minValue = 1 maxValue = 255 STR_VAR idsFile = ~SPLSTATE~ identifier = ~EJ_GRES~ RET value END
+ACTION_IF (value < 0) BEGIN
+	FAIL ~NPC Bodies 1000: no free SPLSTATE.IDS value for EJ_GRES.~
+END
+OUTER_SET ejg_ss = value
+OUTER_SET ejg_str = RESOLVE_STR_REF (~Greater Restoration: Constitution lost to Raise Dead is restored.~)
+
+// Greater Restoration: mark the target for 6 seconds.
+// Greater Restoration is SPPR713, named CLERIC_RESTORATION in SPELL.IDS.
+LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESTORATION~ RET spell_res END
+ACTION_IF FILE_EXISTS_IN_GAME ~%spell_res%.spl~ BEGIN
+	COPY_EXISTING ~%spell_res%.spl~ ~override~
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 328 target = 2 power = 0 parameter1 = 0 parameter2 = ejg_ss timing = 0 duration = 6 resist_dispel = 0 probability1 = 100 special = 1 END
+	BUT_ONLY
+END ELSE BEGIN
+	FAIL ~NPC Bodies 1000: Greater Restoration spell not found.~
+END
+
+// -----------------------------------------------------------------------------
+// Companions (global script).
+// -----------------------------------------------------------------------------
+COPY ~npc-inline/ejgres_empty.baf~ ~weidu_external/npc-bodies/ejgres.baf~
+ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~ BEGIN
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_ROWS 9 ejg_rows
+	OUTER_FOR (ejg_r = 1; ejg_r < ejg_rows; ++ejg_r) BEGIN
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			READ_2DA_ENTRY ejg_r 0 9 ejg_ind
+			READ_2DA_ENTRY ejg_r 1 9 ejg_dv
+		ACTION_IF NOT VARIABLE_IS_SET $EJG_SEEN(~%ejg_ind%~) BEGIN
+			OUTER_SET $EJG_SEEN(~%ejg_ind%~) = 1
+			APPEND_OUTER ~weidu_external/npc-bodies/ejgres.baf~ ~~~~~
+IF
+	Global("EJGRg%ejg_ind%","GLOBAL",0)
+	CheckSpellState("%ejg_dv%",%ejg_ss%)
+THEN
+	RESPONSE #100
+		SetGlobal("EJGRg%ejg_ind%","GLOBAL",1)
+		SetGlobal("EJGRn%ejg_ind%","GLOBAL",%ejg_count%)
+END~~~~~
+			OUTER_FOR (ejg_j = 5; ejg_j >= 1; ejg_j = ejg_j - 1) BEGIN
+				APPEND_OUTER ~weidu_external/npc-bodies/ejgres.baf~ ~~~~~
+IF
+	GlobalGT("EJGRn%ejg_ind%","GLOBAL",0)
+	Global("EJRDs%ejg_ind%_%ejg_j%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJRDs%ejg_ind%_%ejg_j%","GLOBAL",0)
+		IncrementGlobal("EJGRn%ejg_ind%","GLOBAL",-1)
+		ApplySpellRES("EJRDR%ejg_j%","%ejg_dv%")
+		DisplayStringHead("%ejg_dv%",%ejg_str%)
+END~~~~~
+			END
+			APPEND_OUTER ~weidu_external/npc-bodies/ejgres.baf~ ~~~~~
+IF
+	GlobalGT("EJGRn%ejg_ind%","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("EJGRn%ejg_ind%","GLOBAL",0)
+END
+IF
+	Global("EJGRg%ejg_ind%","GLOBAL",1)
+	!CheckSpellState("%ejg_dv%",%ejg_ss%)
+THEN
+	RESPONSE #100
+		SetGlobal("EJGRg%ejg_ind%","GLOBAL",0)
+END~~~~~
+		END
+	END
+END
+ACTION_FOR_EACH ejg_baldur IN ~baldur~ ~bdbaldur~ ~baldur25~ BEGIN
+	ACTION_IF (FILE_EXISTS_IN_GAME ~%ejg_baldur%.bcs~) BEGIN
+		EXTEND_BOTTOM ~%ejg_baldur%.bcs~ ~weidu_external/npc-bodies/ejgres.baf~
+	END
+END
+
+// -----------------------------------------------------------------------------
+// Player-created characters (their own EJPCS<k> scripts, Component 700).
+// -----------------------------------------------------------------------------
+OUTER_FOR (k = 1; k <= 8; ++k) BEGIN
+	ACTION_IF FILE_EXISTS_IN_GAME ~EJPCS%k%.bcs~ BEGIN
+		COPY ~npc-inline/ejgres_empty.baf~ ~weidu_external/npc-bodies/ejgresP%k%.baf~
+		APPEND_OUTER ~weidu_external/npc-bodies/ejgresP%k%.baf~ ~~~~~
+IF
+	Global("EJGRgP%k%","GLOBAL",0)
+	CheckSpellState(Myself,%ejg_ss%)
+THEN
+	RESPONSE #100
+		SetGlobal("EJGRgP%k%","GLOBAL",1)
+		SetGlobal("EJGRnP%k%","GLOBAL",%ejg_count%)
+END~~~~~
+		OUTER_FOR (ejg_j = 5; ejg_j >= 1; ejg_j = ejg_j - 1) BEGIN
+			APPEND_OUTER ~weidu_external/npc-bodies/ejgresP%k%.baf~ ~~~~~
+IF
+	GlobalGT("EJGRnP%k%","GLOBAL",0)
+	Global("EJRDsP%k%_%ejg_j%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJRDsP%k%_%ejg_j%","GLOBAL",0)
+		IncrementGlobal("EJGRnP%k%","GLOBAL",-1)
+		ApplySpellRES("EJRDR%ejg_j%",Myself)
+		DisplayStringHead(Myself,%ejg_str%)
+END~~~~~
+		END
+		APPEND_OUTER ~weidu_external/npc-bodies/ejgresP%k%.baf~ ~~~~~
+IF
+	GlobalGT("EJGRnP%k%","GLOBAL",0)
+THEN
+	RESPONSE #100
+		SetGlobal("EJGRnP%k%","GLOBAL",0)
+END
+IF
+	Global("EJGRgP%k%","GLOBAL",1)
+	!CheckSpellState(Myself,%ejg_ss%)
+THEN
+	RESPONSE #100
+		SetGlobal("EJGRgP%k%","GLOBAL",0)
+END~~~~~
+		EXTEND_BOTTOM ~EJPCS%k%.bcs~ ~weidu_external/npc-bodies/ejgresP%k%.baf~
+	END
+END

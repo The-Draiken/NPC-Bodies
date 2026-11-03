@@ -1,5 +1,0 @@
-IF
- Global("KRESS_QUEST","GLOBAL",3)
-THEN
- RESPONSE #100 DestroySelf()
-END

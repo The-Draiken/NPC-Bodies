@@ -1,5 +1,0 @@
-IF
- Help(NearestEnemyOf(Myself))
-THEN
- RESPONSE #100 FaceObject(LastHelp(Myself)) Continue()
-END

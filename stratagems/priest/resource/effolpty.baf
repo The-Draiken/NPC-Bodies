@@ -1,8 +1,0 @@
-IF
-	ActionListEmpty()
-	!Detect([PC])
-THEN
-	RESPONSE #100
-		MoveToObject(Player1)
-END
-

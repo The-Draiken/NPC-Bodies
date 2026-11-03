@@ -1,8 +1,0 @@
-IF
-	WalkedToTrigger([ANYONE])
-	Allegiance("Anadramatis",ENEMY)
-	!Dead("Anadramatis")
-THEN
-	RESPONSE #100
-		DisplayStringNoName(Myself,@3020)
-END

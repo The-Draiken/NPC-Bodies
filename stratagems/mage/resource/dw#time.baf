@@ -1,8 +1,0 @@
-IF
-	True()
-THEN 
-	RESPONSE #100
-		SetGlobalTimer("DMWWTimeStopRunning","GLOBAL",17)
-		SetGlobalTimer("DMWWTimeStopRecast","GLOBAL",11)
-		DestroySelf()
-END

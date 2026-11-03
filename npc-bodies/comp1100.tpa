@@ -1,0 +1,208 @@
+// =============================================================================
+// Component 1100 [EXPERIMENTAL]: Travel while the main character is petrified
+// ("send away and recall"). Needs Component 900. Included from
+// npc-bodies.tp2.
+//
+// The engine refuses any area exit while a party member is held by
+// petrification, even right beside the exit -- but a party member in a
+// different area never blocks travel. (Removing the main character from the
+// party is not an option: the engine ends the game at once, even with the
+// "Player1 can die" area flag set.)
+//
+// "Is the main character stone?" uses Stratagems' own marker,
+// CheckSpellState(Player1,DW_WAS_IMPRISONED), which its statue spell
+// (dw#p1pet) sets and which Stratagems' own global script uses as its
+// petrification check. (Spell Revisions' version gets the same marker here.)
+// While it is set, the global script gives Player2 the token item EJSTAT.
+// Using the token with the statue in the same area and no combat sends the
+// statue to a holding room (EJSTONE: a copy of a small existing house with
+// its creatures and script removed, which the party can never enter). Using
+// it again brings the statue back beside whoever used it. Once the statue is
+// cured, the global script takes the token back.
+// =============================================================================
+
+<<<<<<<< npc-inline/ej1100_empty.baf
+>>>>>>>>
+
+OUTER_SET ejp9_away = RESOLVE_STR_REF (~The statue has been carried to safety. The party can travel freely; use the token again to bring it back.~)
+OUTER_SET ejp9_back = RESOLVE_STR_REF (~The statue has been brought back.~)
+OUTER_SET ejp9_cant = RESOLVE_STR_REF (~The statue cannot be moved while there is fighting nearby.~)
+OUTER_SET ejp9_given = RESOLVE_STR_REF (~The party takes up a token to carry the statue of their fallen leader.~)
+OUTER_SET ejp9_imp = IDS_OF_SYMBOL (~SPLSTATE~ ~DW_WAS_IMPRISONED~)
+ACTION_IF (ejp9_imp < 0) BEGIN
+	FAIL ~NPC Bodies 1100: DW_WAS_IMPRISONED not found in SPLSTATE.IDS -- is Stratagems component 4130 installed?~
+END
+
+// Spell Revisions' statue: give it Stratagems' petrification marker too.
+ACTION_IF FILE_EXISTS_IN_GAME ~EJP1STN.spl~ BEGIN
+	COPY_EXISTING ~EJP1STN.spl~ ~override~
+		LPF DELETE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = ejp9_imp END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 328 target = 2 power = 0 parameter1 = 0 parameter2 = ejp9_imp timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 special = 1 END
+	BUT_ONLY
+END
+
+// Holding room.
+COPY_EXISTING ~BG0109.ARE~ ~override/EJSTONE.ARE~
+	READ_LONG 0x68 ejp9_ent_off
+	READ_SHORT 0x6c ejp9_ent_num
+	SET ejp9_x = 300
+	SET ejp9_y = 300
+	PATCH_IF (ejp9_ent_num > 0) BEGIN
+		READ_SHORT (ejp9_ent_off + 0x20) ejp9_x
+		READ_SHORT (ejp9_ent_off + 0x22) ejp9_y
+	END
+	WRITE_SHORT 0x58 0
+	WRITE_SHORT 0x5a 0
+	WRITE_LONG 0x64 0
+	WRITE_SHORT 0x74 0
+	WRITE_SHORT 0x76 0
+	WRITE_LONG 0x94 0
+	WRITE_LONG 0x98 0
+
+// ---- The token ----
+// Only the wand's icons are borrowed; the item itself is built from nothing,
+// written byte by byte (main header 0x72, one ability 0x38, one effect 0x30).
+COPY_EXISTING ~WAND04.ITM~ ~override~
+	READ_ASCII 0x3a ejp9_icon_inv
+	READ_ASCII 0x44 ejp9_icon_gnd
+	READ_ASCII 0x58 ejp9_icon_dsc
+	SET ejp9_icon_use_ok = 0
+	READ_LONG 0x64 ejp9_hoff
+	READ_SHORT 0x68 ejp9_hnum
+	PATCH_IF (ejp9_hnum > 0 AND (ejp9_hoff + 0x0c) <= BUFFER_LENGTH) BEGIN
+		READ_ASCII (ejp9_hoff + 0x04) ejp9_icon_use
+		SET ejp9_icon_use_ok = 1
+	END
+	PATCH_IF (ejp9_icon_use_ok = 0) BEGIN
+		READ_ASCII 0x3a ejp9_icon_use
+	END
+BUT_ONLY
+
+CREATE ~ITM~ ~EJSTAT~
+	WRITE_LONG 0x18 0     // flags
+	WRITE_SHORT 0x1c 35   // category: wand (fits quick item slots)
+	WRITE_LONG 0x1e 0     // usable by everyone
+	WRITE_LONG 0x34 0     // price
+	WRITE_SHORT 0x38 1    // stack 1
+	WRITE_ASCII 0x3a ~%ejp9_icon_inv%~ (8)
+	WRITE_SHORT 0x42 0    // lore 0 (always identified)
+	WRITE_ASCII 0x44 ~%ejp9_icon_gnd%~ (8)
+	WRITE_LONG 0x4c 0     // weight
+	WRITE_ASCII 0x58 ~%ejp9_icon_dsc%~ (8)
+	// one ability at 0x72, one effect at 0xaa
+	INSERT_BYTES 0x72 (0x38 + 0x30)
+	WRITE_LONG 0x64 0x72  // abilities offset
+	WRITE_SHORT 0x68 1    // abilities count
+	WRITE_LONG 0x6a 0xaa  // effects offset
+	WRITE_SHORT 0x6e 0    // first equipped effect
+	WRITE_SHORT 0x70 0    // equipped effects count
+	// ability
+	WRITE_BYTE 0x72 3     // magical
+	WRITE_BYTE 0x74 3     // used from an item slot
+	WRITE_ASCII 0x76 ~%ejp9_icon_use%~ (8)
+	WRITE_BYTE 0x7e 5     // target: caster
+	WRITE_BYTE 0x7f 1     // one target
+	WRITE_SHORT 0x80 10   // range
+	WRITE_SHORT 0x90 1    // effects in this ability
+	WRITE_SHORT 0x92 0    // first effect index
+	WRITE_SHORT 0x94 0    // charges 0 = unlimited
+	WRITE_SHORT 0x96 0    // item remains
+	WRITE_SHORT 0x9c 1    // no projectile
+	// effect: cast EJSTUSE instantly on self
+	WRITE_SHORT 0xaa 146
+	WRITE_BYTE 0xac 1
+	WRITE_LONG 0xb2 1
+	WRITE_BYTE 0xb6 1
+	WRITE_BYTE 0xbc 100
+	WRITE_ASCII 0xbe ~EJSTUSE~ (8)
+	SAY NAME1 ~Statue of the Fallen Leader~
+	SAY NAME2 ~Statue of the Fallen Leader~
+	SAY UNIDENTIFIED_DESC ~Your leader has been turned to stone. While the statue stands among you, the party cannot leave this place. Use this token (from a quick item slot) when no fighting is near to carry the statue to safety, so the rest of the party can travel freely in search of a cure. Use it again to bring the statue back beside you.~
+	SAY DESC ~Your leader has been turned to stone. While the statue stands among you, the party cannot leave this place. Use this token (from a quick item slot) when no fighting is near to carry the statue to safety, so the rest of the party can travel freely in search of a cure. Use it again to bring the statue back beside you.~
+
+// ---- Using the token: helper summoned at the user ----
+COPY ~npc-inline/ej1100_empty.baf~ ~weidu_external/npc-bodies/EJSTHLP.baf~
+APPEND_OUTER ~weidu_external/npc-bodies/EJSTHLP.baf~ ~~~~~
+IF
+	Global("EJP1AWAY","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJP1AWAY","GLOBAL",0)
+		MoveGlobalObject(Player1,Myself)
+		DisplayStringHead(LastSummonerOf(Myself),%ejp9_back%)
+		DestroySelf()
+END
+IF
+	CombatCounter(0)
+	InMyArea(Player1)
+	CheckSpellState(Player1,DW_WAS_IMPRISONED)
+THEN
+	RESPONSE #100
+		SetGlobal("EJP1AWAY","GLOBAL",1)
+		MoveGlobal("EJSTONE",Player1,[%ejp9_x%.%ejp9_y%])
+		DisplayStringHead(LastSummonerOf(Myself),%ejp9_away%)
+		DestroySelf()
+END
+IF
+	True()
+THEN
+	RESPONSE #100
+		DisplayStringHead(LastSummonerOf(Myself),%ejp9_cant%)
+		DestroySelf()
+END~~~~~
+COPY ~npc-bodies/cre/BODYDROP.CRE~ ~override/EJSTHLP.cre~
+	WRITE_ASCII 0x280 ~EJSTHLP~ (32)
+	WRITE_ASCII 0x248 ~EJSTHLP~ (8)
+COMPILE ~weidu_external/npc-bodies/EJSTHLP.baf~
+
+CREATE ~EFF~ ~EJSTSUM~
+	WRITE_LONG 0x10 67
+	WRITE_LONG 0x14 1
+	WRITE_LONG 0x18 9
+	WRITE_LONG 0x1c 0
+	WRITE_LONG 0x20 0
+	WRITE_LONG 0x24 1
+	WRITE_LONG 0x28 6
+	WRITE_SHORT 0x2c 100
+	WRITE_SHORT 0x2e 0
+	WRITE_ASCII 0x30 ~EJSTHLP~ (8)
+	WRITE_ASCII 0x70 ~NONE~ (8)
+
+COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJSTUSE.spl~
+	LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+	LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 177 target = 1 power = 0 parameter1 = 0 parameter2 = 2 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJSTSUM~ END
+
+// ---- Giving and taking back the token (global script) ----
+// The token is never taken while the statue is in the holding room
+// (EJP1AWAY = 1), in case the marker cannot be read from another area.
+COPY ~npc-bodies/cre/BODYDROP.CRE~ ~override/EJSTTK.cre~
+	WRITE_ASCII 0x280 ~EJSTTK~ (32)
+	WRITE_LONG 0x248 0
+	WRITE_LONG 0x24c 0
+COPY ~npc-inline/ej1100_empty.baf~ ~weidu_external/npc-bodies/ejstat.baf~
+APPEND_OUTER ~weidu_external/npc-bodies/ejstat.baf~ ~~~~~
+IF
+	CheckSpellState(Player1,DW_WAS_IMPRISONED)
+	!PartyHasItem("EJSTAT")
+	InParty(Player2)
+THEN
+	RESPONSE #100
+		GiveItemCreate("EJSTAT",Player2,1,0,0)
+		DisplayStringHead(Player2,%ejp9_given%)
+END
+IF
+	Global("EJP1AWAY","GLOBAL",0)
+	!CheckSpellState(Player1,DW_WAS_IMPRISONED)
+	PartyHasItem("EJSTAT")
+THEN
+	RESPONSE #100
+		CreateCreatureObject("EJSTTK",Player2,0,0,0)
+		ActionOverride("EJSTTK",TakePartyItem("EJSTAT"))
+		ActionOverride("EJSTTK",DestroyItem("EJSTAT"))
+		ActionOverride("EJSTTK",DestroySelf())
+END~~~~~
+ACTION_FOR_EACH ejp9_baldur IN ~baldur~ ~bdbaldur~ ~baldur25~ BEGIN
+	ACTION_IF (FILE_EXISTS_IN_GAME ~%ejp9_baldur%.bcs~) BEGIN
+		EXTEND_BOTTOM ~%ejp9_baldur%.bcs~ ~weidu_external/npc-bodies/ejstat.baf~
+	END
+END

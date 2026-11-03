@@ -1,5 +1,0 @@
-IF
- ActionListEmpty() !Allegiance(Myself,EVILCUTOFF) !NearSavedLocation(Myself,"#savedloc",108)
-THEN
- RESPONSE #100 MoveToSavedLocation("#savedloc","LOCALS")
-END

@@ -228,12 +228,16 @@ ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
 	OUTER_INNER_PATCH_SAVE name ~%name%~ BEGIN
 			REPLACE_TEXTUALLY ~ ~ ~_~
 	END		
-	ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN
-		OUTER_SET skip = 1
-	END	
-	ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
-		OUTER_SET skip = 1
-	END	
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~none~) BEGIN
+			OUTER_SET skip = 1
+		END	
+		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
+			OUTER_SET skip = 1
+		END
+		// Skip undead (race 125) - vampires and other undead don't drop bodies
+		ACTION_IF (race = 125) BEGIN
+			OUTER_SET skip = 1
+		END
 	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
 		COUNT_2DA_COLS cols
 		READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
@@ -317,24 +321,73 @@ ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
 			THEN
 				RESPONSE #100
 					SetGlobal("EJdead%ind%","GLOBAL",1)
-					SaveObjectLocation("MYAREA","Corpse%ind%","%dv%") 
+					SaveObjectLocation("MYAREA","Corpse%ind%","%dv%")
 					CreateCreatureAtLocation("Corpse%ind%","MYAREA","EJdro%ind%")
 					ActionOverride("EJdro%ind%",CreateItem("EJB%ind%a",0,0,0))
 					ActionOverride("EJdro%ind%",DropItem("EJB%ind%a",[-1.-1]))
 					ActionOverride("EJdro%ind%",DestroySelf())
 					Continue()
-			END~		
+			END
+			// BUGFIX: the block above explicitly excludes STATE_PERMANENT_DEATH
+			// (chunking, disintegration, etc.), which was clearly intentional
+			// for the ORIGINAL body-drop system -- there's no body left to save
+			// a location for or drop an item from. But that also means
+			// EJdead%ind% NEVER gets set to 1 for a permanently-dead companion,
+			// which is the ONLY flag Component 600's temple-priest and
+			// Wish/genie dialogues gate on. This block catches that case
+			// separately, with no body-item handling at all (there's
+			// genuinely nothing to save), just the one flag Component 600
+			// actually needs.
+			//
+			// NOTE: live testing showed this specific placement (this
+			// companion's own class script, %script%.bcs) does NOT reliably
+			// catch it -- the user still got no dialogue option after a
+			// chunk+Stratagems-cure+dismiss cycle. Left in place as a
+			// harmless belt-and-suspenders check (costs nothing if it never
+			// fires), but the version that's actually confirmed-plausible to
+			// work is the one added to baldurextend.baf a bit further down
+			// (BG2's always-on global script, not tied to whatever script
+			// slot happens to be active on this specific creature during the
+			// permanent-death transition).
+			IF
+				StateCheck("%dv%",STATE_PERMANENT_DEATH)
+				Global("EJdead%ind%","GLOBAL",0)
+			THEN
+				RESPONSE #100
+					SetGlobal("EJdead%ind%","GLOBAL",1)
+					Continue()
+			END~
 					
 					
 		EXTEND_BOTTOM ~%script%.bcs~ ~weidu_external/npc-bodies/%script%.baf~
 		
 		ACTION_IF !FILE_CONTAINS_EVALUATED(~weidu_external/npc-bodies/baldurextend.baf~ ~EJB%ind%a~) BEGIN
-					
+
 			APPEND_OUTER ~weidu_external/npc-bodies/baldurextend.baf~ ~
+				// EJjoined%ind%: set once this companion has ever been in the
+				// party (alive or dead). Component 600's temple/genie replies
+				// require it, so NPCs who were never recruited (e.g. the
+				// Branwen statue, whose death variable reads as Dead) never get
+				// a revival line.
+				IF
+					InPartyAllowDead("%dv%")
+					!Global("EJjoined%ind%","GLOBAL",1)
+				THEN
+					RESPONSE #100
+						SetGlobal("EJjoined%ind%","GLOBAL",1)
+				END
+
+				// BUGFIX: never relabel a PERMANENTLY dead (chunked) companion
+				// as EJNOBOD. The real Resurrection spell only applies its
+				// raising sub-spell (the one Stratagems edits so Raise Dead
+				// restores the creature animation) to a target whose GENERAL
+				// is DEAD, so overwriting it here stopped Stratagems' own
+				// chunk recovery from ever running for a rejoined companion.
 				IF
 					InPartyAllowDead("%dv%")
 					Global("EJdead%ind%","GLOBAL",1)
 					!PartyHasItem("EJB%ind%a")
+					!StateCheck("%dv%",STATE_PERMANENT_DEATH)
 				THEN
 					RESPONSE #100
 						ChangeGeneral("%dv%",EJNOBOD)
@@ -347,6 +400,36 @@ ACTION_PHP_EACH JOINABLE_NPC_ARRAY AS cre => dv BEGIN
 				THEN
 					RESPONSE #100
 						ChangeGeneral("%dv%",DEAD)
+				END
+
+				// BUGFIX (2nd attempt): the StateCheck(STATE_PERMANENT_DEATH)
+				// trigger added to %script%.bcs (this companion's own class
+				// script, above) did NOT fire in live testing -- confirmed by
+				// the user still getting no dialogue option at all after a
+				// chunk+Stratagems-cure+dismiss cycle. Likely cause: whatever
+				// script slot %script%.bcs actually is, it's probably not the
+				// one actively assigned to/evaluated for this creature during
+				// the permanent-death window (the engine, or Stratagems
+				// itself, may swap her active script during that transition).
+				// baldur.bcs/bdbaldur.bcs/baldur25.bcs (this file, extended
+				// onto all three a bit further down) are BG2's always-on,
+				// area-independent global scripts -- they keep running
+				// regardless of any individual creature's own script-slot
+				// state, so a name-based trigger here doesn't depend on
+				// %script%.bcs being the active script at the right moment.
+				// Confirmed via Stratagems' own gameplay/resurrection.tpa
+				// (local_add.baf) that StateCheck(...,STATE_PERMANENT_DEATH)
+				// on a chunked party member DOES still resolve successfully
+				// via a name/Myself reference at this stage -- Stratagems
+				// relies on exactly that to re-JoinParty() her (still
+				// permanently dead) so its own diamond-check dialogue has
+				// time to run. This trigger piggybacks on that same window.
+				IF
+					StateCheck("%dv%",STATE_PERMANENT_DEATH)
+					Global("EJdead%ind%","GLOBAL",0)
+				THEN
+					RESPONSE #100
+						SetGlobal("EJdead%ind%","GLOBAL",1)
 				END~
 		END
 	END
@@ -360,9 +443,6 @@ END
 
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RAISE_DEAD~  RET spell_res END //raise dead which is cast by temples
 OUTER_TEXT_SPRINT raisedead ~%spell_res%~
-LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
-	STR_VAR spell_res = EVAL ~%raisedead%~ sr_source = ~spell_rev/sppr5##/sppr504.spl~
-END
 COPY_EXISTING ~%raisedead%.spl~ ~override~
 		READ_STRREF 0x50 ~raise~
 		SAY 0x50 @4
@@ -377,40 +457,26 @@ COPY_EXISTING ~%spell_res%.spl~ ~override~
 	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
 	
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_MASS_RAISE_DEAD~  RET spell_res END
-LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
-	STR_VAR spell_res = EVAL ~%spell_res%~ sr_source = ~spell_rev/sppr7##/sppr729.spl~
-END
 COPY_EXISTING ~%spell_res%.spl~ ~override~
 	READ_STRREF 0x50 ~raise~
 	SAY 0x50 @4
 	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 6 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
 
-LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
-	STR_VAR spell_res = ~SPJA01~ sr_source = ~spell_rev/sppr5##/spja01.spl~
-END
 COPY_EXISTING ~SPJA01.spl~ ~override~ 
 	READ_STRREF 0x50 ~raise~
 	SAY 0x50 @4
 	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 
 
-LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
-	INT_VAR preserve_scs = 0
-	STR_VAR spell_res = ~spwish10~ sr_source = ~spell_rev/spwi9##/spwish10.spl~
-END
 COPY_EXISTING ~spwish10.spl~ ~override~ 
-	READ_STRREF 0x50 ~res~
-	SAY 0x50 @5
-	LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %aliveprot% END
-	LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %deadprot% END
+	READ_STRREF 0x50 ~raise~
+	SAY 0x50 @4
+	LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 target = 2 opcode = 326 parameter1 = 0 parameter2 = EVAL %nobodprot% timing = 1 STR_VAR resource = ~EJNPRES~ END 			
 		
 COPY ~npc-bodies/spl/EJNPRES.spl~ ~override~
 	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (@3) END
 
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
 OUTER_TEXT_SPRINT resurrection ~%spell_res%~
-LAF NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
-	STR_VAR spell_res = EVAL ~%resurrection%~ sr_source = ~spell_rev/sppr7##/sppr712.spl~
-END
 COPY_EXISTING ~%resurrection%.spl~ ~override~
 	READ_STRREF 0x50 ~res~
 	SAY 0x50 @5
@@ -450,20 +516,55 @@ COPY_EXISTING ~speldesc.2da~ ~override~
 
 
 
-BEGIN @200 // Raise Dead Level Drain Penalty/Resurrection Con Penalty
+BEGIN @200 // Raise Dead Con Penalty / Resurrection MaxHP Penalty
 DESIGNATED 200
 // -----------------------------------------------------------------------------
-// Temple-service compatibility (Raise Dead/Resurrection are hardcoded to SPPR504/SPPR712)
-// We keep temples using the original spells, and avoid penalties via immunity subspells
-// cast on the CASTER immediately before the CON penalty is applied.
-//
-// You edited these in NI:
-//   - EJTRD: grants opcode 101 immunity (blocks opcode 10 CON penalty) on the caster for 6 seconds
-//   - EJTRES: grants the same immunity but only affects DEAD actors
+// Raise Dead: -1 CON on the TARGET (the person being raised), no caster penalty.
+// Resurrection: -8 maximum HP on the CASTER only. Temple casts are immune.
 // -----------------------------------------------------------------------------
 
 COPY ~npc-bodies/For Temples/EJTRD.SPL~  ~override/EJTRD.SPL~
 COPY ~npc-bodies/For Temples/EJTRES.SPL~ ~override/EJTRES.SPL~
+	// EJTRES: grant immunity to opcode 18 (max HP penalty) so temple Resurrection is penalty-free
+	// BUGFIX: opcode 101 ("Protection from Opcode") takes the opcode-to-
+	// protect-against in PARAMETER2, not parameter1 (parameter1 is unused
+	// for this opcode) -- confirmed via IESDP's bgee.htm opcode list. This
+	// was backwards, so the immunity effect was granting protection from
+	// opcode 0, never opcode 18, and never actually did anything. Directly
+	// responsible for a real bug reported by the user: a temple priest
+	// (Keldath) who repeatedly cast Resurrection for the player eventually
+	// died, because the -8 max HP penalty below was hitting him every time
+	// with no immunity ever applying.
+	// The immunity is now short-lived (timing 0, 6 seconds -- long enough to
+	// cover the penalty's 2-second delay) instead of timing 2, which on a
+	// spell effectively never expired. Any 101 already in the source file is
+	// removed first so only this one exists.
+	LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = 101 END
+	LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 101 target = 2 power = 0 timing = 0 duration = 6 parameter1 = 0 parameter2 = 18 resist_dispel = 0 probability1 = 100 END
+
+// EJRDCON: the Raise Dead -1 CON penalty (2 in-game weeks = 100800 game
+// seconds). It is applied from the raise spells through a DELAYED opcode 326
+// (1 second, like the existing "set HP to 1" effect). Applied directly, the
+// CON effect landed while the target was still dead and was discarded.
+COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJRDCON.SPL~
+	LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+	LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 2 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 0 duration = 100800 resist_dispel = 0 probability1 = 100 END
+
+// Stackable Raise Dead CON penalty: up to 5 stacks per character.
+// EJRDC<j>: +20 HP first (so a character raised at 1 HP is not killed by the
+// lower CON hit-point bonus), then -1 CON with timing 9, which survives later
+// deaths (a timed effect would be wiped on death, so stacks never built up).
+// Each stack is removed after 2 in-game weeks by a script timer applying
+// EJRDR<j> (opcode 321: remove effects of EJRDC<j>).
+OUTER_FOR (ejrd_j = 1; ejrd_j <= 5; ++ejrd_j) BEGIN
+	COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJRDC%ejrd_j%.SPL~
+		LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 0 parameter1 = 20 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 2 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 9 duration = 0 resist_dispel = 0 probability1 = 100 END
+	COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJRDR%ejrd_j%.SPL~
+		LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 321 target = 2 power = 0 timing = 1 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJRDC%ejrd_j%~ END
+END
 
 ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERIC_RECALL_SPIRIT~ ~CLERIC_RESURRECTION~ BEGIN
 	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~%res_spell%~  RET spell_res END
@@ -475,24 +576,55 @@ ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERI
 			// Apply temple-immunity subspell FIRST (order of operations matters)
 			// You confirmed the cast needs: Cast instantly (specified level)=2, Target=Self, Timing=Instant/Limited.
 			PATCH_IF (~%res_spell%~ STRING_EQUAL_CASE ~CLERIC_RAISE_DEAD~) BEGIN
-				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 146 target = 1 power = 0 timing = 2 duration = 6 parameter2 = 2 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJTRD~ END
+				// EJTRD is no longer cast. Raise Dead has no caster penalty, and in the
+				// temple store the dead character is both caster and target, so an
+				// immunity cast "on the caster" landed on the person being raised and
+				// blocked their -1 CON penalty.
 			END
+			// Resurrection: EJTRES (immunity to the -8 max HP penalty) is applied
+			// ONLY when the caster IS the target. That is exactly the temple store
+			// case, where the engine has the dead party member "cast" the service
+			// on themselves. Opcode 326 checks SPLPROT row 43 (SOURCE: target is
+			// the caster) on the spell's target; a real cleric raising someone
+			// else fails the check, gets no immunity, and pays the penalty.
+			// (Previously EJTRES was cast on EVERY caster via opcode 146, so no
+			// one ever paid it, and the immunity lingered afterwards.)
 			PATCH_IF (~%res_spell%~ STRING_EQUAL_CASE ~CLERIC_RESURRECTION~) BEGIN
-				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 146 target = 1 power = 0 timing = 2 duration = 6 parameter2 = 2 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJTRES~ END
+				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 326 target = 2 power = 0 timing = 1 parameter1 = 0 parameter2 = 43 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJTRES~ END
+				// EJRESD: "this revival was a Resurrection" -- blocks the Raise
+				// Dead CON penalty even if a Raise Dead flag is still pending.
+				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 3 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 insert_point = 1 STR_VAR resource = ~EJRESD~ END
+				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 1 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJRESD~ END
 			END
 
 			// (1) Keep whatever you were doing with HP scaling (effect 17)
 			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 100 parameter2 = 2 timing = 1 resist_dispel = 0 probability1 = 100 END
 			// (2) Penalty effects
-			// You confirmed Raise Dead cannot be made "target-penalized but temple-exempt", so we switch to caster level drain.
-			// Apply Level Drain (opcode 216) to SELF after EJTRD; EJTRD grants immunity so temple (self-cast) is exempt.
+			// Raise Dead: -1 CON on the TARGET (the person being raised), no caster penalty.
+			// CHANGED FROM PERMANENT TO TEMPORARY (2 in-game weeks) per user
+			// request. timing=10 is BGEE's "Instant/Limited, duration given
+			// directly in ticks" mode (confirmed via IESDP's EFF V1/V2 docs);
+			// 15 ticks/second, 300 seconds/in-game hour, so 1 in-game day =
+			// 108000 ticks and 2 weeks (14 days) = 1512000 ticks. Previously
+			// timing=4/duration=2 (permanent, matching this codebase's other
+			// permanent effects) -- was never actually reported as a problem,
+			// this is a deliberate design change, not a bugfix.
 			PATCH_IF (NOT (~%res_spell%~ STRING_EQUAL_CASE ~CLERIC_RESURRECTION~)) BEGIN
-				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 216 target = 1 power = 7 parameter1 = 2 timing = 4 duration = 2 resist_dispel = 0 probability1 = 100 END
+				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 3 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 insert_point = 1 STR_VAR resource = ~EJRAISED~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 1 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJRAISED~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 1 power = 0 parameter1 = 1 parameter2 = 0 timing = 4 duration = 2 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJRAISED~ END
 			END
 
-			// Resurrection: -1 CON ONLY on the CASTER, delayed/permanent (timing=4, duration=2)
+			// Resurrection: -8 maximum HP on the CASTER (opcode 18). EJTRES grants immunity for temple casts.
+			// BUGFIX: parameter2 on opcode 18 is the modifier TYPE, not a
+			// duration/permanence flag -- confirmed via IESDP. parameter2=2
+			// means "percentage", so this was applying "-8% of max HP" per
+			// cast instead of a flat -8, and (independently of the opcode
+			// 101 fix above) never behaved as the "-8 permanent" comment
+			// intended. parameter2=0 is cumulative/flat, matching the
+			// original intent of a flat, stacking-per-cast penalty.
 			PATCH_IF (~%res_spell%~ STRING_EQUAL_CASE ~CLERIC_RESURRECTION~) BEGIN
-				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 1 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 4 duration = 2 resist_dispel = 0 probability1 = 100 END
+				LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 18 target = 1 power = 0 parameter1 = (0 - 8) parameter2 = 0 timing = 4 duration = 2 resist_dispel = 0 probability1 = 100 END
 			END
 
 			// (4) Set raised creature to 1 HP
@@ -500,17 +632,175 @@ ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERI
 		BUT_ONLY
 	END
 END	
-ACTION_FOR_EACH res_spell IN  ~SPJA01~ ~spwish10~ BEGIN
-	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
-		COPY_EXISTING ~%res_spell%.SPL~ ~override~
-			READ_STRREF 0x50 ~desc~
-			SAY 0x50 @6
-			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 100 parameter2 = 2 timing = 1 resist_dispel = 0 probability1 = 100 END
-			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 10 target = 2 power = 0 parameter1 = (0 - 1) parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 END
-			LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 1 parameter2 = 1 timing = 4 duration = 1 resist_dispel = 0 probability1 = 100 END
-		BUT_ONLY
+// SPJA01 (fixed from a typo, "SPPRJA01", which never matched any real
+// resource in this game -- confirmed via CHITIN.KEY lookup -- so this
+// entire patch silently no-op'd for it since day one. SPJA01 is
+// Stratagems' own name, per its resurrection.tpa, for a "Raise Dead not
+// cast by a temple" spell variant.) Keeps the full effect set, CON
+// penalty included, same as the main temple-cast spells above.
+ACTION_IF FILE_EXISTS_IN_GAME ~SPJA01.spl~ BEGIN
+	COPY_EXISTING ~SPJA01.SPL~ ~override~
+		READ_STRREF 0x50 ~desc~
+		SAY 0x50 @6
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 100 parameter2 = 2 timing = 1 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 3 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 insert_point = 1 STR_VAR resource = ~EJRAISED~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 1 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJRAISED~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 265 target = 1 power = 0 parameter1 = 1 parameter2 = 0 timing = 4 duration = 2 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJRAISED~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 1 parameter2 = 1 timing = 4 duration = 1 resist_dispel = 0 probability1 = 100 END
+	BUT_ONLY
+END
+
+// spwish10 (the Wish spell's own "bring back a companion" option) gets the
+// heal and set-to-1-HP effects but deliberately NOT the CON penalty, per
+// the user's explicit request: Wish is meant to be strictly more powerful
+// than ordinary Raise Dead/Resurrection, bypassing their usual costs and
+// penalties entirely (matching classic D&D Wish lore -- it supersedes even
+// a target's own refusal to be raised, which plain Resurrection does not).
+ACTION_IF FILE_EXISTS_IN_GAME ~spwish10.spl~ BEGIN
+	COPY_EXISTING ~spwish10.SPL~ ~override~
+		READ_STRREF 0x50 ~desc~
+		SAY 0x50 @603
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 100 parameter2 = 2 timing = 1 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 7 parameter1 = 1 parameter2 = 1 timing = 4 duration = 1 resist_dispel = 0 probability1 = 100 END
+	BUT_ONLY
+END
+
+// -----------------------------------------------------------------------------
+// Raise Dead's -1 CON penalty, applied AFTER revival. Effects aimed at the
+// dead target in the raise spell itself are lost when it is revived (the
+// GitHub version's own notes say a target penalty could never be made to
+// stick). So Raise Dead only sets the global EJRAISED (see above); this
+// script notices each companion going from dead to alive in the party and,
+// if EJRAISED is set, gives them EJRDCON (-1 CON for 2 in-game weeks).
+// Components 600/700 apply EJRDCON themselves for their own revivals.
+// -----------------------------------------------------------------------------
+<<<<<<<< npc-inline/ejcon.baf
+>>>>>>>>
+OUTER_SET ejc_constr = RESOLVE_STR_REF (~Raise Dead: -1 Constitution for two weeks.~)
+COPY ~npc-inline/ejcon.baf~ ~weidu_external/npc-bodies/ejcon.baf~
+ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~ BEGIN
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_ROWS 9 ejc_rows
+	OUTER_FOR (ejc_r = 1; ejc_r < ejc_rows; ++ejc_r) BEGIN
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			READ_2DA_ENTRY ejc_r 0 9 ejc_ind
+			READ_2DA_ENTRY ejc_r 1 9 ejc_dv
+		ACTION_IF NOT VARIABLE_IS_SET $EJC_SEEN(~%ejc_ind%~) BEGIN
+			OUTER_SET $EJC_SEEN(~%ejc_ind%~) = 1
+			APPEND_OUTER ~weidu_external/npc-bodies/ejcon.baf~ ~~~~~
+IF
+	InPartyAllowDead("%ejc_dv%")
+	Dead("%ejc_dv%")
+	!Global("EJwd%ejc_ind%","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJwd%ejc_ind%","GLOBAL",1)
+END
+IF
+	Global("EJwd%ejc_ind%","GLOBAL",1)
+	Global("EJRESD","GLOBAL",1)
+	InParty("%ejc_dv%")
+	!Dead("%ejc_dv%")
+THEN
+	RESPONSE #100
+		SetGlobal("EJwd%ejc_ind%","GLOBAL",0)
+		SetGlobal("EJRESD","GLOBAL",0)
+		SetGlobal("EJRDs%ejc_ind%_1","GLOBAL",0)
+		SetGlobal("EJRDs%ejc_ind%_2","GLOBAL",0)
+		SetGlobal("EJRDs%ejc_ind%_3","GLOBAL",0)
+		SetGlobal("EJRDs%ejc_ind%_4","GLOBAL",0)
+		SetGlobal("EJRDs%ejc_ind%_5","GLOBAL",0)
+		ApplySpellRES("EJRDR1","%ejc_dv%")
+		ApplySpellRES("EJRDR2","%ejc_dv%")
+		ApplySpellRES("EJRDR3","%ejc_dv%")
+		ApplySpellRES("EJRDR4","%ejc_dv%")
+		ApplySpellRES("EJRDR5","%ejc_dv%")
+END
+IF
+	Global("EJwd%ejc_ind%","GLOBAL",1)
+	Global("EJRAISED","GLOBAL",1)
+	InParty("%ejc_dv%")
+	!Dead("%ejc_dv%")
+THEN
+	RESPONSE #100
+		SetGlobal("EJwd%ejc_ind%","GLOBAL",0)
+		SetGlobal("EJRAISED","GLOBAL",0)
+		SetGlobal("EJRDq%ejc_ind%","GLOBAL",1)
+END
+IF
+	Global("EJwd%ejc_ind%","GLOBAL",1)
+	InParty("%ejc_dv%")
+	!Dead("%ejc_dv%")
+THEN
+	RESPONSE #100
+		SetGlobal("EJwd%ejc_ind%","GLOBAL",0)
+END~~~~~
+			// Stack manager: EJRDq<ind> = 1 asks for one more -1 CON stack.
+			OUTER_FOR (ejrd_j = 1; ejrd_j <= 5; ++ejrd_j) BEGIN
+				APPEND_OUTER ~weidu_external/npc-bodies/ejcon.baf~ ~~~~~
+IF
+	Global("EJRDq%ejc_ind%","GLOBAL",1)
+	Global("EJRDs%ejc_ind%_%ejrd_j%","GLOBAL",0)
+	InParty("%ejc_dv%")
+	!Dead("%ejc_dv%")
+THEN
+	RESPONSE #100
+		SetGlobal("EJRDq%ejc_ind%","GLOBAL",0)
+		SetGlobal("EJRDs%ejc_ind%_%ejrd_j%","GLOBAL",1)
+		SetGlobalTimer("EJRDt%ejc_ind%_%ejrd_j%","GLOBAL",100800)
+		ApplySpellRES("EJRDC%ejrd_j%","%ejc_dv%")
+		DisplayStringHead("%ejc_dv%",%ejc_constr%)
+END~~~~~
+			END
+			APPEND_OUTER ~weidu_external/npc-bodies/ejcon.baf~ ~~~~~
+IF
+	Global("EJRDq%ejc_ind%","GLOBAL",1)
+	InParty("%ejc_dv%")
+	!Dead("%ejc_dv%")
+THEN
+	RESPONSE #100
+		SetGlobal("EJRDq%ejc_ind%","GLOBAL",0)
+END~~~~~
+			OUTER_FOR (ejrd_j = 1; ejrd_j <= 5; ++ejrd_j) BEGIN
+				APPEND_OUTER ~weidu_external/npc-bodies/ejcon.baf~ ~~~~~
+IF
+	Global("EJRDs%ejc_ind%_%ejrd_j%","GLOBAL",1)
+	GlobalTimerExpired("EJRDt%ejc_ind%_%ejrd_j%","GLOBAL")
+	!Dead("%ejc_dv%")
+THEN
+	RESPONSE #100
+		SetGlobal("EJRDs%ejc_ind%_%ejrd_j%","GLOBAL",0)
+		ApplySpellRES("EJRDR%ejrd_j%","%ejc_dv%")
+END~~~~~
+			END
+		END
 	END
-END	
+END
+APPEND_OUTER ~weidu_external/npc-bodies/ejcon.baf~ ~~~~~
+IF
+	OR(2)
+		Global("EJRAISED","GLOBAL",1)
+		Global("EJRESD","GLOBAL",1)
+	!Global("EJRAISEDa","GLOBAL",1)
+THEN
+	RESPONSE #100
+		SetGlobal("EJRAISEDa","GLOBAL",1)
+		SetGlobalTimer("EJRAISEDt","GLOBAL",30)
+END
+IF
+	Global("EJRAISEDa","GLOBAL",1)
+	GlobalTimerExpired("EJRAISEDt","GLOBAL")
+THEN
+	RESPONSE #100
+		SetGlobal("EJRAISED","GLOBAL",0)
+		SetGlobal("EJRESD","GLOBAL",0)
+		SetGlobal("EJRAISEDa","GLOBAL",0)
+END~~~~~
+ACTION_FOR_EACH ejc_baldur IN ~baldur~ ~bdbaldur~ ~baldur25~ BEGIN
+	ACTION_IF (FILE_EXISTS_IN_GAME ~%ejc_baldur%.bcs~) BEGIN
+		EXTEND_BOTTOM ~%ejc_baldur%.bcs~ ~weidu_external/npc-bodies/ejcon.baf~
+	END
+END
 
 BEGIN @300 // Progressive price for Raise Dead spell
 DESIGNATED 300
@@ -706,7 +996,11 @@ ACTION_IF !(FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~) BEGIN
 		END	
 		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
 			OUTER_SET skip = 1
-		END	
+		END
+		// Skip undead (race 125) - vampires and other undead don't drop bodies
+		ACTION_IF (race = 125) BEGIN
+			OUTER_SET skip = 1
+		END
 		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
 			COUNT_2DA_COLS cols
 			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
@@ -1024,22 +1318,14 @@ ACTION_FOR_EACH res_spell IN ~CLERIC_RAISE_DEAD~ ~CLERIC_MASS_RAISE_DEAD~ ~CLERI
 		BUT_ONLY
 	END
 END	
-ACTION_FOR_EACH res_spell IN  ~SPJA01~ BEGIN
+ACTION_FOR_EACH res_spell IN  ~SPJA01~ ~spwish10~ BEGIN
 	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
 		COPY_EXISTING ~%res_spell%.SPL~ ~override~
 			READ_STRREF 0x50 ~raise~
-			SAY 0x50 @10
-		BUT_ONLY
-	END
-END	
-ACTION_FOR_EACH res_spell IN  ~spwish10~ BEGIN
-	ACTION_IF FILE_EXISTS_IN_GAME  ~%res_spell%.spl~ BEGIN
-		COPY_EXISTING ~%res_spell%.SPL~ ~override~
-			READ_STRREF 0x50 ~res~
 			SAY 0x50 @11
 		BUT_ONLY
 	END
-END	
+END
 LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
 OUTER_TEXT_SPRINT resurrection ~%spell_res%~
 COPY_EXISTING ~%resurrection%.spl~ ~override~
@@ -1269,7 +1555,11 @@ ACTION_IF !(FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~) BEGIN
 		END	
 		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
 			OUTER_SET skip = 1
-		END	
+		END
+		// Skip undead (race 125) - vampires and other undead don't drop bodies
+		ACTION_IF (race = 125) BEGIN
+			OUTER_SET skip = 1
+		END
 		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
 			COUNT_2DA_COLS cols
 			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
@@ -1484,14 +1774,12 @@ END~
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
 				
+		COPY_EXISTING ~spwish10.spl~ ~override~ 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %noraiseprot% END 
+				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %raiseprot% END
+				
 		LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~CLERIC_RESURRECTION~  RET spell_res END
 			COPY_EXISTING ~%spell_res%.spl~ ~override~
-				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %revaliveprot% END
-				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revdeadprot% END
-				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter2 = EVAL %aliveprot% parameter1 = 0 parameter2 = EVAL %revaliveprot% END
-				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter2 = EVAL %deadprot% parameter1 = 0 parameter2 = EVAL %revdeadprot% END
-
-		COPY_EXISTING ~spwish10.spl~ ~override~
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter1 = 3 match_parameter2 = 113 parameter1 = 0 parameter2 = EVAL %revaliveprot% END
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 326 match_parameter1 = 3 match_parameter2 = 103 parameter1 = 0 parameter2 = EVAL %revdeadprot% END
 				LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 324 match_parameter2 = EVAL %aliveprot% parameter1 = 0 parameter2 = EVAL %revaliveprot% END
@@ -1506,6 +1794,8 @@ END~
 
 		// *** NEW: remove the permanent -1 CON from Revivify’s copy of Raise Dead ***
 		LPF ALTER_EFFECT INT_VAR match_opcode = 10 match_parameter1 = (0 - 1) match_parameter2 = 0 parameter1 = 0 END
+		// The CON penalty is now triggered by the EJRAISED flag (see Component 200); remove it too.
+		LPF DELETE_EFFECT INT_VAR match_opcode = 265 STR_VAR match_resource = ~EJRAISED~ END
 
 		// ...rest of your existing ADD_SPELL_EFFECT calls...
 END
@@ -1700,7 +1990,11 @@ END
 		END	
 		ACTION_IF (~%script%~ STRING_EQUAL_CASE ~~) BEGIN
 			OUTER_SET skip = 1
-		END	
+		END
+		// Skip undead (race 125) - vampires and other undead don't drop bodies
+		ACTION_IF (race = 125) BEGIN
+			OUTER_SET skip = 1
+		END
 		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
 			COUNT_2DA_COLS cols
 			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
@@ -1744,123 +2038,683 @@ END */
 // =============================================================================
 // Component 600: Temple Resurrection of Fallen Companions
 // =============================================================================
-// Allows players to bring body items to temple priests for resurrection.
-// Non-decayed bodies (EJB%ind%a): Raise Dead (5000 gp)
-// Decayed bodies (EJB%ind%b): Resurrection (10,000 gp)
-//
-// QQQQ placeholder approach (v25100 compatible):
-// 1. Empty heredocs create empty D files at parse time
-// 2. OUTER_SPRINT builds content with QQQQ instead of ~ (avoids ~ delimiter conflict)
-// 3. APPEND_OUTER writes the content to the file
-// 4. REPLACE_TEXTUALLY replaces QQQQ with ~ using %126%
-// 5. COMPILE the final D file
-//
-// Requires: Component 100 (main body system) + Component 400 or 500 (for NPCbods.2da)
-// =============================================================================
-
 BEGIN @600 // Temple Resurrection of Fallen Companions
 DESIGNATED 600
 LABEL ~NPC_BODIES_TEMPLE_RESURRECTION~
-REQUIRE_COMPONENT ~npc-bodies.tp2~ "100" "Requires main component to be installed"
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 100 ~Requires main component~
+// Chunked/disintegrated companions are only rebuilt by Stratagems' "Revised
+// handling of death effects" (4130), so this component installs only after it.
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects) to be installed first. If you also use Spell Revisions, see the Stratagems compatibility patch in the NPC Bodies README.~
 
-ACTION_IF !(MOD_IS_INSTALLED "npc-bodies.tp2" 400) && !(MOD_IS_INSTALLED "npc-bodies.tp2" 500) BEGIN
-	FAIL @620
+// -----------------------------------------------------------------------------
+// Dynamically detect temple/priest NPCs across the WHOLE installed game
+// (base game + EET-merged BG1/SoD/BG2 + any other installed NPC/content mods)
+// instead of a hardcoded 13-name resref list.
+//
+// Heuristic: any creature resource that (a) is single-classed Cleric per
+// CLASS.IDS, (b) is not hostile (EA <= 30 on EA.IDS, i.e. not an enemy
+// faction), and (c) has its own same-resref .DLG file (so it's a nameable,
+// talkable NPC and not bare monster filler) is treated as a candidate
+// temple priest and gets the "bring back a fallen companion" reply appended
+// to its greeting state.
+//
+// This is a heuristic, not a certainty. It will likely miss Cleric/Ranger,
+// Cleric/Mage, Cleric/Thief and Fighter/Cleric multiclass priests (they
+// carry a different, combined CLASS.IDS value) and it may flag a background
+// Cleric NPC that has no actual temple/store attached. Both are worth
+// checking for in-game before treating this as final.
+// -----------------------------------------------------------------------------
+// Detected priests are stored as a small 2DA (one resref per row) instead of
+// one big space-joined string. ACTION_FOR_EACH's IN clause does NOT split a
+// %variable%-substituted string into separate items -- it was silently
+// treating the whole multi-hundred-name blob as a single (useless) list
+// entry, so the per-priest loop below never matched anything and no dialogue
+// was ever generated even though the scan itself was working. Reusing the
+// 2DA read/count pattern already used for NPCbods.2da elsewhere in this file
+// avoids that problem entirely.
+<<<<<<<< npc-inline/ejt_priests.2da
+2DA V1.0
+RESREF
+0	#
+>>>>>>>>
+COPY ~npc-inline/ejt_priests.2da~ ~weidu_external/npc-bodies/ejt_priests.2da~
+OUTER_SET ejt_priest_count = 0
+
+// CLASSMSK.IDS does not exist as a real resource in this game (confirmed via
+// install log: "Resource [CLASSMSK.IDS] not found"), so multiclass Clerics are
+// matched directly against every Cleric-involving CLASS.IDS entry instead of a
+// bitmask. Values below confirmed directly from this install's own class.ids.
+OUTER_SET ejt_cleric_class = IDS_OF_SYMBOL (class CLERIC)
+OUTER_SET ejt_fighter_cleric = IDS_OF_SYMBOL (class FIGHTER_CLERIC)
+OUTER_SET ejt_cleric_mage = IDS_OF_SYMBOL (class CLERIC_MAGE)
+OUTER_SET ejt_cleric_thief = IDS_OF_SYMBOL (class CLERIC_THIEF)
+OUTER_SET ejt_fighter_mage_cleric = IDS_OF_SYMBOL (class FIGHTER_MAGE_CLERIC)
+OUTER_SET ejt_cleric_ranger = IDS_OF_SYMBOL (class CLERIC_RANGER)
+COPY_EXISTING_REGEXP ~.+\.cre~ ~override~
+	READ_BYTE 0x270 ejt_ea
+	READ_BYTE 0x273 ejt_class
+	PATCH_IF (ejt_ea < 200) AND ((ejt_class = ejt_cleric_class) OR (ejt_class = ejt_fighter_cleric) OR (ejt_class = ejt_cleric_mage) OR (ejt_class = ejt_cleric_thief) OR (ejt_class = ejt_fighter_mage_cleric) OR (ejt_class = ejt_cleric_ranger)) BEGIN
+		SPRINT ejt_cand_cre ~%SOURCE_RES%~
+		INNER_ACTION BEGIN
+			ACTION_IF FILE_EXISTS_IN_GAME ~%ejt_cand_cre%.dlg~ BEGIN
+				OUTER_SET ejt_priest_count += 1
+				APPEND_OUTER ~weidu_external/npc-bodies/ejt_priests.2da~ ~%ejt_priest_count%	%ejt_cand_cre%~
+				// Mirrors JOINABLE_NPC_ARRAY in misc_functions.tpa: an associative
+				// array keyed by resref, so the single-pass area scan below can do
+				// an O(1) membership check instead of re-scanning the whole game
+				// once per priest.
+				ACTION_DEFINE_ASSOCIATIVE_ARRAY EJT_PRIEST_SET BEGIN ~%ejt_cand_cre%~ => ~~ END
+			END
+		END
+	END
+BUT_ONLY
+
+// -----------------------------------------------------------------------------
+// TEMPORARY DIAGNOSTIC -- writes what the detection scan found to a plain text
+// file so we can see it without guessing. Safe to delete once Component 600 is
+// confirmed working: it has no effect on gameplay, it just leaves a text file
+// in weidu_external/npc-bodies/.
+// -----------------------------------------------------------------------------
+OUTER_SPRINT ejt_cleric_class_str ~%ejt_cleric_class%~
+OUTER_SPRINT ejt_priest_count_str ~%ejt_priest_count%~
+<<<<<<<< npc-inline/ejt_debug.txt
+NPC Bodies Component 600 diagnostic dump
+>>>>>>>>
+COPY ~npc-inline/ejt_debug.txt~ ~weidu_external/npc-bodies/ejt_debug.txt~
+APPEND_OUTER ~weidu_external/npc-bodies/ejt_debug.txt~ ~cleric_class_value=%ejt_cleric_class_str%~
+APPEND_OUTER ~weidu_external/npc-bodies/ejt_debug.txt~ ~priest_count=%ejt_priest_count_str%~
+
+// -----------------------------------------------------------------------------
+// Determine each detected priest's home area, in ONE single pass over every
+// area in the game (also keeping a full diagnostic dump of every placed
+// actor along the way). This used to re-run a full .are rescan once PER
+// DETECTED PRIEST (nested inside the priest loop) -- besides being extremely
+// slow (hundreds of full-game rescans), it was directly confirmed to produce
+// wrong results: a one-off single-pass version of this same scan correctly
+// found KELDDA's real area, while the per-priest-repeated version kept
+// reporting NONE for him using the identical read. Doing it once here, using
+// the same associative-array cross-referencing already proven elsewhere in
+// this codebase (JOINABLE_NPC_ARRAY in misc_functions.tpa, consumed via
+// ACTION_PHP_EACH), fixes both the performance problem and the correctness
+// problem at once. EJT_PRIEST_SET (built above, alongside ejt_priests.2da)
+// gives an O(1) membership check per actor instead of a re-scan per priest.
+// This is required in the first place because the actual relocation action
+// -- MoveGlobal, confirmed via the Wild Mage Editions mod's own "Hornung's
+// Random Dispatcher" implementation (wildmage/wild_spells/baf/wm_disp.baf)
+// -- needs a literal, compile-time-known destination area string. There is
+// no way to compute "wherever the player currently is" at runtime for this
+// action; MoveBetweenAreas(Player1), tried earlier, does not work for
+// exactly this reason (type mismatch: it wants a literal string, not an
+// object).
+// ARE header: Actors offset @ 0x54 (long), # actors @ 0x58 (short).
+// Actor entry: 272 bytes each; CRE file resref @ +128 (8 bytes).
+// -----------------------------------------------------------------------------
+<<<<<<<< npc-inline/ejt_all_actors.txt
+CRE	AREA	POS
+>>>>>>>>
+COPY ~npc-inline/ejt_all_actors.txt~ ~weidu_external/npc-bodies/ejt_all_actors.txt~
+COPY_EXISTING_REGEXP ~.+\.are~ ~override~
+	READ_LONG 0x54 ejt_actors_offset
+	READ_SHORT 0x58 ejt_num_actors
+	FOR (ejt_actor_i = 0; ejt_actor_i < ejt_num_actors; ++ejt_actor_i) BEGIN
+		READ_ASCII (ejt_actors_offset + (ejt_actor_i * 272) + 128) ejt_actor_cre (8) NULL
+		// Position: X @ +32, Y @ +34 (2 bytes each) -- confirmed via
+		// NearInfinity's Actor.java (ARE_ACTOR_POS_X/ARE_ACTOR_POS_Y).
+		// [1000.1000], copied from the Wild Mage Editions example, was never
+		// actually verified as a walkable point for every area -- it's a
+		// reasonable guess for a big outdoor map but likely invalid inside a
+		// small temple interior. Using the priest's own real position instead
+		// guarantees a valid, walkable destination, since he's standing there.
+		READ_SHORT (ejt_actors_offset + (ejt_actor_i * 272) + 32) ejt_actor_x
+		READ_SHORT (ejt_actors_offset + (ejt_actor_i * 272) + 34) ejt_actor_y
+		SPRINT ejt_actor_cre_s ~%ejt_actor_cre%~
+		SPRINT ejt_actor_area_s ~%SOURCE_RES%~
+		SPRINT ejt_actor_pos_s ~%ejt_actor_x%.%ejt_actor_y%~
+		INNER_ACTION BEGIN
+			APPEND_OUTER ~weidu_external/npc-bodies/ejt_all_actors.txt~ ~%ejt_actor_cre_s%	%ejt_actor_area_s%	%ejt_actor_pos_s%~
+		END
+		PATCH_IF VARIABLE_IS_SET $EJT_PRIEST_SET(~%ejt_actor_cre%~) BEGIN
+			PATCH_IF NOT VARIABLE_IS_SET $EJT_PRIEST_AREA(~%ejt_actor_cre%~) BEGIN
+				// Value is the fully pre-formatted MoveGlobal argument list
+				// (area, target object, and the priest's own real point) so
+				// the generation loop below can drop it straight into
+				// MoveGlobal(...) with a single placeholder.
+				// NOTE ON THE MakeGlobal/MoveGlobal vs LeaveAreaLUA HISTORY:
+				// per the Wild Mage Editions source (wm_disp.baf line 191:
+				// "For party members, uses LeaveAreaLUA; for NPCs, uses
+				// MoveGlobal with MakeGlobal"), MakeGlobal+MoveGlobal is the
+				// CORRECT pair for an object the engine does not currently
+				// track as party-affiliated -- which, under the redesigned
+				// Component 600 flow (see ejtemple-single.d), is exactly
+				// what this companion is at the moment of relocation: she is
+				// revived by directly casting Raise Dead/Resurrection on her
+				// BEFORE she ever rejoins the party, so JoinParty() only
+				// ever runs on an ALIVE creature (the well-supported case
+				// used everywhere else in the game). Switching to
+				// LeaveAreaLUA earlier did not fix the crash (confirmed via
+				// two symbolicated dumps with an identical failure
+				// signature); disassembly of the actual GroupSetTarget call
+				// site traced the null pointer to a per-party-member
+				// formation record that's very plausibly only initialized
+				// when JoinParty() runs on a living creature -- not to
+				// which relocation call precedes it. Reverted to
+				// MakeGlobal/MoveGlobal accordingly, now that it's being
+				// used on a genuinely non-party object as intended.
+				DEFINE_ASSOCIATIVE_ARRAY EJT_PRIEST_AREA BEGIN ~%ejt_actor_cre%~ => ~"%SOURCE_RES%",Myself,[%ejt_actor_x%.%ejt_actor_y%]~ END
+			END
+		END
+	END
+BUT_ONLY
+
+// TEMPORARY DIAGNOSTIC -- plain-text dump of the final priest->MoveGlobal-args
+// mapping built above, so it can be checked directly instead of guessed at.
+// Safe to delete once Component 600 is confirmed fully working.
+<<<<<<<< npc-inline/ejt_priest_areas.txt
+PRIEST	MOVEGLOBAL_ARGS
+>>>>>>>>
+COPY ~npc-inline/ejt_priest_areas.txt~ ~weidu_external/npc-bodies/ejt_priest_areas.txt~
+ACTION_PHP_EACH EJT_PRIEST_AREA AS ejt_dump_priest => ejt_dump_area BEGIN
+	APPEND_OUTER ~weidu_external/npc-bodies/ejt_priest_areas.txt~ ~%ejt_dump_priest%	%ejt_dump_area%~
 END
 
-ACTION_FOR_EACH priest_dlg IN ~ellendel~ ~pochra~ ~nalin~ ~poghman4~ ~tremai~ ~galile~ ~keldda~ ~agnasi~ ~doghma~ ~ecolt~ ~ameral~ ~hgnya01~ ~dempri~ BEGIN
-	ACTION_IF FILE_EXISTS_IN_GAME ~%priest_dlg%.dlg~ BEGIN
-
-		// ==========================================================================
-		// Read NPCbods.2da and build D files entirely in patch context
-		// Uses QQQQ placeholders for ~, then replaces QQQQ with ~ via %% delimiters
-		// ==========================================================================
-		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
-			COUNT_2DA_COLS cols
-			READ_2DA_ENTRIES_NOW ~r2en_bods~ cols
-			SET ej_npc_count = r2en_bods
-
-			// APPEND header
-			INNER_ACTION BEGIN
-				OUTER_SPRINT ej_line ~APPEND QQQQ%priest_dlg%QQQQ
-~
-				APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_line%~
-			END
-
-			// State blocks + reply blocks for each NPC
-			FOR (row = 1; row < r2en_bods; ++row) BEGIN
-				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 0 ind
-				READ_2DA_ENTRY_FORMER ~r2en_bods~ row 2 cre
-				INNER_PATCH cre BEGIN
-					REPLACE_TEXTUALLY ~\\.CRE~ ~~
-				END
-
-				// Raise state
-				INNER_ACTION BEGIN
-					OUTER_SPRINT ej_block ~IF QQQQ THEN BEGIN ejtemple_raise_%ind%
-  SAY @602
-  IF QQQQPartyGoldGT(4999)QQQQ THEN REPLY @601 DO QQQQ
-    TakePartyItem("EJB%ind%a")
-    DestroyItem("EJB%ind%a")
-    TakePartyGold(5000)
-    SetGlobal("EJdead%ind%","GLOBAL",0)
-    CreateCreatureObject("%cre%",Myself,0,0,0)
-  QQQQ GOTO ejtemple_done_%priest_dlg%
-  IF QQQQ THEN REPLY @607 GOTO ejtemple_no_gold_%priest_dlg%
-END~
-					APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_block%~
-				END
-
-				// Resurrect state
-				INNER_ACTION BEGIN
-					OUTER_SPRINT ej_block ~IF QQQQ THEN BEGIN ejtemple_resurrect_%ind%
-  SAY @605
-  IF QQQQPartyGoldGT(9999)QQQQ THEN REPLY @601 DO QQQQ
-    TakePartyItem("EJB%ind%b")
-    DestroyItem("EJB%ind%b")
-    TakePartyGold(10000)
-    SetGlobal("EJdead%ind%","GLOBAL",0)
-    CreateCreatureObject("%cre%",Myself,0,0,0)
-  QQQQ GOTO ejtemple_done_%priest_dlg%
-  IF QQQQ THEN REPLY @607 GOTO ejtemple_no_gold_%priest_dlg%
-END~
-					APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_block%~
-				END
-
-				// Reply blocks
-				INNER_ACTION BEGIN
-					OUTER_SPRINT ej_block ~EXTEND_BOTTOM QQQQ%priest_dlg%QQQQ QQQQ0QQQQ
-  IF QQQQPartyHasItem("EJB%ind%a")QQQQ THEN REPLY @601 GOTO ejtemple_raise_%ind%
-  IF QQQQPartyHasItem("EJB%ind%b")QQQQ THEN REPLY @601 GOTO ejtemple_resurrect_%ind%
-END~
-					APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~ ~%ej_block%~
-				END
-			END
-
-			// Done and No-Gold states + END
-			INNER_ACTION BEGIN
-				OUTER_SPRINT ej_block ~IF QQQQ THEN BEGIN ejtemple_done_%priest_dlg%
-  SAY @608
-  IF QQQQ THEN EXIT
-END
-IF QQQQ THEN BEGIN ejtemple_no_gold_%priest_dlg%
-  SAY @610
-  IF QQQQ THEN EXIT
-END
-END~
-				APPEND_OUTER ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~%ej_block%~
-			END
-
-		// Replace QQQQ with ~ using %% delimiters in REPLACE_TEXTUALLY
-		COPY_EXISTING ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~ ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~
-			REPLACE_TEXTUALLY ~QQQQ~ %%~%%
+// -----------------------------------------------------------------------------
+// Wish / genie: bring back a DISMISSED (out-of-party) dead companion for
+// free, framed as convincing the genie Wish summons. Per the user's
+// explicit design: Wish is meant to supersede Raise Dead/Resurrection
+// entirely -- no gold cost, no CON penalty, no permanent-death exclusion --
+// and per later user feedback, this needs to be RELIABLY reachable (for
+// testing, and just generally), not gated behind rare random odds.
+//
+// REDESIGNED after live testing: the original version of this feature built
+// a whole parallel creature (EJGENIE) + script + cloned spell (SPWISH41) +
+// wish.2da roll-table entry from scratch. The user then pointed out (a) 11
+// Wish casts never surfaced it (consistent with it never having actually
+// been installed yet at the time -- but also with wish.2da odds simply
+// being bad) and (b) it should just always be available rather than random.
+// Investigating the user-supplied XPexchange mod's own tp2 revealed BG2:EE
+// ALREADY ships two fully scripted "talk to a genie" creatures for Wish --
+// WISH01.CRE and WISH02.CRE -- each with its own real dialogue (resref
+// stored at CRE offset 0x2CC; confirmed via XPexchange's own
+// COPY_EXISTING+READ_ASCII 0x2cc, and confirmed by direct inspection here
+// that WISH01's and WISH02's dialogues are NOT the same resref, so both are
+// read dynamically below rather than guessed/hardcoded). Extending those
+// two real dialogues -- the exact same EXTEND_BOTTOM technique already
+// used for temple priests -- is simpler and more authentic than the
+// from-scratch approach, and an extra unconditional Summon Creature effect
+// on Wish's own spell (WIZARD_WISH) guarantees a genie appears on every
+// single cast, regardless of the normal random roll.
+ACTION_IF FILE_EXISTS_IN_GAME ~WISH01.cre~ BEGIN
+	// BUGFIX: a bare "RET ejt_wish_res" here failed to install with
+	// "Unknown return value: ejt_wish_res". Every other call to
+	// RES_NUM_OF_SPELL_NAME in this entire file (17 of them) uses bare
+	// "RET spell_res" and none rename it -- that's apparently not a style
+	// choice but a real constraint on this particular function/RET
+	// mechanism. Rather than risk a second failed install guessing at
+	// alias syntax, this just follows the same bare "RET spell_res"
+	// convention as every other call site, then immediately copies the
+	// result into our own variable before anything else that reuses
+	// "spell_res" later can overwrite it.
+	LAF RES_NUM_OF_SPELL_NAME STR_VAR spell_name = ~WIZARD_WISH~ RET spell_res END
+	OUTER_SPRINT ejt_wish_res ~%spell_res%~
+	ACTION_IF FILE_EXISTS_IN_GAME ~%ejt_wish_res%.spl~ BEGIN
+		COPY_EXISTING ~%ejt_wish_res%.spl~ ~override~
+			// Values match this mod's other summon-a-helper effect
+			// (previously used for the scrapped EJGENIE, itself copied from
+			// Stratagems' proven dw#diamo pattern) -- WISH01 is used
+			// completely unmodified here (not cloned), so its own already-
+			// working vanilla script/dialogue-triggering behavior is
+			// trusted to do the rest exactly as it always has.
+			// BUGFIX: removed the extra opcode-67 summon of WISH01; vanilla Wish already summons the genie, so it produced two per cast.
 		BUT_ONLY
-		COPY_EXISTING ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~ ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~
-			REPLACE_TEXTUALLY ~QQQQ~ %%~%%
+	END
+
+	// Read each genie's own dialogue resref dynamically (see comment above
+	// on why this can't be hardcoded). Uses the same READ-then-SPRINT-then-
+	// INNER_ACTION dance already used elsewhere in this file to move a
+	// COPY_EXISTING-scoped value out to OUTER scope.
+	COPY_EXISTING ~WISH01.cre~ ~override~
+		READ_ASCII 0x2cc ejt_wishdlg1_r
+		SPRINT ejt_wishdlg1_s ~%ejt_wishdlg1_r%~
+		INNER_ACTION BEGIN
+			OUTER_SPRINT ejt_wishdlg1_str ~%ejt_wishdlg1_s%~
+		END
+	BUT_ONLY
+
+	OUTER_SET ejt_have_wishdlg2 = 0
+	ACTION_IF FILE_EXISTS_IN_GAME ~WISH02.cre~ BEGIN
+		COPY_EXISTING ~WISH02.cre~ ~override~
+			READ_ASCII 0x2cc ejt_wishdlg2_r
+			SPRINT ejt_wishdlg2_s ~%ejt_wishdlg2_r%~
+			INNER_ACTION BEGIN
+				OUTER_SPRINT ejt_wishdlg2_str ~%ejt_wishdlg2_s%~
+			END
 		BUT_ONLY
-
-		COMPILE ~weidu_external/npc-bodies/ejtemple_states_%priest_dlg%.d~
-		COMPILE ~weidu_external/npc-bodies/ejtemple_replies_%priest_dlg%.d~
-
+		// Only treat WISH02 as a second, separate target if its dialogue
+		// resref actually differs from WISH01's -- no point extending the
+		// same dialogue file twice.
+		ACTION_IF NOT (~%ejt_wishdlg1_str%~ STRING_EQUAL_CASE ~%ejt_wishdlg2_str%~) BEGIN
+			OUTER_SET ejt_have_wishdlg2 = 1
+		END
 	END
 END
 
+// Per-index D files, generated for every companion NPC Bodies has ever
+// tracked a death for, matched against every detected priest above.
+// No longer gated on the body item existing: a companion with no body at
+// all must still be recoverable via the no-penalty Resurrection path (see
+// ejtemple-single.d), so every row in NPCbods.2da gets a dialogue entry.
+//
+// NOTE ON SCALE: with the scan now matching hundreds of real priests across
+// the whole EET world instead of 13 hardcoded ones, this generates and
+// compiles one small .d file per (priest, companion) pair -- potentially
+// tens of thousands of tiny compiles. That is expected to make this specific
+// component take noticeably longer to install than before. If that turns out
+// to be impractical, the next step is collapsing this to one .d file per
+// priest (looping companions inside it) instead of one file per pair.
+ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~ BEGIN
+	COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+		COUNT_2DA_ROWS 9 ejt_total_rows
+	// BUGFIX (duplicate options): some companions appear under more than one
+	// INDEX with the same display name (Jaheira: index 65 dv IDIOT01, and index
+	// 67 dv JAHEIRA). Each index generated its own temple/genie reply, so the
+	// player saw two "Resurrection" lines, one targeting the wrong script name
+	// (did nothing). Pre-pass: record the highest index per display name; only
+	// that index is generated below.
+	OUTER_FOR (ejt_pre = 1; ejt_pre < ejt_total_rows; ++ejt_pre) BEGIN
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			READ_2DA_ENTRY ejt_pre 0 9 ejt_pre_ind
+			READ_2DA_ENTRY ejt_pre 3 9 ejt_pre_name
+		OUTER_SPRINT ejt_pre_name_s ~%ejt_pre_name%~
+		ACTION_IF NOT VARIABLE_IS_SET $EJT_NAME_MAX(~%ejt_pre_name_s%~) BEGIN
+			OUTER_SET $EJT_NAME_MAX(~%ejt_pre_name_s%~) = ejt_pre_ind
+		END ELSE BEGIN
+			ACTION_IF (ejt_pre_ind > $EJT_NAME_MAX(~%ejt_pre_name_s%~)) BEGIN
+				OUTER_SET $EJT_NAME_MAX(~%ejt_pre_name_s%~) = ejt_pre_ind
+			END
+		END
+	END
+	// Iterate through every real row (row 0 is the column-header placeholder row)
+	OUTER_FOR (ejt_row = 1; ejt_row < ejt_total_rows; ++ejt_row) BEGIN
+		COPY ~weidu_external/npc-bodies/NPCbods.2da~ ~weidu_external/npc-bodies/NPCbods.2da~
+			READ_2DA_ENTRY ejt_row 0 9 ejt_ind
+			READ_2DA_ENTRY ejt_row 1 9 ejt_dv
+			READ_2DA_ENTRY ejt_row 2 9 ejt_cre
+			READ_2DA_ENTRY ejt_row 3 9 ejt_name
+		OUTER_SPRINT ejt_ind_str ~%ejt_ind%~
+		OUTER_SPRINT ejt_dv_str ~%ejt_dv%~
+		OUTER_SPRINT ejt_cre_str ~%ejt_cre%~
+		OUTER_SPRINT ejt_name_str ~%ejt_name%~
+		OUTER_INNER_PATCH_SAVE ejt_name_str ~%ejt_name_str%~ BEGIN
+			REPLACE_TEXTUALLY ~_~ ~ ~
+		END
+		// Display name for the Wish genie's line. Some joinable CREs carry a
+		// placeholder long name rather than the companion's own (Branwen's
+		// recruitable CRE is the petrified "Statue"). In that case, build the
+		// name from the death variable instead: BRANWEN -> Branwen.
+		ACTION_IF (~%ejt_name_str%~ STRING_EQUAL_CASE ~Statue~) BEGIN
+			OUTER_SPRINT ejt_name_str ~%ejt_dv%~
+			OUTER_INNER_PATCH_SAVE ejt_name_str ~%ejt_name_str%~ BEGIN
+				REPLACE_TEXTUALLY ~[_0-9]*$~ ~~
+			END
+			ACTION_TO_LOWER ejt_name_str
+			OUTER_INNER_PATCH_SAVE ejt_name_str ~%ejt_name_str%~ BEGIN
+				REPLACE_EVALUATE ~^\(.\)~ BEGIN TO_UPPER MATCH1 END ~%MATCH1%~
+			END
+		END
+
+		// Gold cost for the new direct Raise Dead / Resurrection options
+		// (see ejtemple-single.d), computed from this companion's OWN
+		// creature file so pricing follows their actual level rather than a
+		// flat fee. Level offsets confirmed via NearInfinity's
+		// CreResource.java: CRE_LEVEL_FIRST_CLASS/SECOND/THIRD sit at
+		// readOther()'s offset+556/557/558, and readOther's "offset" param
+		// is fed in AFTER the reader consumes the 8-byte "CRE V1.0"
+		// signature+version (confirmed via the same method's own
+		// "offset += 8" just before calling readOther) -- so the true
+		// absolute file offsets are 556+8=564=0x234, 565=0x235, 566=0x236.
+		// BUGFIX: this previously read 0x22C/0x22D/0x22E (8 bytes too
+		// early), silently pulling level data from the wrong field the
+		// whole time this component existed. Cross-checked against three
+		// other fields already read elsewhere in this exact file using the
+		// same "offset+8" basis and known to work correctly: Allegiance/EA
+		// at absolute 0x270, Class at 0x273 (both already used, and
+		// correct, in the priest-detection scan above), and the genie's
+		// own Override Script field at 0x248 (see the genie setup just
+		// above this loop, and the pre-existing WRITE_ASCII 0x248 used for
+		// EJdro%ind% further down this file) -- all consistent with the
+		// same "code offset + 8" rule, confirming 0x234/0x235/0x236 rather
+		// than the old 0x22C/0x22D/0x22E.
+		// Formula matches Component 300's RAISDEAD.2DA: level x 1000gp,
+		// clamped to that table's 1-40 range. Resurrection is priced at
+		// double the Raise Dead rate -- this mod's own earlier design notes
+		// (comp600.txt / EJTEMPLE_D.d) used a flat 5000/10000 2:1 ratio, so
+		// this keeps that same ratio while making both figures level-scaled
+		// instead of flat. Easy to change the multiplier later if wanted.
+		OUTER_SET ejt_lvl1 = 0
+		OUTER_SET ejt_lvl2 = 0
+		OUTER_SET ejt_lvl3 = 0
+		// ejt_anim: this companion's real Animation ID (CRE V1.0 offset 0x28,
+		// 2 bytes -- confirmed via NearInfinity's CreResource.java: addField
+		// for CRE_ANIMATION sits at readOther()'s offset+32, and per the same
+		// "code offset + 8 = true file offset" rule already established for
+		// the level fields just below, 32+8=0x28). Read from this companion's
+		// own real CRE file, so it's always her own correct, original
+		// appearance. CURRENTLY UNUSED: the Polymorph-based chunk fix this
+		// fed was dropped (see the EJRJN comment further below); the
+		// __ANIM__ substitutions in the .d generation are harmless no-ops.
+		OUTER_SET ejt_anim = 0
+		ACTION_IF FILE_EXISTS_IN_GAME ~%ejt_dv%.cre~ BEGIN
+			COPY_EXISTING ~%ejt_dv%.cre~ ~override~
+				READ_BYTE 0x234 ejt_lvl1_r
+				READ_BYTE 0x235 ejt_lvl2_r
+				READ_BYTE 0x236 ejt_lvl3_r
+				READ_SHORT 0x28 ejt_anim_r
+				SPRINT ejt_lvl1_s ~%ejt_lvl1_r%~
+				SPRINT ejt_lvl2_s ~%ejt_lvl2_r%~
+				SPRINT ejt_lvl3_s ~%ejt_lvl3_r%~
+				SPRINT ejt_anim_s ~%ejt_anim_r%~
+				INNER_ACTION BEGIN
+					OUTER_SET ejt_lvl1 = %ejt_lvl1_s%
+					OUTER_SET ejt_lvl2 = %ejt_lvl2_s%
+					OUTER_SET ejt_lvl3 = %ejt_lvl3_s%
+					OUTER_SET ejt_anim = %ejt_anim_s%
+				END
+			BUT_ONLY
+		END
+		// READ_SHORT reads a SIGNED 16-bit value, but Animation IDs are an
+		// UNSIGNED 16-bit ID space and commonly exceed 0x7FFF (many ordinary
+		// humanoid animations sit in the 0x6000-0xE000+ range) -- a signed
+		// read of such a value comes back negative (e.g. 0xC000 reads as
+		// -16384), and handing that straight to Polymorph's integer
+		// parameter would sign-extend it to a completely different 32-bit
+		// number, not the original unsigned ID. Correct it back to the true
+		// unsigned 16-bit value before using it anywhere.
+		ACTION_IF (ejt_anim < 0) BEGIN
+			OUTER_SET ejt_anim = ejt_anim + 65536
+		END
+		OUTER_SPRINT ejt_anim_str ~%ejt_anim%~
+		OUTER_SET ejt_lvl = ejt_lvl1
+		ACTION_IF (ejt_lvl2 > ejt_lvl) BEGIN OUTER_SET ejt_lvl = ejt_lvl2 END
+		ACTION_IF (ejt_lvl3 > ejt_lvl) BEGIN OUTER_SET ejt_lvl = ejt_lvl3 END
+		ACTION_IF (ejt_lvl < 1) BEGIN OUTER_SET ejt_lvl = 1 END
+		ACTION_IF (ejt_lvl > 40) BEGIN OUTER_SET ejt_lvl = 40 END
+		OUTER_SET ejt_raise_cost = ejt_lvl * 1000
+		OUTER_SET ejt_res_cost = ejt_lvl * 2000
+		OUTER_SET ejt_raise_cost_m1 = ejt_raise_cost - 1
+		OUTER_SET ejt_res_cost_m1 = ejt_res_cost - 1
+		OUTER_SPRINT ejt_raise_cost_str ~%ejt_raise_cost%~
+		OUTER_SPRINT ejt_res_cost_str ~%ejt_res_cost%~
+		OUTER_SPRINT ejt_raise_cost_m1_str ~%ejt_raise_cost_m1%~
+		OUTER_SPRINT ejt_res_cost_m1_str ~%ejt_res_cost_m1%~
+
+		// NPCbods.2da has one row per CRE-file variant a companion has ever
+		// used (e.g. Jaheira has separate BG1/SoD/BG2/ToB rows), all sharing
+		// the same index -- without this check the loop below would compile
+		// and EXTEND_BOTTOM the identical dialogue into the same priest's DLG
+		// once per variant, producing several duplicate copies of the same
+		// selectable line. Only process each index once.
+		OUTER_SPRINT ejt_name_key ~%ejt_name%~
+		OUTER_SET ejt_name_max = $EJT_NAME_MAX(~%ejt_name_key%~)
+		ACTION_IF (ejt_ind = ejt_name_max) AND (NOT VARIABLE_IS_SET $EJT_SEEN_INDEX(~%ejt_ind_str%~)) BEGIN
+		ACTION_DEFINE_ASSOCIATIVE_ARRAY EJT_SEEN_INDEX BEGIN ~%ejt_ind_str%~ => ~~ END
+
+		// Join-after-revival watcher, one per companion, shared by BOTH the
+		// temple-priest dialogue (ejtemple-single.d) and the Wish/genie
+		// dialogue (ejtgenie-single.d). See either file's comments for why
+		// this exists: a fixed Wait()+JoinParty() after ReallyForceSpellDead
+		// is a real race (live-testing-confirmed) that can reproduce the
+		// original null-pointer crash, silently fail to join her, or join
+		// her only for the engine to immediately kick her back out. This
+		// tiny placeholder (cloned from the same BODYDROP.CRE base as
+		// EJdro%ind%, but its own dedicated resref so none of EJdro's
+		// unrelated item-pickup/decay logic can interfere) just polls
+		// Global("EJRejoinPending%ind%") and !Dead("%dv%") every round,
+		// indefinitely, and only calls JoinParty() once that's genuinely
+		// true.
+		COPY ~npc-bodies/cre/BODYDROP.CRE~ ~override/EJRJN%ejt_ind_str%.cre~
+			WRITE_ASCII 0x280 ~EJRJN%ejt_ind_str%~
+			WRITE_ASCII 0x248 ~EJRJN%ejt_ind_str%~
+		<<<<<<<< npc-inline/EJRJN%ejt_ind_str%.baf
+		>>>>>>>>
+		COPY ~npc-inline/EJRJN%ejt_ind_str%.baf~ ~weidu_external/npc-bodies/EJRJN%ejt_ind_str%.baf~
+		// BUGFIX (chunked/permadeath revival), real cause found. Stratagems
+		// restores a chunked companion's body with the Resurrection spell
+		// itself: its resurrection.tpa sets opcode 32 (Raise dead, whose EE
+		// parameter 2 is "Restore creature animation?") to 1 on the
+		// Resurrection sub-spell (SPPR712A). A pure-Stratagems install
+		// (no NPC Bodies) was confirmed by the user to reconstruct a
+		// chunked Jaheira correctly with a plain Resurrection cast.
+		//
+		// That sub-spell is only applied when the target's GENERAL is DEAD
+		// (the spell's own SPLPROT checks are rows 103/113, "GENERAL = n"
+		// and "GENERAL != n"). This mod's scripts (baldurextend.baf) used to
+		// overwrite a dead companion's GENERAL with the custom EJNOBOD
+		// value whenever the party held no body item, which a chunked
+		// companion never has -- so the animation-restoring sub-spell was
+		// skipped for her, from a scroll, a Rod, or this watcher alike.
+		// (The earlier destroy-and-recreate and Polymorph attempts were
+		// both dropped: neither was how Stratagems does it.)
+		//
+		// Fixes: baldurextend.baf no longer sets EJNOBOD on a permanently
+		// dead companion, and this watcher sets GENERAL back to DEAD
+		// immediately before casting, so the real spell's own logic runs.
+		// The watcher dispatches the right revival spell (EJRevSpell%ind%:
+		// 1 = Raise Dead, 2 = Resurrection) and then polls for !Dead()
+		// before joining her.
+		APPEND_OUTER ~weidu_external/npc-bodies/EJRJN%ejt_ind_str%.baf~ ~
+			IF
+				Global("EJRejoinPending%ejt_ind_str%","GLOBAL",1)
+				!Global("EJRevived%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevSpell%ejt_ind_str%","GLOBAL",1)
+			THEN
+				RESPONSE #100
+					SetGlobal("EJRevived%ejt_ind_str%","GLOBAL",1)
+					ChangeGeneral("%ejt_dv_str%",DEAD)
+					ReallyForceSpellDead("%ejt_dv_str%",CLERIC_RAISE_DEAD)
+			END
+			IF
+				Global("EJRejoinPending%ejt_ind_str%","GLOBAL",1)
+				!Global("EJRevived%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevSpell%ejt_ind_str%","GLOBAL",2)
+			THEN
+				RESPONSE #100
+					SetGlobal("EJRevived%ejt_ind_str%","GLOBAL",1)
+					ChangeGeneral("%ejt_dv_str%",DEAD)
+					ReallyForceSpellDead("%ejt_dv_str%",CLERIC_RESURRECTION)
+			END
+			IF
+				Global("EJRejoinPending%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevived%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevSpell%ejt_ind_str%","GLOBAL",1)
+				!Dead("%ejt_dv_str%")
+			THEN
+				RESPONSE #100
+					SetGlobal("EJRevSpell%ejt_ind_str%","GLOBAL",3)
+					SetGlobal("EJRAISED","GLOBAL",0)
+					SetGlobal("EJwd%ejt_ind_str%","GLOBAL",0)
+					SetGlobal("EJRDq%ejt_ind_str%","GLOBAL",1)
+			END
+			IF
+				Global("EJRejoinPending%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevived%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevSpell%ejt_ind_str%","GLOBAL",2)
+				!Dead("%ejt_dv_str%")
+			THEN
+				RESPONSE #100
+					SetGlobal("EJRevSpell%ejt_ind_str%","GLOBAL",3)
+					SetGlobal("EJRESD","GLOBAL",0)
+					SetGlobal("EJRDs%ejt_ind_str%_1","GLOBAL",0)
+					SetGlobal("EJRDs%ejt_ind_str%_2","GLOBAL",0)
+					SetGlobal("EJRDs%ejt_ind_str%_3","GLOBAL",0)
+					SetGlobal("EJRDs%ejt_ind_str%_4","GLOBAL",0)
+					SetGlobal("EJRDs%ejt_ind_str%_5","GLOBAL",0)
+					ApplySpellRES("EJRDR1","%ejt_dv_str%")
+					ApplySpellRES("EJRDR2","%ejt_dv_str%")
+					ApplySpellRES("EJRDR3","%ejt_dv_str%")
+					ApplySpellRES("EJRDR4","%ejt_dv_str%")
+					ApplySpellRES("EJRDR5","%ejt_dv_str%")
+			END
+			IF
+				Global("EJRejoinPending%ejt_ind_str%","GLOBAL",1)
+				Global("EJRevived%ejt_ind_str%","GLOBAL",1)
+				!Dead("%ejt_dv_str%")
+			THEN
+				RESPONSE #100
+					SetGlobal("EJwd%ejt_ind_str%","GLOBAL",0)
+					SetGlobal("EJRejoinPending%ejt_ind_str%","GLOBAL",0)
+					SetGlobal("EJRevived%ejt_ind_str%","GLOBAL",0)
+					SetGlobal("EJRevSpell%ejt_ind_str%","GLOBAL",0)
+					SetGlobal("EJdead%ejt_ind_str%","GLOBAL",0)
+					TakePartyItem("EJB%ejt_ind_str%a")
+					DestroyItem("EJB%ejt_ind_str%a")
+					TakePartyItem("EJB%ejt_ind_str%b")
+					DestroyItem("EJB%ejt_ind_str%b")
+					ActionOverride("%ejt_dv_str%",JoinParty())
+					DestroySelf()
+			END~
+		COMPILE ~weidu_external/npc-bodies/EJRJN%ejt_ind_str%.baf~
+
+		// EJT_PRIEST_AREA only contains priests whose home area was actually
+		// found during the single-pass scan above, so there's no NONE-sentinel
+		// to check here -- a priest missing an area is simply absent from the
+		// array and never generated.
+		ACTION_PHP_EACH EJT_PRIEST_AREA AS priest => priest_args BEGIN
+			ACTION_IF FILE_EXISTS_IN_GAME ~%priest%.dlg~ BEGIN
+				COPY ~npc-bodies/ejtemple-single.d~ ~weidu_external/npc-bodies/ejtemple_%priest%_%ejt_ind_str%.d~
+					REPLACE_TEXTUALLY ~__PRIEST__~ ~%priest%~
+					REPLACE_TEXTUALLY ~__INDEX__~ ~%ejt_ind_str%~
+					REPLACE_TEXTUALLY ~__DV__~ ~%ejt_dv_str%~
+					REPLACE_TEXTUALLY ~__ANIM__~ ~%ejt_anim_str%~
+					REPLACE_TEXTUALLY ~__MOVEGLOBAL_ARGS__~ ~%priest_args%~
+					REPLACE_TEXTUALLY ~__RAISE_COST__~ ~%ejt_raise_cost_str%~
+					REPLACE_TEXTUALLY ~__RAISE_COST_M1__~ ~%ejt_raise_cost_m1_str%~
+					REPLACE_TEXTUALLY ~__RES_COST__~ ~%ejt_res_cost_str%~
+					REPLACE_TEXTUALLY ~__RES_COST_M1__~ ~%ejt_res_cost_m1_str%~
+				COMPILE ~weidu_external/npc-bodies/ejtemple_%priest%_%ejt_ind_str%.d~
+			END
+		END
+
+		// Wish/genie: one free reply per eligible companion, appended into
+		// WISH01's real dialogue state 0 (and WISH02's too, if it turned out
+		// to be a genuinely different dialogue file) -- not one per priest,
+		// so this runs once per companion index rather than once per
+		// (priest, companion) pair.
+		ACTION_IF FILE_EXISTS_IN_GAME ~WISH01.cre~ BEGIN
+			COPY ~npc-bodies/ejtgenie-single.d~ ~weidu_external/npc-bodies/ejtgenie1_%ejt_ind_str%.d~
+				REPLACE_TEXTUALLY ~__WISHDLG__~ ~%ejt_wishdlg1_str%~
+				REPLACE_TEXTUALLY ~__INDEX__~ ~%ejt_ind_str%~
+				REPLACE_TEXTUALLY ~__DV__~ ~%ejt_dv_str%~
+				REPLACE_TEXTUALLY ~__ANIM__~ ~%ejt_anim_str%~
+				REPLACE_TEXTUALLY ~__NAME__~ ~%ejt_name_str%~
+			COMPILE ~weidu_external/npc-bodies/ejtgenie1_%ejt_ind_str%.d~
+			ACTION_IF (ejt_have_wishdlg2 = 1) BEGIN
+				COPY ~npc-bodies/ejtgenie-single.d~ ~weidu_external/npc-bodies/ejtgenie2_%ejt_ind_str%.d~
+					REPLACE_TEXTUALLY ~__WISHDLG__~ ~%ejt_wishdlg2_str%~
+					REPLACE_TEXTUALLY ~__INDEX__~ ~%ejt_ind_str%~
+					REPLACE_TEXTUALLY ~__DV__~ ~%ejt_dv_str%~
+					REPLACE_TEXTUALLY ~__ANIM__~ ~%ejt_anim_str%~
+					REPLACE_TEXTUALLY ~__NAME__~ ~%ejt_name_str%~
+				COMPILE ~weidu_external/npc-bodies/ejtgenie2_%ejt_ind_str%.d~
+			END
+		END
+		END
+	END
+END
+
+// =============================================================================
+// Component 700: Player-Created Character Revival [EXPERIMENTAL]
+// Separate component so it can be installed/uninstalled on its own while it is
+// being tested. All logic lives in comp700.tpa.
+// =============================================================================
+BEGIN @700 // Player-Created Character Revival [EXPERIMENTAL]
+DESIGNATED 700
+LABEL ~NPC_BODIES_PC_REVIVAL~
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 600 ~Requires Component 600 (Temple Resurrection of Fallen Companions)~
+
+INCLUDE ~npc-bodies/comp700.tpa~
+
+// =============================================================================
+// Component 800: Diamonds required for Resurrection (pick one). Replaces
+// Stratagems' single-diamond check (which ate whole stacks). Logic in
+// comp800.tpa.
+// =============================================================================
+BEGIN @801 DESIGNATED 800 SUBCOMPONENT @800
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+OUTER_SET ejd_count = 0
+INCLUDE ~npc-bodies/comp800.tpa~
+
+BEGIN @802 DESIGNATED 801 SUBCOMPONENT @800
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+OUTER_SET ejd_count = 1
+INCLUDE ~npc-bodies/comp800.tpa~
+
+BEGIN @803 DESIGNATED 802 SUBCOMPONENT @800
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+OUTER_SET ejd_count = 2
+INCLUDE ~npc-bodies/comp800.tpa~
+
+BEGIN @804 DESIGNATED 803 SUBCOMPONENT @800
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+OUTER_SET ejd_count = 3
+INCLUDE ~npc-bodies/comp800.tpa~
+
+BEGIN @805 DESIGNATED 804 SUBCOMPONENT @800
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+OUTER_SET ejd_count = 4
+INCLUDE ~npc-bodies/comp800.tpa~
+
+BEGIN @806 DESIGNATED 805 SUBCOMPONENT @800
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+OUTER_SET ejd_count = 5
+INCLUDE ~npc-bodies/comp800.tpa~
+
+// =============================================================================
+// Component 900: Petrified main character can be shattered (Stratagems'
+// main-character statue, or Spell Revisions' petrification). Logic and notes
+// in comp900.tpa.
+// =============================================================================
+BEGIN @900 DESIGNATED 900
+REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects).~
+FORBID_COMPONENT ~cdtweaks/setup-cdtweaks.tp2~ 3300 ~Not compatible with cdtweaks' Death Cam, which ends the game when the main character is petrified. Uninstall it and use NPC Bodies' own Death Cam (Component 1200) instead.~
+INCLUDE ~npc-bodies/comp900.tpa~
+
+// =============================================================================
+// Component 1000: Greater Restoration cures Raise Dead CON penalties (pick
+// how many stacks one casting removes). Logic in comp1000.tpa.
+// =============================================================================
+BEGIN @1001 DESIGNATED 1000 SUBCOMPONENT @1000
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 200 ~Requires Component 200 (Raise Dead / Resurrection penalties)~
+OUTER_SET ejg_count = 1
+INCLUDE ~npc-bodies/comp1000.tpa~
+
+BEGIN @1002 DESIGNATED 1001 SUBCOMPONENT @1000
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 200 ~Requires Component 200 (Raise Dead / Resurrection penalties)~
+OUTER_SET ejg_count = 2
+INCLUDE ~npc-bodies/comp1000.tpa~
+
+BEGIN @1003 DESIGNATED 1002 SUBCOMPONENT @1000
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 200 ~Requires Component 200 (Raise Dead / Resurrection penalties)~
+OUTER_SET ejg_count = 3
+INCLUDE ~npc-bodies/comp1000.tpa~
+
+BEGIN @1004 DESIGNATED 1003 SUBCOMPONENT @1000
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 200 ~Requires Component 200 (Raise Dead / Resurrection penalties)~
+OUTER_SET ejg_count = 5
+INCLUDE ~npc-bodies/comp1000.tpa~
+
+// =============================================================================
+// Component 1100 [EXPERIMENTAL]: Travel while the main character is
+// petrified (a token sends the statue to a holding room and brings it back).
+// Logic in comp1100.tpa.
+// =============================================================================
+BEGIN @1100 DESIGNATED 1100
+REQUIRE_COMPONENT ~npc-bodies.tp2~ 900 ~Requires Component 900 (Petrified main character can be shattered)~
+INCLUDE ~npc-bodies/comp1100.tpa~
+
+// =============================================================================
+// Component 1200: NPC Bodies Death Cam (cdtweaks' Death Cam, made compatible
+// with petrification). Logic in comp1200.tpa.
+// =============================================================================
+BEGIN @1200 DESIGNATED 1200
+FORBID_COMPONENT ~cdtweaks/setup-cdtweaks.tp2~ 3300 ~cdtweaks' Death Cam is already installed; uninstall it first (this component replaces it).~
+INCLUDE ~npc-bodies/comp1200.tpa~

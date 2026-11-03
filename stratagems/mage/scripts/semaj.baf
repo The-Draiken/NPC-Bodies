@@ -1,7 +1,0 @@
-IF
-	Dead("sarevok") // Sarevok
-THEN
-	RESPONSE #100
-		ClearAllActions()
-		EscapeArea()
-END

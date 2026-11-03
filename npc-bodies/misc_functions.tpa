@@ -1039,53 +1039,6 @@ BEGIN
   END
 END
 
-DEFINE_ACTION_FUNCTION NPC_BODIES_REPLACE_WITH_SPELL_REVISION_SOURCE
-INT_VAR
-  preserve_scs = 1
-STR_VAR
-  spell_res = ""
-  sr_source = ""
-RET
-  replaced
-BEGIN
-  OUTER_SET replaced = 0
-
-  OUTER_SET spell_revisions_installed = 0
-  ACTION_IF (MOD_IS_INSTALLED ~setup-spell_rev.tp2~ 0) BEGIN
-    OUTER_SET spell_revisions_installed = 1
-  END
-  ACTION_IF (MOD_IS_INSTALLED ~spell_rev/setup-spell_rev.tp2~ 0) BEGIN
-    OUTER_SET spell_revisions_installed = 1
-  END
-
-  OUTER_SET scs_resurrection_installed = 0
-  ACTION_IF (MOD_IS_INSTALLED ~stratagems/setup-stratagems.tp2~ 4130) BEGIN
-    OUTER_SET scs_resurrection_installed = 1
-  END
-  ACTION_IF (MOD_IS_INSTALLED ~setup-stratagems.tp2~ 4130) BEGIN
-    OUTER_SET scs_resurrection_installed = 1
-  END
-
-  ACTION_IF ((spell_revisions_installed = 1) AND ((preserve_scs = 0) OR (scs_resurrection_installed = 0))) BEGIN
-    ACTION_IF FILE_EXISTS ~%sr_source%~ BEGIN
-      COPY_EXISTING ~%spell_res%.spl~ ~override~
-        READ_LONG 0x08 npc_bodies_spell_name_ref
-        READ_LONG 0x0c npc_bodies_spell_name2_ref
-        READ_LONG 0x50 npc_bodies_spell_desc_ref
-      BUT_ONLY
-
-      // Overwriting the override spell here lets WeiDU back up the installed
-      // Spell Revisions file before NPC Bodies applies its own patches.
-      COPY ~%sr_source%~ ~override/%spell_res%.spl~
-        WRITE_LONG 0x08 npc_bodies_spell_name_ref
-        WRITE_LONG 0x0c npc_bodies_spell_name2_ref
-        WRITE_LONG 0x50 npc_bodies_spell_desc_ref
-
-      OUTER_SET replaced = 1
-    END
-  END
-END
-
 //From K4thos
 //Patch function that replaces set or all occurrences of the given regexp pattern in the file with the given string.
 //Use EVAL to perform variable substitution on the string and/or the regexp pattern.

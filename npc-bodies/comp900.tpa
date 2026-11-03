@@ -1,0 +1,106 @@
+// =============================================================================
+// Component 900: Petrified main character can be shattered (needs Stratagems
+// 4130). Included from npc-bodies.tp2.
+//
+// Works with either petrification:
+//   - Spell Revisions' (spwi604d: slow, then a hold with stone colours) --
+//     kept as it is; the main character's part is added via opcode 326 on
+//     Stratagems' DW_IS_CHARNAME spell state (SPLPROT row 110);
+//   - Stratagems' own main-character statue (dw#p1pet), whose two
+//     protections (untargetable, immune to damage) are removed.
+// In both cases the main character's statue gets:
+//   - HP set to 2 and a floor of 1 HP (opcode 208), so any hit leaves 1 HP
+//     instead of killing them outright;
+//   - a repeating pulse (opcode 272) that sees "current HP < 2" and casts
+//     EJP1SHT.
+// EJP1SHT removes only the HP floor (opcode 337: remove effects by opcode),
+// keeping the statue stone, and kills one second later with a separate,
+// delayed step (EJP1KIL: opcode 13, death type 128 = stone shatter). In
+// testing, killing in the same step as removing the floor did not work: the
+// floor was still in force, so the statue just un-petrified at 1 HP.
+// The main character dying ends the game as normal. The added effects share
+// spwi604d's secondary type, so Stone to Flesh removes them with the stone.
+//
+// Travel while petrified is Component 1100. Not compatible with cdtweaks'
+// Death Cam (its script counts a petrified main character as dead); use
+// Component 1200 instead.
+// =============================================================================
+
+OUTER_SET ejp9_cn = IDS_OF_SYMBOL (~SPLSTATE~ ~DW_IS_CHARNAME~)
+ACTION_IF (ejp9_cn < 0) BEGIN
+	FAIL ~NPC Bodies 900: DW_IS_CHARNAME not found in SPLSTATE.IDS -- is Stratagems component 4130 installed?~
+END
+
+// An earlier version of this component moved Spell Revisions' Flesh to Stone
+// out of override. If that copy is still parked, put it back.
+ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/sr_spwi604.spl~ BEGIN
+	OUTER_SET ejp9_is_sr = 0
+	ACTION_IF FILE_EXISTS ~override/spwi604.spl~ BEGIN
+		COPY_EXISTING ~spwi604.spl~ ~override~
+			PATCH_IF (INDEX_BUFFER (~[sS][pP][wW][iI]604[dD]~) >= 0) BEGIN
+				SET ejp9_is_sr = 1
+			END
+		BUT_ONLY
+	END
+	ACTION_IF (ejp9_is_sr = 0) BEGIN
+		COPY ~weidu_external/npc-bodies/sr_spwi604.spl~ ~override/spwi604.spl~
+	END
+END
+
+// EJP1KIL: the kill (stone shatter).
+COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJP1KIL.spl~
+	LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+	LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 13 target = 2 power = 0 parameter1 = 1 parameter2 = 128 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 END
+
+// EJP1SHT: remove the HP floor now, kill one second later.
+COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJP1SHT.spl~
+	LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+	LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 337 target = 2 power = 0 parameter1 = "-1" parameter2 = 208 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 END
+	LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 326 target = 2 power = 0 parameter1 = 0 parameter2 = 0 timing = 4 duration = 1 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJP1KIL~ END
+
+// EJP1PUL.EFF: each pulse, if current HP < 2 (SPLPROT row 145), shatter.
+CREATE ~EFF~ ~EJP1PUL~
+	WRITE_LONG 0x10 326
+	WRITE_LONG 0x14 2
+	WRITE_LONG 0x1c 2
+	WRITE_LONG 0x20 145
+	WRITE_LONG 0x24 1
+	WRITE_LONG 0x28 0
+	WRITE_SHORT 0x2c 100
+	WRITE_SHORT 0x2e 0
+	WRITE_ASCII 0x30 ~EJP1SHT~ (8)
+
+// Stratagems' statue.
+ACTION_IF FILE_EXISTS_IN_GAME ~dw#p1pet.spl~ BEGIN
+	COPY_EXISTING ~dw#p1pet.spl~ ~override~
+		LPF DELETE_EFFECT INT_VAR match_opcode = 100 END
+		LPF DELETE_EFFECT INT_VAR match_opcode = 101 match_parameter2 = 12 END
+		LPF DELETE_EFFECT INT_VAR match_opcode = 232 END
+		LPF DELETE_EFFECT INT_VAR match_opcode = 272 STR_VAR match_resource = ~EJP1PUL~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 0 parameter1 = 2 parameter2 = 1 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 208 target = 2 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 272 target = 2 power = 0 parameter1 = 1 parameter2 = 3 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJP1PUL~ END
+	BUT_ONLY
+END
+
+// Spell Revisions' statue (main character only).
+ACTION_IF FILE_EXISTS_IN_GAME ~spwi604d.spl~ BEGIN
+	OUTER_SET ejp9_sectype = 0
+	COPY_EXISTING ~spwi604d.spl~ ~override~
+		READ_BYTE 0x27 ejp9_st
+		SPRINT ejp9_st_s ~%ejp9_st%~
+		INNER_ACTION BEGIN
+			OUTER_SET ejp9_sectype = %ejp9_st_s%
+		END
+	BUT_ONLY
+	COPY ~npc-bodies/For Temples/EJTRD.SPL~ ~override/EJP1STN.spl~
+		WRITE_BYTE 0x27 ejp9_sectype
+		LPF ~DELETE_SPELL_EFFECT~ INT_VAR opcode_to_delete = "-1" END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 17 target = 2 power = 0 parameter1 = 2 parameter2 = 1 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 208 target = 2 power = 0 parameter1 = 1 parameter2 = 0 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 272 target = 2 power = 0 parameter1 = 1 parameter2 = 3 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJP1PUL~ END
+	COPY_EXISTING ~spwi604d.spl~ ~override~
+		LPF DELETE_EFFECT INT_VAR match_opcode = 326 STR_VAR match_resource = ~EJP1STN~ END
+		LPF ~ADD_SPELL_EFFECT~ INT_VAR opcode = 326 target = 2 power = 0 parameter1 = ejp9_cn parameter2 = 110 timing = 1 duration = 0 resist_dispel = 0 probability1 = 100 STR_VAR resource = ~EJP1STN~ END
+	BUT_ONLY
+END

@@ -1,7 +1,0 @@
-IF
-	HPLT(Myself,2)
-THEN
-	RESPONSE #100
-		ChangeAnimation("HELLJON2") // Jon Irenicus
-		SetGlobal("DefeatedJon","GLOBAL",1)
-END

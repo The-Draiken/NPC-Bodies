@@ -1,8 +1,0 @@
-IF
-  This()
-  That()
-  //duelling// TheOther()
-THEN
-   RESPONSE #100
-            SomethingAwesome()
-END
