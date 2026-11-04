@@ -739,13 +739,18 @@ END
 // -----------------------------------------------------------------------------
 ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/ejt_priest_areas.txt~ BEGIN
 	COPY ~weidu_external/npc-bodies/ejt_priest_areas.txt~ ~weidu_external/npc-bodies/ejt_priest_areas.txt~
-		COUNT_2DA_ROWS 2 ejp_prows
+		COUNT_2DA_ROWS 3 ejp_prows
 	OUTER_FOR (p = 1; p < ejp_prows; ++p) BEGIN
 		COPY ~weidu_external/npc-bodies/ejt_priest_areas.txt~ ~weidu_external/npc-bodies/ejt_priest_areas.txt~
-			READ_2DA_ENTRY p 0 2 ejp_priest
+			READ_2DA_ENTRY p 0 3 ejp_priest
+			READ_2DA_ENTRY p 2 3 ejp_pstates
+		// Column 3 = the dialogue states that open the temple store ("_"-joined).
+		OUTER_INNER_PATCH_SAVE ejp_pstates ~%ejp_pstates%~ BEGIN
+			REPLACE_TEXTUALLY ~_~ ~ ~
+		END
 		ACTION_IF FILE_EXISTS_IN_GAME ~%ejp_priest%.dlg~ BEGIN
 			COPY ~npc-inline/ejp_empty.baf~ ~weidu_external/npc-bodies/ejpcpr_%ejp_priest%.d~
-			APPEND_OUTER ~weidu_external/npc-bodies/ejpcpr_%ejp_priest%.d~ ~~~~~EXTEND_BOTTOM ~%ejp_priest%~ 0~~~~~
+			APPEND_OUTER ~weidu_external/npc-bodies/ejpcpr_%ejp_priest%.d~ ~~~~~EXTEND_BOTTOM ~%ejp_priest%~ %ejp_pstates%~~~~~
 			OUTER_FOR (N = 2; N <= 6; ++N) BEGIN
 				OUTER_FOR (k = 1; k <= ejp_max; ++k) BEGIN
 					APPEND_OUTER ~weidu_external/npc-bodies/ejpcpr_%ejp_priest%.d~ ~~~~~

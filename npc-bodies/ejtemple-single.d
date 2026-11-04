@@ -1,4 +1,4 @@
-EXTEND_BOTTOM ~__PRIEST__~ 0
+EXTEND_BOTTOM ~__PRIEST__~ __STATES__
 	// Offered whenever this companion has died at least once (EJdead flag
 	// set) and is not currently a normal dead-in-party member reachable
 	// through the native Raise Dead/Resurrection store -- i.e. they were

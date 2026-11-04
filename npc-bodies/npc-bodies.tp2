@@ -2047,64 +2047,143 @@ REQUIRE_COMPONENT ~npc-bodies.tp2~ 100 ~Requires main component~
 REQUIRE_COMPONENT ~stratagems/setup-stratagems.tp2~ 4130 ~Requires Stratagems component 4130 (Revised handling of death effects) to be installed first. If you also use Spell Revisions, see the Stratagems compatibility patch in the NPC Bodies README.~
 
 // -----------------------------------------------------------------------------
-// Dynamically detect temple/priest NPCs across the WHOLE installed game
-// (base game + EET-merged BG1/SoD/BG2 + any other installed NPC/content mods)
-// instead of a hardcoded 13-name resref list.
+// Detect temple priests across the WHOLE installed game (BG1/SoD/BG2 via EET,
+// IWD1/IWD2/NWN-in-EET, and any other content mod) by what they DO rather
+// than what class they are: a temple priest is anyone whose dialogue opens a
+// temple store (STO type 3). The old Cleric-class scan missed priests that
+// are not Cleric class (e.g. Gellana Mirrorshade at the Friendly Arm, the
+// priests of Oghma at Candlekeep), priests whose dialogue file is not named
+// after their creature file, and priests whose services are not offered in
+// dialogue state 0.
 //
-// Heuristic: any creature resource that (a) is single-classed Cleric per
-// CLASS.IDS, (b) is not hostile (EA <= 30 on EA.IDS, i.e. not an enemy
-// faction), and (c) has its own same-resref .DLG file (so it's a nameable,
-// talkable NPC and not bare monster filler) is treated as a candidate
-// temple priest and gets the "bring back a fallen companion" reply appended
-// to its greeting state.
-//
-// This is a heuristic, not a certainty. It will likely miss Cleric/Ranger,
-// Cleric/Mage, Cleric/Thief and Fighter/Cleric multiclass priests (they
-// carry a different, combined CLASS.IDS value) and it may flag a background
-// Cleric NPC that has no actual temple/store attached. Both are worth
-// checking for in-game before treating this as final.
+//   1. STO scan: every store of type 3 (temple).
+//   2. DLG scan: every dialogue with a StartStore(...) action naming one of
+//      those stores. Its STATE numbers that offer that reply are recorded,
+//      so the new replies appear exactly where the priest offers services.
+//   3. CRE scan: every creature whose dialogue (CRE 0x2cc) is such a
+//      dialogue, so the area scan below can find where the priest stands.
+// Everything is keyed by DIALOGUE resref (that is what gets extended).
 // -----------------------------------------------------------------------------
-// Detected priests are stored as a small 2DA (one resref per row) instead of
-// one big space-joined string. ACTION_FOR_EACH's IN clause does NOT split a
-// %variable%-substituted string into separate items -- it was silently
-// treating the whole multi-hundred-name blob as a single (useless) list
-// entry, so the per-priest loop below never matched anything and no dialogue
-// was ever generated even though the scan itself was working. Reusing the
-// 2DA read/count pattern already used for NPCbods.2da elsewhere in this file
-// avoids that problem entirely.
-<<<<<<<< npc-inline/ejt_priests.2da
-2DA V1.0
-RESREF
-0	#
->>>>>>>>
-COPY ~npc-inline/ejt_priests.2da~ ~weidu_external/npc-bodies/ejt_priests.2da~
 OUTER_SET ejt_priest_count = 0
 
-// CLASSMSK.IDS does not exist as a real resource in this game (confirmed via
-// install log: "Resource [CLASSMSK.IDS] not found"), so multiclass Clerics are
-// matched directly against every Cleric-involving CLASS.IDS entry instead of a
-// bitmask. Values below confirmed directly from this install's own class.ids.
-OUTER_SET ejt_cleric_class = IDS_OF_SYMBOL (class CLERIC)
-OUTER_SET ejt_fighter_cleric = IDS_OF_SYMBOL (class FIGHTER_CLERIC)
-OUTER_SET ejt_cleric_mage = IDS_OF_SYMBOL (class CLERIC_MAGE)
-OUTER_SET ejt_cleric_thief = IDS_OF_SYMBOL (class CLERIC_THIEF)
-OUTER_SET ejt_fighter_mage_cleric = IDS_OF_SYMBOL (class FIGHTER_MAGE_CLERIC)
-OUTER_SET ejt_cleric_ranger = IDS_OF_SYMBOL (class CLERIC_RANGER)
-COPY_EXISTING_REGEXP ~.+\.cre~ ~override~
-	READ_BYTE 0x270 ejt_ea
-	READ_BYTE 0x273 ejt_class
-	PATCH_IF (ejt_ea < 200) AND ((ejt_class = ejt_cleric_class) OR (ejt_class = ejt_fighter_cleric) OR (ejt_class = ejt_cleric_mage) OR (ejt_class = ejt_cleric_thief) OR (ejt_class = ejt_fighter_mage_cleric) OR (ejt_class = ejt_cleric_ranger)) BEGIN
-		SPRINT ejt_cand_cre ~%SOURCE_RES%~
-		INNER_ACTION BEGIN
-			ACTION_IF FILE_EXISTS_IN_GAME ~%ejt_cand_cre%.dlg~ BEGIN
-				OUTER_SET ejt_priest_count += 1
-				APPEND_OUTER ~weidu_external/npc-bodies/ejt_priests.2da~ ~%ejt_priest_count%	%ejt_cand_cre%~
-				// Mirrors JOINABLE_NPC_ARRAY in misc_functions.tpa: an associative
-				// array keyed by resref, so the single-pass area scan below can do
-				// an O(1) membership check instead of re-scanning the whole game
-				// once per priest.
-				ACTION_DEFINE_ASSOCIATIVE_ARRAY EJT_PRIEST_SET BEGIN ~%ejt_cand_cre%~ => ~~ END
+// 1. Temple stores.
+COPY_EXISTING_REGEXP GLOB ~^.+\.sto$~ ~override~
+	PATCH_IF (BUFFER_LENGTH > 0x0c) BEGIN
+		READ_LONG 0x08 ejt_sto_type
+		PATCH_IF (ejt_sto_type = 3) BEGIN
+			SPRINT ejt_sto_u ~%SOURCE_RES%~
+			TO_UPPER ejt_sto_u
+			DEFINE_ASSOCIATIVE_ARRAY EJT_TEMPLE_STO BEGIN ~%ejt_sto_u%~ => 1 END
+		END
+	END
+BUT_ONLY
+
+// 2. Dialogues that open a temple store, and the states that offer it.
+// DLG V1.0: 0x08 #states, 0x0c states offset (16 bytes each: text, first
+// transition, #transitions, trigger); 0x10 #transitions, 0x14 transitions
+// offset (32 bytes each: flags, ..., action index @ 0x10; flag bit 2 = has
+// action); 0x28 actions offset, 0x2c #actions (8 bytes each: offset, length).
+COPY_EXISTING_REGEXP GLOB ~^.+\.dlg$~ ~override~
+	PATCH_IF (BUFFER_LENGTH > 0x30) AND (INDEX_BUFFER (CASE_INSENSITIVE ~StartStore~) >= 0) BEGIN
+		SPRINT ejt_dlg_u ~%SOURCE_RES%~
+		TO_UPPER ejt_dlg_u
+		READ_LONG 0x08 ejt_ns
+		READ_LONG 0x0c ejt_so
+		READ_LONG 0x10 ejt_nt
+		READ_LONG 0x14 ejt_to
+		READ_LONG 0x28 ejt_ao
+		READ_LONG 0x2c ejt_na
+		SET ejt_any = 0
+		FOR (ejt_a = 0; ejt_a < ejt_na; ++ejt_a) BEGIN
+			READ_LONG (ejt_ao + ejt_a * 8) ejt_aoff
+			READ_LONG (ejt_ao + ejt_a * 8 + 4) ejt_alen
+			SET $EJT_ACT(~%ejt_a%~) = 0
+			PATCH_IF (ejt_alen > 0) AND ((ejt_aoff + ejt_alen) <= BUFFER_LENGTH) BEGIN
+				READ_ASCII ejt_aoff ejt_atxt (ejt_alen)
+				SET ejt_is_tmp = 0
+				INNER_PATCH ~%ejt_atxt%~ BEGIN
+					REPLACE_EVALUATE CASE_INSENSITIVE ~StartStore[^"]*"\([^"]+\)"~ BEGIN
+						SPRINT ejt_st_u ~%MATCH1%~
+						TO_UPPER ejt_st_u
+						PATCH_IF VARIABLE_IS_SET $EJT_TEMPLE_STO(~%ejt_st_u%~) BEGIN
+							SET ejt_is_tmp = 1
+						END
+					END ~%MATCH0%~
+				END
+				PATCH_IF (ejt_is_tmp = 1) BEGIN
+					SET $EJT_ACT(~%ejt_a%~) = 1
+					SET ejt_any = 1
+				END
 			END
+		END
+		PATCH_IF (ejt_any = 1) BEGIN
+			SPRINT ejt_states ~~
+			SPRINT ejt_svc_states ~~
+			FOR (ejt_s = 0; ejt_s < ejt_ns; ++ejt_s) BEGIN
+				READ_LONG (ejt_so + ejt_s * 16 + 4) ejt_ft
+				READ_LONG (ejt_so + ejt_s * 16 + 8) ejt_ntr
+				SET ejt_hit = 0
+				SET ejt_svc_ai = "-1"
+				FOR (ejt_t = ejt_ft; ejt_t < (ejt_ft + ejt_ntr) AND ejt_t < ejt_nt; ++ejt_t) BEGIN
+					READ_LONG (ejt_to + ejt_t * 32) ejt_tflags
+					PATCH_IF ((ejt_tflags BAND 4) = 4) BEGIN
+						READ_LONG (ejt_to + ejt_t * 32 + 0x10) ejt_tai
+						PATCH_IF (ejt_tai >= 0) AND (ejt_tai < ejt_na) BEGIN
+							PATCH_IF ($EJT_ACT(~%ejt_tai%~) = 1) BEGIN
+								SET ejt_hit = 1
+								// Transition flag bit 0 = "has reply text". Without
+								// text, the store opens automatically when the
+								// state has nothing else to show (e.g. the Nashkel
+								// temple priest). Adding our replies hides that
+								// step, so remember it and add a visible copy.
+								PATCH_IF ((ejt_tflags BAND 1) = 0) AND (ejt_svc_ai < 0) BEGIN
+									SET ejt_svc_ai = ejt_tai
+								END
+							END
+						END
+					END
+				END
+				PATCH_IF (ejt_hit = 1) BEGIN
+					PATCH_IF (~%ejt_states%~ STRING_EQUAL ~~) BEGIN
+						SPRINT ejt_states ~%ejt_s%~
+					END ELSE BEGIN
+						SPRINT ejt_states ~%ejt_states%_%ejt_s%~
+					END
+				END
+				PATCH_IF (ejt_svc_ai >= 0) BEGIN
+					READ_LONG (ejt_ao + ejt_svc_ai * 8) ejt_saoff
+					READ_LONG (ejt_ao + ejt_svc_ai * 8 + 4) ejt_salen
+					READ_ASCII ejt_saoff ejt_svc_txt (ejt_salen)
+					INNER_PATCH_SAVE ejt_svc_txt ~%ejt_svc_txt%~ BEGIN
+						REPLACE_TEXTUALLY ~[%WNL%%LNL%%MNL%]+~ ~ ~
+					END
+					DEFINE_ASSOCIATIVE_ARRAY EJT_SVCACT BEGIN ~%ejt_dlg_u%_%ejt_s%~ => ~%ejt_svc_txt%~ END
+					PATCH_IF (~%ejt_svc_states%~ STRING_EQUAL ~~) BEGIN
+						SPRINT ejt_svc_states ~%ejt_s%~
+					END ELSE BEGIN
+						SPRINT ejt_svc_states ~%ejt_svc_states%_%ejt_s%~
+					END
+				END
+			END
+			PATCH_IF NOT (~%ejt_states%~ STRING_EQUAL ~~) BEGIN
+				DEFINE_ASSOCIATIVE_ARRAY EJT_TEMPLE_DLG BEGIN ~%ejt_dlg_u%~ => ~%ejt_states%~ END
+			END
+			PATCH_IF NOT (~%ejt_svc_states%~ STRING_EQUAL ~~) BEGIN
+				DEFINE_ASSOCIATIVE_ARRAY EJT_SVC BEGIN ~%ejt_dlg_u%~ => ~%ejt_svc_states%~ END
+			END
+		END
+	END
+BUT_ONLY
+
+// 3. Creatures that use one of those dialogues.
+COPY_EXISTING_REGEXP GLOB ~^.+\.cre$~ ~override~
+	PATCH_IF (BUFFER_LENGTH > 0x2d4) BEGIN
+		READ_ASCII 0x2cc ejt_cdlg (8) NULL
+		TO_UPPER ejt_cdlg
+		PATCH_IF VARIABLE_IS_SET $EJT_TEMPLE_DLG(~%ejt_cdlg%~) BEGIN
+			SPRINT ejt_cre_u ~%SOURCE_RES%~
+			TO_UPPER ejt_cre_u
+			DEFINE_ASSOCIATIVE_ARRAY EJT_CRE_DLG BEGIN ~%ejt_cre_u%~ => ~%ejt_cdlg%~ END
 		END
 	END
 BUT_ONLY
@@ -2115,14 +2194,13 @@ BUT_ONLY
 // confirmed working: it has no effect on gameplay, it just leaves a text file
 // in weidu_external/npc-bodies/.
 // -----------------------------------------------------------------------------
-OUTER_SPRINT ejt_cleric_class_str ~%ejt_cleric_class%~
-OUTER_SPRINT ejt_priest_count_str ~%ejt_priest_count%~
 <<<<<<<< npc-inline/ejt_debug.txt
-NPC Bodies Component 600 diagnostic dump
+NPC Bodies Component 600 diagnostic dump (temple dialogue -> states that open a temple store)
 >>>>>>>>
 COPY ~npc-inline/ejt_debug.txt~ ~weidu_external/npc-bodies/ejt_debug.txt~
-APPEND_OUTER ~weidu_external/npc-bodies/ejt_debug.txt~ ~cleric_class_value=%ejt_cleric_class_str%~
-APPEND_OUTER ~weidu_external/npc-bodies/ejt_debug.txt~ ~priest_count=%ejt_priest_count_str%~
+ACTION_PHP_EACH EJT_TEMPLE_DLG AS ejt_dd => ejt_ds BEGIN
+	APPEND_OUTER ~weidu_external/npc-bodies/ejt_debug.txt~ ~%ejt_dd%	%ejt_ds%~
+END
 
 // -----------------------------------------------------------------------------
 // Determine each detected priest's home area, in ONE single pass over every
@@ -2167,14 +2245,28 @@ COPY_EXISTING_REGEXP ~.+\.are~ ~override~
 		// guarantees a valid, walkable destination, since he's standing there.
 		READ_SHORT (ejt_actors_offset + (ejt_actor_i * 272) + 32) ejt_actor_x
 		READ_SHORT (ejt_actors_offset + (ejt_actor_i * 272) + 34) ejt_actor_y
+		// The area's own actor entry can override the creature's dialogue
+		// (ARE actor + 0x48); otherwise the creature's own dialogue is used.
+		READ_ASCII (ejt_actors_offset + (ejt_actor_i * 272) + 0x48) ejt_actor_odlg (8) NULL
+		TO_UPPER ejt_actor_odlg
+		SPRINT ejt_actor_cre_u ~%ejt_actor_cre%~
+		TO_UPPER ejt_actor_cre_u
+		SPRINT ejt_actor_dlg ~~
+		PATCH_IF VARIABLE_IS_SET $EJT_TEMPLE_DLG(~%ejt_actor_odlg%~) BEGIN
+			SPRINT ejt_actor_dlg ~%ejt_actor_odlg%~
+		END ELSE BEGIN
+			PATCH_IF VARIABLE_IS_SET $EJT_CRE_DLG(~%ejt_actor_cre_u%~) BEGIN
+				SPRINT ejt_actor_dlg $EJT_CRE_DLG(~%ejt_actor_cre_u%~)
+			END
+		END
 		SPRINT ejt_actor_cre_s ~%ejt_actor_cre%~
 		SPRINT ejt_actor_area_s ~%SOURCE_RES%~
 		SPRINT ejt_actor_pos_s ~%ejt_actor_x%.%ejt_actor_y%~
 		INNER_ACTION BEGIN
 			APPEND_OUTER ~weidu_external/npc-bodies/ejt_all_actors.txt~ ~%ejt_actor_cre_s%	%ejt_actor_area_s%	%ejt_actor_pos_s%~
 		END
-		PATCH_IF VARIABLE_IS_SET $EJT_PRIEST_SET(~%ejt_actor_cre%~) BEGIN
-			PATCH_IF NOT VARIABLE_IS_SET $EJT_PRIEST_AREA(~%ejt_actor_cre%~) BEGIN
+		PATCH_IF NOT (~%ejt_actor_dlg%~ STRING_EQUAL ~~) BEGIN
+			PATCH_IF NOT VARIABLE_IS_SET $EJT_PRIEST_AREA(~%ejt_actor_dlg%~) BEGIN
 				// Value is the fully pre-formatted MoveGlobal argument list
 				// (area, target object, and the priest's own real point) so
 				// the generation loop below can drop it straight into
@@ -2200,7 +2292,7 @@ COPY_EXISTING_REGEXP ~.+\.are~ ~override~
 				// which relocation call precedes it. Reverted to
 				// MakeGlobal/MoveGlobal accordingly, now that it's being
 				// used on a genuinely non-party object as intended.
-				DEFINE_ASSOCIATIVE_ARRAY EJT_PRIEST_AREA BEGIN ~%ejt_actor_cre%~ => ~"%SOURCE_RES%",Myself,[%ejt_actor_x%.%ejt_actor_y%]~ END
+				DEFINE_ASSOCIATIVE_ARRAY EJT_PRIEST_AREA BEGIN ~%ejt_actor_dlg%~ => ~"%SOURCE_RES%",Myself,[%ejt_actor_x%.%ejt_actor_y%]~ END
 			END
 		END
 	END
@@ -2210,11 +2302,40 @@ BUT_ONLY
 // mapping built above, so it can be checked directly instead of guessed at.
 // Safe to delete once Component 600 is confirmed fully working.
 <<<<<<<< npc-inline/ejt_priest_areas.txt
-PRIEST	MOVEGLOBAL_ARGS
+PRIEST	MOVEGLOBAL_ARGS	STATES
 >>>>>>>>
 COPY ~npc-inline/ejt_priest_areas.txt~ ~weidu_external/npc-bodies/ejt_priest_areas.txt~
+// Column 3: the dialogue states that open the temple store, joined with "_"
+// (Component 700 reads this file too).
 ACTION_PHP_EACH EJT_PRIEST_AREA AS ejt_dump_priest => ejt_dump_area BEGIN
-	APPEND_OUTER ~weidu_external/npc-bodies/ejt_priest_areas.txt~ ~%ejt_dump_priest%	%ejt_dump_area%~
+	OUTER_SPRINT ejt_dump_states $EJT_TEMPLE_DLG(~%ejt_dump_priest%~)
+	APPEND_OUTER ~weidu_external/npc-bodies/ejt_priest_areas.txt~ ~%ejt_dump_priest%	%ejt_dump_area%	%ejt_dump_states%~
+END
+
+// Priests whose store opens through a reply WITHOUT text (it fires on its
+// own only when the state has nothing else to show). Our added replies stop
+// that from happening, so give each such state a visible reply that runs the
+// very same store action. One small .d per dialogue, compiled once.
+<<<<<<<< npc-inline/ejt_svc_empty.d
+>>>>>>>>
+ACTION_PHP_EACH EJT_PRIEST_AREA AS svc_dlg => svc_args BEGIN
+	ACTION_IF (VARIABLE_IS_SET $EJT_SVC(~%svc_dlg%~)) AND (FILE_EXISTS_IN_GAME ~%svc_dlg%.dlg~) BEGIN
+		OUTER_SPRINT svc_states $EJT_SVC(~%svc_dlg%~)
+		OUTER_SPRINT svc_d ~~
+		OUTER_INNER_PATCH ~%svc_states%~ BEGIN
+			REPLACE_EVALUATE ~\([0-9]+\)~ BEGIN
+				SPRINT svc_act $EJT_SVCACT(~%svc_dlg%_%MATCH1%~)
+				SPRINT svc_d ~~~~~%svc_d%
+EXTEND_BOTTOM ~%svc_dlg%~ %MATCH1%
+	IF ~~ THEN REPLY ~I would like to make use of the temple's services.~ DO ~%svc_act%~ EXIT
+END
+~~~~~
+			END ~%MATCH1%~
+		END
+		COPY ~npc-inline/ejt_svc_empty.d~ ~weidu_external/npc-bodies/ejtsvc_%svc_dlg%.d~
+		APPEND_OUTER ~weidu_external/npc-bodies/ejtsvc_%svc_dlg%.d~ ~~~~~%svc_d%~~~~~
+		COMPILE ~weidu_external/npc-bodies/ejtsvc_%svc_dlg%.d~
+	END
 END
 
 // -----------------------------------------------------------------------------
@@ -2580,7 +2701,12 @@ ACTION_IF FILE_EXISTS ~weidu_external/npc-bodies/NPCbods.2da~ BEGIN
 		// array and never generated.
 		ACTION_PHP_EACH EJT_PRIEST_AREA AS priest => priest_args BEGIN
 			ACTION_IF FILE_EXISTS_IN_GAME ~%priest%.dlg~ BEGIN
+				OUTER_SPRINT priest_states $EJT_TEMPLE_DLG(~%priest%~)
+				OUTER_INNER_PATCH_SAVE priest_states ~%priest_states%~ BEGIN
+					REPLACE_TEXTUALLY ~_~ ~ ~
+				END
 				COPY ~npc-bodies/ejtemple-single.d~ ~weidu_external/npc-bodies/ejtemple_%priest%_%ejt_ind_str%.d~
+					REPLACE_TEXTUALLY ~__STATES__~ ~%priest_states%~
 					REPLACE_TEXTUALLY ~__PRIEST__~ ~%priest%~
 					REPLACE_TEXTUALLY ~__INDEX__~ ~%ejt_ind_str%~
 					REPLACE_TEXTUALLY ~__DV__~ ~%ejt_dv_str%~
